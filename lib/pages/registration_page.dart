@@ -22,15 +22,34 @@ class _RegistrationPageState extends State<RegistrationPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Verifica se todos os campos estão preenchidos
     if (name.isEmpty || surname.isEmpty || email.isEmpty || password.isEmpty){
       _showDialog('Erro','Preencha todos os campos');
       return;
     }
 
+    // Verificação se o email já está cadastrado
     if (UserDb.emailExists(email)){
       _showDialog('Erro','Email já cadastrado');
       return;
     }
+
+    // Verificação se o email é válido
+    if (!UserDb.isValidEmail(email)) {
+      _showDialog('Erro','Email inválido');
+      return;
+    }
+    // Verificando se a senha é válida
+    if(UserDb.isValidPassword(password)){
+      _showDialog('Erro','Senha com menos de 8 caracteres');
+      return;
+    }
+    // Verificando se o nome é válido
+    if(!UserDb.isValidName(name)){
+      _showDialog('Erro', 'Nome com caracteres inválidos');
+      return;
+    }
+
 
     final newUser = User(name, surname, email, password);
     UserDb.addUser(newUser);

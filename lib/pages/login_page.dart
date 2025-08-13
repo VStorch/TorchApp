@@ -23,7 +23,10 @@ class _LoginPageState extends State<LoginPage> {
     if (UserDb.checkUser(email, password) == false){
       _showDialog('Erro','Usuário não encontrado');
       return;
-    } else {
+
+    }
+
+    else {
       Navigator.push(
         context,
         MaterialPageRoute(
