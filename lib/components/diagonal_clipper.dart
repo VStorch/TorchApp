@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Clipper que corta a imagem do ser-humaninho
 class DiagonalClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

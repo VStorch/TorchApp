@@ -20,12 +20,13 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Verifica se o usuário existe
     if (UserDb.checkUser(email, password) == false){
       _showDialog('Erro','Usuário não encontrado');
       return;
 
     }
-
+    // Joga o caboclo pro welcome
     else {
       Navigator.push(
         context,
@@ -33,11 +34,12 @@ class _LoginPageState extends State<LoginPage> {
             builder: (context) => Welcome()),
       );
     }
-
     _emailController.clear();
     _passwordController.clear();
+
   }
 
+  // Mostra o diálogo
   void _showDialog(String title, String message){
     showDialog(
       context: context,
@@ -62,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
@@ -69,8 +72,12 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
+
+              // Recorta a imagem do cachorro
               ClipPath(
                 clipper: DiagonalClipper(),
+
+                // Define a posição da imagem, seu tamanho etc.
                 child: Transform.translate(
                   offset: Offset(0, 0),
                   child: Image.asset(
@@ -86,6 +93,8 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+
+                    // Email
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -96,6 +105,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 10),
+
+                    // Senha
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
@@ -106,6 +117,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+
+                    // Esqueceu a senha
                     SizedBox(height: 7),
                     Align(
                       alignment: Alignment.centerRight,
@@ -117,6 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+
+                    // Botão entrar
                     SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: () {
@@ -128,6 +143,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: Text('Entrar'),
                     ),
+
+                    // Botão não tem uma conta
                     SizedBox(height: 2),
                     TextButton(
                       onPressed: () {
