@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/components/diagonal_clipper.dart';
+import 'package:torch_app/pages/password_page.dart';
 import 'package:torch_app/pages/registration_page.dart';
 import 'package:flutter/services.dart';
 import 'package:torch_app/pages/welcome.dart';
@@ -104,10 +105,23 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     SizedBox(height: 7),
+
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PasswordPage(),
+                          ),
+                        );
+                      },
+                      child: Text("Esqueceu a senha?"),
+                    ),
+
                     Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        'Esqueceu a senha?',
+                        '',
                         style: TextStyle(
                           color: Colors.black54,
                           fontSize: 14,
