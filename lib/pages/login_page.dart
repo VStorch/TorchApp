@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/components/diagonal_clipper.dart';
-import 'package:torch_app/pages/password_page.dart';
-import 'package:torch_app/pages/registration_page.dart';
 import 'package:flutter/services.dart';
-import 'package:torch_app/pages/welcome.dart';
+
+import '../components/diagonal_clipper.dart';
+import 'password_page.dart';
+import 'registration_page.dart';
+import 'welcome.dart';
+
 import '../data/user_db.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,18 +19,28 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Color(0xFFEBDD6C),
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+  }
+
   void _login() {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (UserDb.checkUser(email, password) == false){
-      _showDialog('Erro','Usuário não encontrado');
+    if (!UserDb.checkUser(email, password)) {
+      _showDialog('Erro', 'Usuário não encontrado');
       return;
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => Welcome()),
+        MaterialPageRoute(builder: (context) => const Welcome()),
       );
     }
 
@@ -36,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.clear();
   }
 
-  void _showDialog(String title, String message){
+  void _showDialog(String title, String message) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -44,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
         content: Text(message),
         actions: [
           TextButton(
-            child: Text('OK'),
+            child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -54,12 +66,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle(
-        statusBarColor: Color(0xFFEBDD6C),
-        statusBarIconBrightness: Brightness.dark,
-      ),
-    );
     return Scaffold(
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
@@ -69,21 +75,19 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               ClipPath(
                 clipper: DiagonalClipper(),
-                child: Transform.translate(
-                  offset: Offset(0, 0),
-                  child: Image.asset(
-                    'lib/assets/images/dog.png',
-                    height: 500,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                child: Image.asset(
+                  'lib/assets/images/dog.png',
+                  height: 500,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 25),
+                padding: const EdgeInsets.symmetric(horizontal: 25),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    const SizedBox(height: 20),
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -93,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
@@ -104,53 +108,39 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 7),
-
+                    const SizedBox(height: 7),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PasswordPage(),
+                            builder: (context) => const PasswordPage(),
                           ),
                         );
                       },
-                      child: Text("Esqueceu a senha?"),
+                      child: const Text("Esqueceu a senha?"),
                     ),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        '',
-                        style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: () {
-                        _login();
-                      },
+                      onPressed: _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFEBDD6C),
+                        backgroundColor: const Color(0xFFEBDD6C),
                         foregroundColor: Colors.black,
                       ),
-                      child: Text('Entrar'),
+                      child: const Text('Entrar'),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     TextButton(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => RegistrationPage()),
+                              builder: (context) => const RegistrationPage()),
                         );
                         _emailController.clear();
                         _passwordController.clear();
                       },
-                      child: Text(
+                      child: const Text(
                         'Não tem uma conta? Clique aqui!',
                         style: TextStyle(
                           color: Colors.black54,
