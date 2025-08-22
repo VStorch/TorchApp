@@ -17,21 +17,42 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _surnameController = TextEditingController();
 
   void _registerUser() {
+
+    // Variáveis final = imutáveis .trim: remove espaços extras no início e no final do texto
     final name = _nameController.text.trim();
     final surname = _surnameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    // Verifica se todos os campos estão preenchidos
     if (name.isEmpty || surname.isEmpty || email.isEmpty || password.isEmpty){
       _showDialog('Erro','Preencha todos os campos');
       return;
     }
 
+    // Verificação se o email já está cadastrado
     if (UserDb.emailExists(email)){
       _showDialog('Erro','Email já cadastrado');
       return;
     }
 
+    // Verificação se o email é válido
+    if (!UserDb.isValidEmail(email)) {
+      _showDialog('Erro','Email inválido');
+      return;
+    }
+    // Verificando se a senha é válida
+    if(UserDb.isValidPassword(password)){
+      _showDialog('Erro','Senha com menos de 8 caracteres');
+      return;
+    }
+    // Verificando se o nome é válido
+    if(!UserDb.isValidName(name)){
+      _showDialog('Erro', 'Nome com caracteres inválidos');
+      return;
+    }
+
+    // Adiciona um novo usuário e limpa os campos, além de definir o diálogo
     final newUser = User(name, surname, email, password);
     UserDb.addUser(newUser);
     _showDialog('Sucesso','Usuário cadastrado com sucesso');
@@ -42,6 +63,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     _passwordController.clear();
   }
 
+  // Mostra o diálogo e cria o botão ok
   void _showDialog(String title, String message){
     showDialog(
       context: context,
@@ -61,8 +83,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
+      // Dá um resize para que a caixa de texto não fique ocultada pelo usuário
       resizeToAvoidBottomInset: true,
       backgroundColor: Color(0xFFF5F3E2),
+
       appBar: AppBar(
         backgroundColor: Color(0xFFEBDD6C),
         title: Text(
@@ -74,11 +99,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
         ),
         centerTitle: true,
       ),
+
+      // SafeArea: faz com que o conteúdo não possa ser ocultado
       body: SafeArea(
+
+        // ScrollView: faz com que o conteúdo possa ser deslocado, no caso de nome ou senha muito grandes
           child: SingleChildScrollView(
+            
+            // Define o espaçamento do objeto com as margens
             padding: EdgeInsets.symmetric(horizontal: 25, vertical: 70),
               child: Column(
                 children: [
+                  
+                  // Nome
                   TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -89,6 +122,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
                   SizedBox(height: 25),
+                  
+                  // Sobrenome
                   TextField(
                     controller: _surnameController,
                     decoration: InputDecoration(
@@ -99,6 +134,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
                   SizedBox(height: 25),
+                  
+                  // Email
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
@@ -109,6 +146,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
                   SizedBox(height: 25),
+                  
+                  // Senha
                   TextField(
                     controller: _passwordController,
                     obscureText: true,
@@ -120,6 +159,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                   ),
                   SizedBox(height: 30),
+
+                  // Botão de registro
                   ElevatedButton(
                     onPressed: _registerUser,
                     style: ElevatedButton.styleFrom(
