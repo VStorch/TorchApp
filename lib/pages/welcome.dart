@@ -1,7 +1,7 @@
 // Pacote de interface visual
 import 'package:flutter/material.dart';
 
-// Stateful widget(alterável)
+// Stateful widget (alterável)
 class Welcome extends StatefulWidget {
   const Welcome({super.key});
 
