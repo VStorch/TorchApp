@@ -12,7 +12,7 @@ Frontend em Flutter para o TorchApp. O repositório do backend está disponível
 
 ---
 
-#### Como rodar o projeto:
+### Como rodar o projeto:
 
 Caso haja problemas no terminal, execute:
 
