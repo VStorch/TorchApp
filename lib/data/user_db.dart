@@ -36,19 +36,19 @@ class UserDb {
     return regExp.hasMatch(email);
   }
 
-  //Método verificador de senha
+  // Método verificador de senha
   static bool isValidPassword(String password){
     return password.length <8;
   }
 
-  //Método verificador de nome
+  // Método verificador de nome
   static bool isValidName(String name){
     String pattern =
         r'^[a-zA-ZáéíóúãõâêîôûçÇ ]';
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(name);
   }
-  //Método verificador de sobrenome
+  // Método verificador de sobrenome
   static bool isValidSurname(String surname){
     String pattern =
         r'^[a-zA-ZáéíóúãõâêîôûçÇ ]';
