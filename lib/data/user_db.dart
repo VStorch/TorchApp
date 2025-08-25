@@ -48,4 +48,11 @@ class UserDb {
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(name);
   }
+  //Método verificador de sobrenome
+  static bool isValidSurname(String surname){
+    String pattern =
+        r'^[a-zA-ZáéíóúãõâêîôûçÇ ]';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(surname);
+  }
 }

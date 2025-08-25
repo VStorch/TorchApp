@@ -29,6 +29,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
       _showDialog('Erro','Preencha todos os campos');
       return;
     }
+    // Verificando se o nome é válido
+    if(!UserDb.isValidName(name)){
+      _showDialog('Erro', 'Nome com caracteres inválidos');
+      return;
+    }
+
+    // Verificando se o sobrenome é válido
+    if(!UserDb.isValidSurname(surname)){
+      _showDialog('Erro', 'Sobrenome com caracteres inválidos');
+      return;
+    }
 
     // Verificação se o email já está cadastrado
     if (UserDb.emailExists(email)){
@@ -44,11 +55,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
     // Verificando se a senha é válida
     if(UserDb.isValidPassword(password)){
       _showDialog('Erro','Senha com menos de 8 caracteres');
-      return;
-    }
-    // Verificando se o nome é válido
-    if(!UserDb.isValidName(name)){
-      _showDialog('Erro', 'Nome com caracteres inválidos');
       return;
     }
 
@@ -90,9 +96,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       appBar: AppBar(
         backgroundColor: Color(0xFFEBDD6C),
+        toolbarHeight: 90,
         title: Text(
             'Cadastro',
           style: TextStyle(
+            fontSize: 40,
             color: Colors.black,
             fontWeight: FontWeight.bold
           ),
