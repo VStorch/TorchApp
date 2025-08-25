@@ -4,7 +4,7 @@ import 'package:torch_app/pages/password_page.dart';
 import 'package:torch_app/pages/registration_page.dart';
 import 'package:flutter/services.dart';
 import 'package:torch_app/pages/welcome.dart';
-import '../data/user_db.dart';
+import '../data/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,7 +22,7 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text.trim();
 
     // Verifica se o usuário existe
-    if (UserDb.checkUser(email, password) == false){
+    if (UserService.checkUser(email, password) == false){
       _showDialog('Erro','Usuário não encontrado');
       return;
 

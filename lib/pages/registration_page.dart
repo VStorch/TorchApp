@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/user.dart';
-import '../data/user_db.dart';
+import '../data/user_service.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -30,37 +30,37 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
     // Verificando se o nome é válido
-    if(!UserDb.isValidName(name)){
+    if(!UserService.isValidName(name)){
       _showDialog('Erro', 'Nome com caracteres inválidos');
       return;
     }
 
     // Verificando se o sobrenome é válido
-    if(!UserDb.isValidSurname(surname)){
+    if(!UserService.isValidSurname(surname)){
       _showDialog('Erro', 'Sobrenome com caracteres inválidos');
       return;
     }
 
     // Verificação se o email já está cadastrado
-    if (UserDb.emailExists(email)){
+    if (UserService.emailExists(email)){
       _showDialog('Erro','Email já cadastrado');
       return;
     }
 
     // Verificação se o email é válido
-    if (!UserDb.isValidEmail(email)) {
+    if (!UserService.isValidEmail(email)) {
       _showDialog('Erro','Email inválido');
       return;
     }
     // Verificando se a senha é válida
-    if(UserDb.isValidPassword(password)){
+    if(UserService.isValidPassword(password)){
       _showDialog('Erro','Senha com menos de 8 caracteres');
       return;
     }
 
     // Adiciona um novo usuário e limpa os campos, além de definir o diálogo
     final newUser = User(name, surname, email, password);
-    UserDb.addUser(newUser);
+    UserService.addUser(newUser);
     _showDialog('Sucesso','Usuário cadastrado com sucesso');
 
     _nameController.clear();
