@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../data/user.dart';
 import '../data/user_db.dart';
+
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -90,11 +90,13 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       appBar: AppBar(
         backgroundColor: Color(0xFFEBDD6C),
+        toolbarHeight: 90,
         title: Text(
             'Cadastro',
           style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold
+            fontFamily: 'InknutAntiqua',
+            fontWeight: FontWeight.w600,
+            fontSize: 30,
           ),
         ),
         centerTitle: true,
@@ -107,9 +109,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: SingleChildScrollView(
             
             // Define o espaçamento do objeto com as margens
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 70),
+            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 350),
               child: Column(
                 children: [
+                  ClipOval(
+                    child: Image.asset(
+                    'lib/assets/images/cachorroneve.jpg',
+                    width: 300,
+                    height : 300,
+                    fit: BoxFit.cover),
+                  ),
+
                   
                   // Nome
                   TextField(
