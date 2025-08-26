@@ -16,7 +16,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _nameController = TextEditingController();
   final _surnameController = TextEditingController();
 
-  void _registerUser() {
+  void _registerUser() async {
 
     // Variáveis final = imutáveis .trim: remove espaços extras no início e no final do texto
     final name = _nameController.text.trim();
@@ -41,32 +41,38 @@ class _RegistrationPageState extends State<RegistrationPage> {
       return;
     }
 
-    // Verificação se o email já está cadastrado
-    if (UserService.emailExists(email)){
-      _showDialog('Erro','Email já cadastrado');
-      return;
-    }
-
     // Verificação se o email é válido
     if (!UserService.isValidEmail(email)) {
       _showDialog('Erro','Email inválido');
       return;
     }
     // Verificando se a senha é válida
-    if(UserService.isValidPassword(password)){
+    if(!UserService.isValidPassword(password)){
       _showDialog('Erro','Senha com menos de 8 caracteres');
+      return;
+    }
+
+    // Verificação se o email já está cadastrado
+    if (await UserService.emailExists(email)){
+      _showDialog('Erro','Email já cadastrado');
       return;
     }
 
     // Adiciona um novo usuário e limpa os campos, além de definir o diálogo
     final newUser = User(name, surname, email, password);
-    UserService.addUser(newUser);
-    _showDialog('Sucesso','Usuário cadastrado com sucesso');
+    final success = await UserService.addUser(newUser);
 
-    _nameController.clear();
-    _surnameController.clear();
-    _emailController.clear();
-    _passwordController.clear();
+    if (success) {
+      _showDialog('Sucesso','Usuário cadastrado com sucesso');
+
+      _nameController.clear();
+      _surnameController.clear();
+      _emailController.clear();
+      _passwordController.clear();
+    }
+    else {
+      _showDialog('Erro','Falha ao cadastrar usuário');
+    }
   }
 
   // Mostra o diálogo e cria o botão ok

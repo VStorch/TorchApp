@@ -3,24 +3,27 @@ import 'package:http/http.dart' as http;
 import 'package:torch_app/data/user.dart';
 
 class UserService {
-  final String baseUrl = 'http://10.0.2.2:8080/users';
+  static const String baseUrl = 'http://10.0.2.2:8080/users';
 
   // Metódo para adicionar um novo usuário ao servidor
-  Future<User> addUser(User user) async {
+  static Future<bool> addUser(User user) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(user.toJson()),
     );
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return User.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Erro ao criar usuário');
-    }
+    return response.statusCode == 201; // 201 Created
+  }
+
+  // Verifica se email já existe no servidor
+  static Future<bool> emailExists(String email) async {
+    final url = Uri.parse("$baseUrl/email/$email");
+    final response = await http.get(url);
+    return response.statusCode == 200;
   }
 
   // Buscar todos os usuários
-  Future<List<User>> getUsers() async {
+  static Future<List<User>> getUsers() async {
     final response = await http.get(Uri.parse(baseUrl));
 
     if (response.statusCode == 200) {
@@ -32,18 +35,16 @@ class UserService {
   }
 
   // Método de Login
-  Future<User> loginUser(String email, String password) async {
+  static Future<bool> loginUser(String email, String password) async {
     final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password})
     );
     if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
-    } else if (response.statusCode == 401) {
-      throw Exception('Email ou senha inválidos');
+      return true;
     } else {
-      throw Exception('Erro no login: ${response.body}');
+      return false;
     }
   }
 

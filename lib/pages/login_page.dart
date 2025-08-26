@@ -17,15 +17,16 @@ class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  void _login() {
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
+    final success = await UserService.loginUser(email, password);
+
     // Verifica se o usuário existe
-    if (UserService.checkUser(email, password) == false){
+    if (!success){
       _showDialog('Erro','Usuário não encontrado');
       return;
-
     }
     // Joga o caboclo pro welcome
     else {
@@ -37,7 +38,6 @@ class _LoginPageState extends State<LoginPage> {
     }
     _emailController.clear();
     _passwordController.clear();
-
   }
 
   // Mostra o diálogo
