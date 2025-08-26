@@ -97,7 +97,7 @@ class _PasswordPageState extends State<PasswordPage> {
                 ),
               ),
 
-              const SizedBox(height: 148),
+              const SizedBox(height: 104),
 
               Center(
                 child: SizedBox(
