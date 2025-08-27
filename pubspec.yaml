@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  lottie: ^2.2.0
 
   cupertino_icons: ^1.0.2
 
@@ -24,6 +25,8 @@ flutter:
   assets:
     - lib/assets/images/dog.png
     - lib/assets/images/dogP.png
+    - lib/assets/images/Moody.json
+
 
   fonts:
     - family: InknutAntiqua
