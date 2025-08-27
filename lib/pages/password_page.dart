@@ -97,13 +97,15 @@ class _PasswordPageState extends State<PasswordPage> {
                 ),
               ),
 
-              const SizedBox(height: 104),
+              const SizedBox(height: 70),
 
               Center(
-                child: SizedBox(
+                child: ClipOval(
                   child: Image.asset(
                     "lib/assets/images/dogP.png",
                     scale: 1,
+                    width: 350,
+                    height: 350,
                     fit: BoxFit.contain,
                   ),
                 ),
