@@ -109,16 +109,18 @@ class _RegistrationPageState extends State<RegistrationPage> {
           child: SingleChildScrollView(
             
             // Define o espaçamento do objeto com as margens
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 350),
+            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
               child: Column(
                 children: [
                   ClipOval(
                     child: Image.asset(
                     'lib/assets/images/cachorroneve.jpg',
-                    width: 300,
-                    height : 300,
+                    width: 200,
+                    height : 200,
+
                     fit: BoxFit.cover),
                   ),
+                  SizedBox(height: 25),
 
                   
                   // Nome
