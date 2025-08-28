@@ -26,6 +26,7 @@ flutter:
     - lib/assets/images/dog.png
     - lib/assets/images/dogP.png
     - lib/assets/images/Moody.json
+    - lib/assets/images/Patas.json
 
 
   fonts:
