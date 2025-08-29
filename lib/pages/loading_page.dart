@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'login_page.dart'; // importa a tela de login
+import 'login_page.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});
@@ -10,17 +10,22 @@ class LoadingPage extends StatefulWidget {
 }
 
 class _LoadingPageState extends State<LoadingPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _fallController;
   late Animation<Offset> _fallingAnimation;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+
+  int dotCount = 0;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = AnimationController(
+    _fallController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 5),
+      duration: const Duration(seconds: 2),
     );
 
     _fallingAnimation = Tween<Offset>(
@@ -28,25 +33,51 @@ class _LoadingPageState extends State<LoadingPage>
       end: const Offset(0, 0),
     ).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _fallController,
         curve: Curves.bounceOut,
       ),
     );
 
-    _controller.forward();
+    _fadeController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
 
-    // Após 4 segundos, navega para LoginPage
+    _fadeAnimation = Tween<double>(
+      begin: 0.6,
+      end: 1,
+    ).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _fallController.forward().whenComplete(() {
+      _fadeController.repeat(reverse: true);
+    });
+
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return false;
+      setState(() {
+        dotCount = (dotCount + 1) % 4;
+      });
+      return true;
+    });
+
+    // Vai pra tela de login
     Future.delayed(const Duration(seconds: 8), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _fallController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
@@ -60,13 +91,16 @@ class _LoadingPageState extends State<LoadingPage>
             Center(
               child: SlideTransition(
                 position: _fallingAnimation,
-                child: const Text(
-                  'Torch',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blueAccent,
-                    letterSpacing: 4,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: const Text(
+                    'TORCH',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                      letterSpacing: 4,
+                    ),
                   ),
                 ),
               ),
@@ -104,9 +138,9 @@ class _LoadingPageState extends State<LoadingPage>
 
             Align(
               alignment: const Alignment(0.1, 1),
-              child: const Text(
-                'Carregando...',
-                style: TextStyle(
+              child: Text(
+                'Carregando${"." * dotCount}',
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
