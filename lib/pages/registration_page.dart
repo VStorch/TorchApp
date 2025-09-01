@@ -3,6 +3,7 @@ import '../data/user.dart';
 import '../data/user_db.dart';
 
 
+
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
 
@@ -11,6 +12,10 @@ class RegistrationPage extends StatefulWidget {
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
+  static const IconData cruelty_free_outlined = IconData(0xf05d4, fontFamily: 'MaterialIcons');
+  static const IconData key = IconData(0xf052b, fontFamily: 'MaterialIcons');
+  static const IconData email_rounded = IconData(0xf705, fontFamily: 'MaterialIcons');
+  static const IconData account_circle = IconData(0xe043, fontFamily: 'MaterialIcons');
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -86,111 +91,115 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+    @override
+    Widget build(BuildContext context) {
+      return Scaffold(
 
-      // Dá um resize para que a caixa de texto não fique ocultada pelo usuário
-      resizeToAvoidBottomInset: true,
-      backgroundColor: Color(0xFFF5F3E2),
+        // Dá um resize para que a caixa de texto não fique ocultada pelo usuário
+        resizeToAvoidBottomInset: true,
+        backgroundColor: Color(0xFFF5F3E2),
 
-      appBar: AppBar(
-        backgroundColor: Color(0xFFEBDD6C),
-        toolbarHeight: 90,
-        title: Text(
-            'Cadastro',
-          style: TextStyle(
-            fontFamily: 'InknutAntiqua',
-            fontWeight: FontWeight.w600,
-            fontSize: 30,
+        appBar: AppBar(
+          backgroundColor: Color(0xFFEBDD6C),
+          toolbarHeight: 90,
+          title: Text(
+              'Cadastro',
+            style: TextStyle(
+              fontFamily: 'InknutAntiqua',
+              fontWeight: FontWeight.w600,
+              fontSize: 30,
+            ),
           ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
 
-      // SafeArea: faz com que o conteúdo não possa ser ocultado
-      body: SafeArea(
+        // SafeArea: faz com que o conteúdo não possa ser ocultado
+        body: SafeArea(
 
-        // ScrollView: faz com que o conteúdo possa ser deslocado, no caso de nome ou senha muito grandes
-          child: SingleChildScrollView(
-            
-            // Define o espaçamento do objeto com as margens
-            padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-              child: Column(
-                children: [
-                  ClipOval(
-                    child: Image.asset(
-                    'lib/assets/images/cachorroneve.jpg',
-                    width: 200,
-                    height : 200,
+          // ScrollView: faz com que o conteúdo possa ser deslocado, no caso de nome ou senha muito grandes
+            child: SingleChildScrollView(
 
-                    fit: BoxFit.cover),
-                  ),
-                  SizedBox(height: 25),
+              // Define o espaçamento do objeto com as margens
+              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+                child: Column(
+                  children: [
+                    ClipOval(
+                      child: Image.asset(
+                      'lib/assets/images/cachorroneve.jpg',
+                      width: 200,
+                      height : 200,
 
-                  
-                  // Nome
-                  TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Nome...',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50)
+                      fit: BoxFit.cover),
+                    ),
+                    SizedBox(height: 25),
+
+
+                    // Nome
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Nome...',
+                        prefixIcon: Icon(cruelty_free_outlined),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50)
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 25),
-                  
-                  // Sobrenome
-                  TextField(
-                    controller: _surnameController,
-                    decoration: InputDecoration(
-                      labelText: 'Sobrenome...',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50)
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 25),
-                  
-                  // Email
-                  TextField(
-                    controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email...',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50)
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 25),
-                  
-                  // Senha
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Senha...',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50)
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 30),
+                    SizedBox(height: 25),
 
-                  // Botão de registro
-                  ElevatedButton(
-                    onPressed: _registerUser,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFEBDD6C),
-                      foregroundColor: Colors.black,
+                    // Sobrenome
+                    TextField(
+                      controller: _surnameController,
+                      decoration: InputDecoration(
+                        labelText: 'Sobrenome...',
+                        prefixIcon: Icon(account_circle),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50)
+                        ),
+                      ),
                     ),
-                    child: Text('Cadastrar'),
-                  ),
-                ],
-              ),
-          ),
-      ),
-    );
-  }
+                    SizedBox(height: 25),
+
+                    // Email
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email...',
+                        prefixIcon: Icon(email_rounded),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50)
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 25),
+
+                    // Senha
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Senha...',
+                        prefixIcon: Icon(key),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50)
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+
+                    // Botão de registro
+                    ElevatedButton(
+                      onPressed: _registerUser,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFEBDD6C),
+                        foregroundColor: Colors.black,
+                      ),
+                      child: Text('Cadastrar'),
+                    ),
+                  ],
+                ),
+            ),
+        ),
+      );
+    }
 }

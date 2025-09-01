@@ -21,12 +21,41 @@ class _WelcomeState extends State<Welcome> {
     return Scaffold(
 
       // Registra a cor de fundo padrão
-      backgroundColor: Colors.amber,
+      backgroundColor: Color(0xFFFBF8E1),
+      appBar: AppBar(
+        toolbarHeight: 90,
+        title: Container(
+          height : 50,
+          child: TextField(
+            style: TextStyle(fontSize: 20),
+            decoration: InputDecoration(
+              hintText: 'Busque um PetShop',
+              prefixIcon: Icon(Icons.search),
+              filled: true,
+              fillColor: Color(0xFFFBF8E1),
+              contentPadding: EdgeInsets.symmetric(vertical : 0, horizontal : 0),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
 
-      // Centraliza o texto e dá a mensagem de bem-vindo
-      body: Center(
-        child: Text('Seja bem vindo!'),
+
+              )
+
+
+            )
+          ),
+        ),
+        backgroundColor: Color(0xFFEBDD6C),
       ),
+
+
+
+
+
+
+
+
+
     );
   }
 }
