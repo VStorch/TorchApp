@@ -6,7 +6,7 @@ import 'password_page.dart';
 import 'registration_page.dart';
 import 'welcome.dart';
 
-import '../data/user_db.dart';
+import '../data/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -30,15 +30,16 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _login() {
+  Future<void> _login() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Verifica se o usuário existe
-    if (!UserDb.checkUser(email, password)) {
-      _showDialog('Erro', 'Usuário não encontrado');
-      return;
+    final success = await UserService.loginUser(email, password);
 
+    // Verifica se o usuário existe
+    if (!success){
+      _showDialog('Erro','Usuário não encontrado');
+      return;
     }
     // Joga o caboclo pro welcome
     else {
@@ -49,7 +50,6 @@ class _LoginPageState extends State<LoginPage> {
     }
     _emailController.clear();
     _passwordController.clear();
-
   }
 
   // Mostra o diálogo
