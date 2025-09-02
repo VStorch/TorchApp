@@ -34,7 +34,7 @@ flutter:
   fonts:
     - family: InknutAntiqua
       fonts:
-        - asset: lib/assets/fonts/InknutAntiqua-Black.ttf
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Black.ttf
           weight: 700
         - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Regular.ttf
           weight: 400
