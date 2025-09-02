@@ -24,6 +24,20 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Color(0xFFFBF8E1),
       appBar: AppBar(
         toolbarHeight: 90,
+
+        // Cria o ícone do menu, que neste contexto é a pata de cachorro
+        leading: Builder(
+            builder: (context) {
+              return IconButton(
+                icon: const Icon(Icons.pets),
+                iconSize: 35,
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            }
+        ),
+
         title: Container(
           height : 50,
           child: TextField(
@@ -37,8 +51,8 @@ class _HomePageState extends State<HomePage> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
-              )
-            )
+              ),
+            ),
           ),
         ),
         backgroundColor: Color(0xFFEBDD6C),
