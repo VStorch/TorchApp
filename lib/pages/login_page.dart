@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../components/diagonal_clipper.dart';
 import 'password_page.dart';
 import 'registration_page.dart';
-import 'welcome.dart';
+import 'home_page.dart';
 
 import '../data/user_service.dart';
 
@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     else {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Welcome()),
+        MaterialPageRoute(builder: (context) => const HomePage()),
       );
     }
     _emailController.clear();

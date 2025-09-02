@@ -145,7 +145,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Nome...',
-                        prefixIcon: Icon(cruelty_free_outlined),
+                        prefixIcon: Icon(Icons.pets),
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(50)
                         ),

@@ -2,16 +2,16 @@
 import 'package:flutter/material.dart';
 
 // Stateful widget (alterável)
-class Welcome extends StatefulWidget {
-  const Welcome({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<Welcome> createState() => _WelcomeState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 
 // Classe que define o comportamento e aparência do widget Welcome, precisa extender o "Welcome" para poder alterá-lo
-class _WelcomeState extends State<Welcome> {
+class _HomePageState extends State<HomePage> {
   @override
 
   // Build responsável por construir a interface do usuário
