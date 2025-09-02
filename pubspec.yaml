@@ -34,16 +34,16 @@ flutter:
   fonts:
     - family: InknutAntiqua
       fonts:
-        - asset: lib/assets/images/InknutAntiqua-Black.ttf
+        - asset: lib/assets/fonts/InknutAntiqua-Black.ttf
           weight: 700
-        - asset: fonts/Inknut_Antiqua/InknutAntiqua-Regular.ttf
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Regular.ttf
           weight: 400
-        - asset: fonts/Inknut_Antiqua/InknutAntiqua-Bold.ttf
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Bold.ttf
           weight: 700
-        - asset: fonts/Inknut_Antiqua/InknutAntiqua-SemiBold.ttf
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-SemiBold.ttf
           weight: 600
 
     - family: InclusiveSans
       fonts:
-        - asset: lib/assets/images/InclusiveSans.ttf
+        - asset: lib/assets/fonts/InclusiveSans.ttf
           weight: 700
