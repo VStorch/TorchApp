@@ -19,6 +19,13 @@ class _AboutPageState extends State<AboutPage> {
 
     // Scaffold: layout básico do flutter
     return Scaffold(
+      body:  const Text(
+        'asafgbhnm, ',
+
+        style: TextStyle(fontSize: 16, height: 1.5),
+
+
+      ),
 
       // Registra a cor de fundo padrão
       backgroundColor: Color(0xFFFBF8E1),
@@ -57,6 +64,7 @@ class _AboutPageState extends State<AboutPage> {
         ),
         backgroundColor: Color(0xFFEBDD6C),
       ),
+
       drawer: Drawer(
         backgroundColor: Color(0xFFEBDD6C),
         child: ListView(

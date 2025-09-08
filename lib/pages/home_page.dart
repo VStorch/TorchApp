@@ -1,5 +1,6 @@
 // Pacote de interface visual
 import 'package:flutter/material.dart';
+import 'package:torch_app/pages/about_page.dart';
 
 // Stateful widget (alterável)
 class HomePage extends StatefulWidget {
@@ -61,8 +62,9 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Color(0xFFEBDD6C),
         child: ListView(
           padding: EdgeInsets.zero,
-          children: const [
-            SizedBox(
+
+          children:  <Widget>[
+            const SizedBox(
               height: 100,
               child: DrawerHeader(
                 decoration: BoxDecoration(color: Color(0xFFE8CA42),
@@ -78,41 +80,65 @@ class _HomePageState extends State<HomePage> {
                 ),),
               ),
             ),
-            ListTile(
+
+            const ListTile(
               leading: Icon(Icons.home),
               title: Text("Tela Inicial"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.pets),
               title: Text("Meus Pets"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.business),
               title: Text("PetShops favoritos"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.calendar_month),
               title: Text("Meus Agendamentos"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.local_offer),
               title: Text("Promoções"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.person),
               title: Text("Meu Perfil"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.settings),
               title: Text("Configurações"),
             ),
-            ListTile(
+            const ListTile(
               leading: Icon(Icons.logout),
               title: Text("Sair"),
             ),
             ListTile(
+
               leading: Icon(Icons.info),
-              title: Text("Sobre"),
+
+              title: TextButton(
+                onPressed: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context)=> const AboutPage()),
+                  );
+
+                },
+                child: const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+
+                  'Sobre',
+
+                  style: TextStyle(
+
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                ),)
+
+              ),
             ),
           ],
         ),
