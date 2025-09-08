@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/pages/loading_page.dart';
+import 'package:torch_app/pages/my_pets_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoadingPage(),
+      home: const MyPetsPage(),
     );
   }
 }
