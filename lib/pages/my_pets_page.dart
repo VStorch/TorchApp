@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../data/pet/pet.dart';
+import '../data/pet/pet_service.dart';
 
 class MyPetsPage extends StatefulWidget {
   const MyPetsPage({super.key});
@@ -9,11 +11,14 @@ class MyPetsPage extends StatefulWidget {
 
 class _MyPetsPageState extends State<MyPetsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final PetService _petService = PetService();
 
   @override
   Widget build(BuildContext context) {
+    final pets = _petService.pets;
+
     return Scaffold(
-      key: _scaffoldKey, // <- chave do Scaffold
+      key: _scaffoldKey,
       backgroundColor: const Color(0xFFF6F0D1),
 
       appBar: AppBar(
@@ -35,8 +40,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   hintText: 'Busque um PetShop...',
                   filled: true,
                   fillColor: const Color(0xFFF6F0D1),
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                     borderSide: BorderSide.none,
@@ -47,9 +51,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
             const SizedBox(width: 12),
             IconButton(
               icon: const Icon(Icons.search, color: Colors.black),
-              onPressed: () {
-                // ação de busca
-              },
+              onPressed: () {},
             ),
           ],
         ),
@@ -67,11 +69,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 child: Center(
                   child: Text(
                     "Menu",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -92,128 +90,248 @@ class _MyPetsPageState extends State<MyPetsPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: [
-            // Card do pet
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              color: const Color(0xFFFFF8C6),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(Icons.pets, size: 28),
-                        SizedBox(width: 8),
-                        Text(
-                          "Thor",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    const Text("Idade: 2 anos"),
-                    const Text("Raça: Golden Retriever"),
-                    const Text("Último agendamento: 10/06/2025"),
-                    const Text("Serviços favoritos: Banho, Tosa"),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        OutlinedButton(
-                          onPressed: () {
-                            // ação Editar
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.black),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: const Text("Editar"),
-                        ),
-                        OutlinedButton(
-                          onPressed: () {
-                            // ação Excluir
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Colors.black),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: const Text("Excluir"),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Card vazio (sem pets)
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              color: const Color(0xFFFFF8C6),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: const [
-                        Icon(Icons.pets, size: 28),
-                        SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            "Você ainda não tem nenhum pet cadastrado?",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    const Text("Toque no botão abaixo para adicionar um amigo!"),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          // ação Cadastrar
-                        },
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.black),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        child: const Text("Cadastrar"),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          ],
+          children: pets.isEmpty
+              ? [_buildEmptyCard()]
+              : pets.map((pet) => _buildPetCard(pet)).toList(),
         ),
       ),
 
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFEBDD6C),
-        onPressed: () {
-          // ação adicionar pet
-        },
+        onPressed: () => _showAddPetDialog(context),
         child: const Icon(Icons.add, color: Colors.black, size: 32),
+      ),
+    );
+  }
+
+  /// CARD DO PET
+  Widget _buildPetCard(Pet pet) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFFFFF8C6),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pets, size: 28),
+                const SizedBox(width: 8),
+                Text(pet.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text("Espécie: ${pet.species}"),
+            Text("Raça: ${pet.breed}"),
+            Text("Peso: ${pet.weight} kg"),
+            Text("Nascimento: ${pet.birthDate.toLocal().toString().split(' ')[0]}"),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    // implementar edição depois
+                  },
+                  child: const Text("Editar"),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _petService.removerPet(pet.id!);
+                    });
+                  },
+                  child: const Text("Excluir"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// CARD QUANDO NÃO TEM PETS
+  Widget _buildEmptyCard() {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFFFFF8C6),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: const [
+                Icon(Icons.pets, size: 28),
+                SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    "Você ainda não tem nenhum pet cadastrado?",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            const Text("Toque no botão abaixo para adicionar um amigo!"),
+            const SizedBox(height: 16),
+            Center(
+              child: OutlinedButton(
+                onPressed: () => _showAddPetDialog(context),
+                child: const Text("Cadastrar"),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// DIALOG BONITO PARA CADASTRAR UM PET
+  void _showAddPetDialog(BuildContext context) {
+    final nameController = TextEditingController();
+    final speciesController = TextEditingController();
+    final breedController = TextEditingController();
+    final weightController = TextEditingController();
+    DateTime birthDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFFF6F0D1),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Cadastrar Pet",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildInputField("Nome", nameController),
+                const SizedBox(height: 12),
+                _buildInputField("Espécie", speciesController),
+                const SizedBox(height: 12),
+                _buildInputField("Raça", breedController),
+                const SizedBox(height: 12),
+                _buildInputField("Peso (kg)", weightController,
+                    keyboard: TextInputType.number),
+                const SizedBox(height: 12),
+
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEBDD6C),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: const ColorScheme.light(
+                              primary: Color(0xFFEBDD6C),
+                              onPrimary: Colors.black,
+                              surface: Color(0xFFF6F0D1),
+                              onSurface: Colors.black,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+                    if (picked != null) {
+                      birthDate = picked;
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text("Selecionar Data de Nascimento"),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        side: const BorderSide(color: Colors.black),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancelar"),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEBDD6C),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onPressed: () {
+                        final pet = Pet(
+                          null,
+                          nameController.text,
+                          speciesController.text,
+                          breedController.text,
+                          double.tryParse(weightController.text) ?? 0.0,
+                          birthDate,
+                        );
+                        setState(() {
+                          _petService.adicionarPet(pet);
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Salvar"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// INPUT CUSTOMIZADO
+  Widget _buildInputField(String label, TextEditingController controller,
+      {TextInputType keyboard = TextInputType.text}) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboard,
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: const Color(0xFFFFF8C6),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }
