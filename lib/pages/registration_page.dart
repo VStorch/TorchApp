@@ -108,7 +108,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         appBar: AppBar(
           backgroundColor: Color(0xFFEBDD6C),
           toolbarHeight: 90,
-          title: Text(
+          title: const Text(
               'Cadastro',
             style: TextStyle(
               fontFamily: 'InknutAntiqua',
@@ -126,7 +126,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             child: SingleChildScrollView(
 
               // Define o espaçamento do objeto com as margens
-              padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                 child: Column(
                   children: [
                     ClipOval(
@@ -137,7 +137,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
                       fit: BoxFit.cover),
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
 
                     // Nome
@@ -151,7 +151,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
                     // Sobrenome
                     TextField(
@@ -164,7 +164,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
                     // Email
                     TextField(
@@ -177,7 +177,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
 
                     // Senha
                     TextField(
@@ -191,7 +191,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
 
                     // Botão de registro
                     ElevatedButton(
@@ -200,7 +200,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                         backgroundColor: Color(0xFFEBDD6C),
                         foregroundColor: Colors.black,
                       ),
-                      child: Text('Cadastrar'),
+                      child: const Text('Cadastrar'),
                     ),
                   ],
                 ),
