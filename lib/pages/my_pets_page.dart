@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../data/pet/pet.dart';
 import '../data/pet/pet_service.dart';
 
@@ -124,10 +125,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
               ],
             ),
             const SizedBox(height: 10),
-            Text("Espécie: ${pet.species}"),
             Text("Raça: ${pet.breed}"),
             Text("Peso: ${pet.weight} kg"),
-            Text("Nascimento: ${pet.birthDate.toLocal().toString().split(' ')[0]}"),
+            Text(
+              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}", // ✅ formatado
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -191,10 +193,9 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  /// DIALOG BONITO PARA CADASTRAR UM PET
+  /// DIALOG PARA CADASTRAR UM PET
   void _showAddPetDialog(BuildContext context) {
     final nameController = TextEditingController();
-    final speciesController = TextEditingController();
     final breedController = TextEditingController();
     final weightController = TextEditingController();
     DateTime birthDate = DateTime.now();
@@ -223,8 +224,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 const SizedBox(height: 20),
 
                 _buildInputField("Nome", nameController),
-                const SizedBox(height: 12),
-                _buildInputField("Espécie", speciesController),
                 const SizedBox(height: 12),
                 _buildInputField("Raça", breedController),
                 const SizedBox(height: 12),
@@ -296,7 +295,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
                         final pet = Pet(
                           null,
                           nameController.text,
-                          speciesController.text,
                           breedController.text,
                           double.tryParse(weightController.text) ?? 0.0,
                           birthDate,

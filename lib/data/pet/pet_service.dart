@@ -2,9 +2,17 @@ import 'pet.dart';
 
 class PetService {
   final List<Pet> _pets = [];
+  int _nextId = 1; // gera IDs únicos
 
   void adicionarPet(Pet pet) {
-    _pets.add(pet);
+    final petComId = Pet(
+      _nextId++, // gera id único
+      pet.name,
+      pet.breed,
+      pet.weight,
+      pet.birthDate,
+    );
+    _pets.add(petComId);
   }
 
   void editarPet(Pet petAtualizado) {
