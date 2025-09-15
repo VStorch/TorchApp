@@ -413,7 +413,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  /// INPUT CUSTOMIZADO
   Widget _buildInputField(String label, TextEditingController controller,
       {TextInputType keyboard = TextInputType.text}) {
     return TextField(
