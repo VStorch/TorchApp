@@ -66,6 +66,71 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: const Color(0xFFEBDD6C),
       ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+            child: SizedBox(
+              height: 600,
+
+            child: Stack(
+              children: [
+
+
+
+                Positioned(
+                  top: 100,
+                  left: 55,
+
+
+
+
+
+
+                  child: SizedBox(
+
+                    width: 250,
+                    height: 50,
+
+
+
+                  child: ElevatedButton(
+                    onPressed: () {},
+
+                    style: ElevatedButton.styleFrom(
+
+
+                      backgroundColor: const Color(0xFFEBDD6C),
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(),
+
+
+                    ),
+
+                    child: const Text(
+                        style: TextStyle(fontSize: 18),
+                        'Repetir o último serviço'),
+                  ),
+
+                ),
+
+                ),
+
+                //ClipOval(
+                  //child: Image.asset(
+                      //'lib/assets/images/Gato bugado.png',
+                      //width: 200,
+                      //height : 200,
+
+                      //fit: BoxFit.cover),
+                //),
+              ],
+
+            ),
+        ),
+
+        ),
+        
+      ),
       drawer: Drawer(
         backgroundColor: const Color(0xFFEBDD6C),
         child: ListView(
