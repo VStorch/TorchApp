@@ -64,7 +64,7 @@ class _LoadingPageState extends State<LoadingPage>
     });
 
     // Vai pra tela de login
-    Future.delayed(const Duration(seconds: 8), () {
+    Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
