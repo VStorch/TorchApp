@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:torch_app/pages/loading_page.dart';
-import 'package:torch_app/pages/my_pets_page.dart';
-import 'package:torch_app/pages/pet_shops_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,20 +11,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
 
       // Configurações de localização
-      localizationsDelegates: const [
+      localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
+      supportedLocales: [
         Locale('pt', 'BR'), // português do Brasil
       ],
 
-      home: const PetShopPage(),
+      home: LoadingPage(),
     );
   }
 }
