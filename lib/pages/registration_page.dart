@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../data/user.dart';
-import '../data/user_service.dart';
+import '../data/user/user.dart';
+import '../data/user/user_service.dart';
 
 
 

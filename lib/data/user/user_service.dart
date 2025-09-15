@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:torch_app/data/user.dart';
+import 'package:torch_app/data/user/user.dart';
 
 class UserService {
   static const String baseUrl = 'http://10.0.2.2:8080/users';

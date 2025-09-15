@@ -6,7 +6,7 @@ import 'password_page.dart';
 import 'registration_page.dart';
 import 'home_page.dart';
 
-import '../data/user_service.dart';
+import '../data/user/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
