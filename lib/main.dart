@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/deep_link_password_page.dart';
 import 'package:torch_app/pages/loading_page.dart';
 
 void main() {
@@ -11,9 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const DeepLinkPasswordPage(),
+      home: LoadingPage(),
     );
   }
 }
