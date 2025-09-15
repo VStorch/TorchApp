@@ -105,7 +105,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  /// CARD DO PET
   Widget _buildPetCard(Pet pet) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -128,7 +127,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
             Text("Raça: ${pet.breed}"),
             Text("Peso: ${pet.weight} kg"),
             Text(
-              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}", // ✅ formatado
+              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
             ),
             const SizedBox(height: 20),
             Row(
@@ -136,7 +135,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
               children: [
                 OutlinedButton(
                   onPressed: () {
-                    // implementar edição depois
+                    _showEditPetDialog(context, pet);
                   },
                   child: const Text("Editar"),
                 ),
@@ -193,7 +192,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  /// DIALOG PARA CADASTRAR UM PET
   void _showAddPetDialog(BuildContext context) {
     final nameController = TextEditingController();
     final breedController = TextEditingController();
@@ -301,6 +299,105 @@ class _MyPetsPageState extends State<MyPetsPage> {
                         );
                         setState(() {
                           _petService.adicionarPet(pet);
+                        });
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Salvar"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showEditPetDialog(BuildContext context, Pet pet) {
+    final nameController = TextEditingController(text: pet.name);
+    final breedController = TextEditingController(text: pet.breed);
+    final weightController = TextEditingController(text: pet.weight.toString());
+    DateTime birthDate = pet.birthDate;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: const Color(0xFFF6F0D1),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  "Editar Pet",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                _buildInputField("Nome", nameController),
+                const SizedBox(height: 12),
+                _buildInputField("Raça", breedController),
+                const SizedBox(height: 12),
+                _buildInputField("Peso (kg)", weightController,
+                    keyboard: TextInputType.number),
+                const SizedBox(height: 12),
+
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEBDD6C),
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: birthDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      birthDate = picked;
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_month),
+                  label: const Text("Selecionar Data de Nascimento"),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancelar"),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEBDD6C),
+                        foregroundColor: Colors.black,
+                      ),
+                      onPressed: () {
+                        final petAtualizado = Pet(
+                          pet.id, // mantém ID
+                          nameController.text,
+                          breedController.text,
+                          double.tryParse(weightController.text) ?? 0.0,
+                          birthDate,
+                        );
+                        setState(() {
+                          _petService.editarPet(petAtualizado);
                         });
                         Navigator.pop(context);
                       },
