@@ -31,7 +31,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      backgroundColor: const Color(0xFFF6F0D1),
 
       // Registra a cor de fundo padrão
       backgroundColor: const Color(0xFFFBF8E1),
@@ -39,27 +38,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
         backgroundColor: const Color(0xFFEBDD6C),
         toolbarHeight: 90,
         automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.pets, size: 35, color: Colors.black),
-              onPressed: () {
-                _scaffoldKey.currentState?.openDrawer();
-              },
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Busque um PetShop...',
-                  filled: true,
-                  fillColor: const Color(0xFFF6F0D1),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
 
         // Cria o ícone do menu, que neste contexto é a pata de cachorro
         leading: Builder(
@@ -74,6 +52,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
             }
         ),
 
+        // Campo de Busca
         title: SizedBox(
           height : 50,
           child: TextField(
@@ -89,16 +68,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 borderSide: BorderSide.none,
               ),
             ),
-            const SizedBox(width: 12),
-            IconButton(
-              icon: const Icon(Icons.search, color: Colors.black),
-              onPressed: () {},
-            ),
-          ],
+          ),
         ),
-        backgroundColor: const Color(0xFFEBDD6C),
       ),
 
+      // Menu
       drawer: Drawer(
         backgroundColor: const Color(0xFFEBDD6C),
         child: ListView(
@@ -116,79 +90,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 ),
               ),
             ),
-            ListTile(leading: Icon(Icons.home), title: Text("Tela Inicial")),
-            ListTile(leading: Icon(Icons.pets), title: Text("Meus Pets")),
-            ListTile(leading: Icon(Icons.business), title: Text("PetShops favoritos")),
-            ListTile(leading: Icon(Icons.calendar_month), title: Text("Meus Agendamentos")),
-            ListTile(leading: Icon(Icons.local_offer), title: Text("Promoções")),
-            ListTile(leading: Icon(Icons.person), title: Text("Meu Perfil")),
-            ListTile(leading: Icon(Icons.settings), title: Text("Configurações")),
-            ListTile(leading: Icon(Icons.logout), title: Text("Sair")),
-            ListTile(leading: Icon(Icons.info), title: Text("Sobre")),
-          ],
-        ),
-      ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: pets.isEmpty
-              ? [_buildEmptyCard()]
-              : pets.map((pet) => _buildPetCard(pet)).toList(),
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFEBDD6C),
-        onPressed: () => _showAddPetDialog(context),
-        child: const Icon(Icons.add, color: Colors.black, size: 32),
-      ),
-    );
-  }
-
-  Widget _buildPetCard(Pet pet) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: const Color(0xFFFFF8C6),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.pets, size: 28),
-                const SizedBox(width: 8),
-                Text(pet.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text("Raça: ${pet.breed}"),
-            Text("Peso: ${pet.weight} kg"),
-            Text(
-              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                OutlinedButton(
-                  onPressed: () {
-                    _showEditPetDialog(context, pet);
-                  },
-                  child: const Text("Editar"),
-                ),
-                OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _petService.removerPet(pet.id!);
-                    });
-                  },
-                  child: const Text("Excluir"),
-                ),
-              ],
             ListTile(
               leading: const Icon(Icons.home),
 
@@ -418,6 +319,71 @@ class _MyPetsPageState extends State<MyPetsPage> {
           ],
         ),
       ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: pets.isEmpty
+              ? [_buildEmptyCard()]
+              : pets.map((pet) => _buildPetCard(pet)).toList(),
+        ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFEBDD6C),
+        onPressed: () => _showAddPetDialog(context),
+        child: const Icon(Icons.add, color: Colors.black, size: 32),
+      ),
+    );
+  }
+
+  Widget _buildPetCard(Pet pet) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFFFFF8C6),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.pets, size: 28),
+                const SizedBox(width: 8),
+                Text(pet.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text("Raça: ${pet.breed}"),
+            Text("Peso: ${pet.weight} kg"),
+            Text(
+              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    _showEditPetDialog(context, pet);
+                  },
+                  child: const Text("Editar"),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    setState(() {
+                      _petService.removerPet(pet.id!);
+                    });
+                  },
+                  child: const Text("Excluir"),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -431,8 +397,8 @@ class _MyPetsPageState extends State<MyPetsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: const [
+            const Row(
+              children: [
                 Icon(Icons.pets, size: 28),
                 SizedBox(width: 8),
                 Flexible(
