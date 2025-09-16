@@ -49,6 +49,17 @@ class _DeepLinkPasswordPageState extends State<DeepLinkPasswordPage> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 60),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Implementar a lógica para salvar a nova senha
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEBDD6C),
+                      foregroundColor: Colors.black,
+                    ),
+                    child: const Text('Salvar'),
+                  ),
                 ],
               ),
             )
