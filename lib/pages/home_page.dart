@@ -74,38 +74,19 @@ class _HomePageState extends State<HomePage> {
 
             child: Stack(
               children: [
-
-
-
                 Positioned(
                   top: 100,
                   left: 55,
-
-
-
-
-
-
                   child: SizedBox(
-
                     width: 250,
                     height: 50,
-
-
-
                   child: ElevatedButton(
                     onPressed: () {},
-
                     style: ElevatedButton.styleFrom(
-
-
                       backgroundColor: const Color(0xFFEBDD6C),
                       foregroundColor: Colors.black,
                       shape: const RoundedRectangleBorder(),
-
-
                     ),
-
                     child: const Text(
                         style: TextStyle(fontSize: 18),
                         'Repetir o último serviço'),
@@ -113,16 +94,28 @@ class _HomePageState extends State<HomePage> {
 
                 ),
 
+
                 ),
+                Positioned(
+                  top: 300,
+                  left: 85,
 
-                //ClipOval(
-                  //child: Image.asset(
-                      //'lib/assets/images/Gato bugado.png',
-                      //width: 200,
-                      //height : 200,
 
-                      //fit: BoxFit.cover),
-                //),
+                child: ClipOval(
+
+
+                  child: Image.asset
+                    (
+
+                      'lib/assets/images/Gato bugado.png',
+                      width: 200,
+                      height : 200,
+
+
+                      fit: BoxFit.cover),
+
+                ),
+                ),
               ],
 
             ),

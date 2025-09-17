@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:torch_app/pages/home_page.dart';
 import 'package:torch_app/pages/loading_page.dart';
 
 void main() {
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: const LoadingPage(),
+      home: const HomePage(),
     );
   }
 }
