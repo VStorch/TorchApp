@@ -1,4 +1,3 @@
-// Pacote de interface visual
 import 'package:flutter/material.dart';
 
 // Stateful widget (alterável)
@@ -9,7 +8,6 @@ class MyProfilePage extends StatefulWidget {
   State<MyProfilePage> createState() => _MyProfilePageState();
 }
 
-// Classe que define o comportamento e aparência do widget
 class _MyProfilePageState extends State<MyProfilePage> {
   @override
   Widget build(BuildContext context) {
