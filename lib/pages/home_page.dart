@@ -70,7 +70,7 @@ class _HomePageState extends State<HomePage> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
             child: SizedBox(
-              height: 600,
+              height: 750,
 
             child: Stack(
               children: [
@@ -96,6 +96,163 @@ class _HomePageState extends State<HomePage> {
 
 
                 ),
+                Positioned(
+                  top: 150,
+                  left: 320,
+                    child: Transform.rotate(
+                      angle: 45 * (3.14159 / 180),
+                      child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                    ),
+                ),
+                Positioned(
+                  top: 210,
+                  left: 240,
+                  child: Transform.rotate(
+                    angle: 68 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 170,
+                  left: 165,
+                  child: Transform.rotate(
+                    angle: 60 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 230,
+                  left: 80,
+                  child: Transform.rotate(
+                    angle: 48 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 280,
+                  left: 0,
+                  child: Transform.rotate(
+                    angle: 25 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 370,
+                  left: 0,
+                  child: Transform.rotate(
+                    angle: 0 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 470,
+                  left: 20,
+                  child: Transform.rotate(
+                    angle: -10 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 570,
+                  left: 40,
+                  child: Transform.rotate(
+                    angle: -40 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 640,
+                  left: 95,
+                  child: Transform.rotate(
+                    angle: -70 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 670,
+                  left: 200,
+                  child: Transform.rotate(
+                    angle: -70 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 708,
+                  left: 300,
+                  child: Transform.rotate(
+                    angle: -60 * (3.14159 / 180),
+                    child: Image.asset
+                      (
+                        'lib/assets/images/pata de cachorro.png',
+                        width: 40,
+                        height : 40,
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                Positioned(
+                  top: 520,
+                  left: 100,
+
+
+                    child: Image.asset
+                      (
+                        'lib/assets/images/torchapp.png',
+                        width: 166.6666666666667,
+                        height : 100,
+                        fit: BoxFit.cover),
+
+                ),
+
                 Positioned(
                   top: 300,
                   left: 85,

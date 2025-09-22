@@ -1,4 +1,6 @@
   import 'package:flutter/material.dart';
+import 'package:torch_app/pages/loading_page.dart';
+import 'package:torch_app/pages/login_page.dart';
 import '../data/user.dart';
 import '../data/user_service.dart';
 
@@ -74,6 +76,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
       _surnameController.clear();
       _emailController.clear();
       _passwordController.clear();
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
     }
     else {
       _showDialog('Erro','Falha ao cadastrar usuário');
