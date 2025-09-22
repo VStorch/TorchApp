@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         Locale('pt', 'BR'), // português do Brasil
       ],
 
-      home: MyProfilePage(),
+      home: LoadingPage(),
     );
   }
 }
