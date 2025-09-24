@@ -1,54 +1,31 @@
-// Pacote de interface visual
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/about_page.dart';
-import 'package:torch_app/pages/promotions_page.dart';
-import 'package:torch_app/pages/settings_page.dart';
+import '../models/page_type.dart';
+import '../models/menu_item.dart';
+import '../components/customdrawer.dart';
 
-import 'favorite_petshops_page.dart';
-import 'login_page.dart';
-import 'my_appointments_page.dart';
-import 'my_pets_page.dart';
-import 'my_profile_page.dart';
-
-// Stateful widget (alterável)
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-
-// Classe que define o comportamento e aparência do widget Welcome, precisa extender o "Welcome" para poder alterá-lo
-class _HomePageState extends State<HomePage> {
-  @override
-
-  // Build responsável por construir a interface do usuário
   Widget build(BuildContext context) {
+    // Usa a fábrica para pegar dados como título, ícone e destino
+    final menuItem = MenuItem.fromType(PageType.about);
 
-    // Scaffold: layout básico do flutter
     return Scaffold(
-
-      // Registra a cor de fundo padrão
-      backgroundColor: const Color(0xFFFBF8E1),
       appBar: AppBar(
         toolbarHeight: 90,
-
-        // Cria o ícone do menu, que neste contexto é a pata de cachorro
+        backgroundColor: const Color(0xFFEBDD6C),
         leading: Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.pets),
-                iconSize: 35,
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            }
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.pets),
+              iconSize: 35,
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            );
+          },
         ),
-
         title: SizedBox(
-          height : 50,
+          height: 50,
           child: TextField(
             style: const TextStyle(fontSize: 20),
             decoration: InputDecoration(
@@ -56,7 +33,7 @@ class _HomePageState extends State<HomePage> {
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical : 0, horizontal : 0),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -64,13 +41,26 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        backgroundColor: const Color(0xFFEBDD6C),
       ),
+      drawer: CustomDrawer(
+        menuItems: [
+          MenuItem.fromType(PageType.home),
+          MenuItem.fromType(PageType.myPets),
+          MenuItem.fromType(PageType.favorites),
+          MenuItem.fromType(PageType.appointments),
+          MenuItem.fromType(PageType.promotions),
+          MenuItem.fromType(PageType.profile),
+          MenuItem.fromType(PageType.settings),
+          MenuItem.fromType(PageType.login),
+          MenuItem.fromType(PageType.about),
+        ],
+      ),
+      backgroundColor: const Color(0xFFFBF8E1),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-            child: SizedBox(
-              height: 750,
+          child: SizedBox(
+            height: 750,
 
             child: Stack(
               children: [
@@ -80,34 +70,34 @@ class _HomePageState extends State<HomePage> {
                   child: SizedBox(
                     width: 250,
                     height: 50,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFEBDD6C),
-                      foregroundColor: Colors.black,
-                      shape: const RoundedRectangleBorder(),
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEBDD6C),
+                        foregroundColor: Colors.black,
+                        shape: const RoundedRectangleBorder(),
+                      ),
+                      child: const Text(
+                          style: TextStyle(fontSize: 18),
+                          'Repetir o último serviço'),
                     ),
-                    child: const Text(
-                        style: TextStyle(fontSize: 18),
-                        'Repetir o último serviço'),
-                  ),
 
-                ),
+                  ),
 
 
                 ),
                 Positioned(
                   top: 150,
                   left: 320,
-                    child: Transform.rotate(
-                      angle: 45 * (3.14159 / 180),
-                      child: Image.asset
+                  child: Transform.rotate(
+                    angle: 45 * (3.14159 / 180),
+                    child: Image.asset
                       (
                         'lib/assets/images/pata de cachorro.png',
                         width: 40,
                         height : 40,
                         fit: BoxFit.cover),
-                    ),
+                  ),
                 ),
                 Positioned(
                   top: 210,
@@ -244,12 +234,12 @@ class _HomePageState extends State<HomePage> {
                   left: 100,
 
 
-                    child: Image.asset
-                      (
-                        'lib/assets/images/torchapp.png',
-                        width: 166.6666666666667,
-                        height : 100,
-                        fit: BoxFit.cover),
+                  child: Image.asset
+                    (
+                      'lib/assets/images/torchapp.png',
+                      width: 166.6666666666667,
+                      height : 100,
+                      fit: BoxFit.cover),
 
                 ),
 
@@ -258,279 +248,28 @@ class _HomePageState extends State<HomePage> {
                   left: 85,
 
 
-                child: ClipOval(
+                  child: ClipOval(
 
 
-                  child: Image.asset
-                    (
+                    child: Image.asset
+                      (
 
-                      'lib/assets/images/Gato bugado.png',
-                      width: 200,
-                      height : 200,
+                        'lib/assets/images/Gato bugado.png',
+                        width: 200,
+                        height : 200,
 
 
-                      fit: BoxFit.cover),
+                        fit: BoxFit.cover),
 
-                ),
+                  ),
                 ),
               ],
 
             ),
-        ),
+          ),
 
         ),
-        
-      ),
-      drawer: Drawer(
-        backgroundColor: const Color(0xFFEBDD6C),
-        child: ListView(
-          padding: EdgeInsets.zero,
 
-          children:  <Widget>[
-            const SizedBox(
-              height: 100,
-              child: DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFFE8CA42),
-                ),
-                child: Center(
-                  child: Text(
-                    "Menu",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const HomePage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Tela Inicial',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.pets),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyPetsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meus Pets ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.business),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const FavoritePetshopsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Petshops Favoritos ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyAppointmentsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meus agendamentos ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.local_offer),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const PromotionsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Promoções ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyProfilePage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meu Perfil ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const SettingsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Configurações ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const LoginPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Sair ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const AboutPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Sobre ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

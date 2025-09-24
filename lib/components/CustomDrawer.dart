@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'MenuItem.dart';
-import 'menu_item.dart';
+import '../models/menu_item.dart';
 
 class CustomDrawer extends StatelessWidget {
   final List<MenuItem> menuItems;
 
-  CustomDrawer({required this.menuItems});
+  const CustomDrawer({required this.menuItems, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: const Color(0xFFEBDD6C),
       child: ListView(
+        padding: EdgeInsets.zero,
         children: [
           const SizedBox(
             height: 100,
@@ -18,7 +19,7 @@ class CustomDrawer extends StatelessWidget {
               decoration: BoxDecoration(color: Color(0xFFE8CA42)),
               child: Center(
                 child: Text(
-                  "Menu",  // Título fixo
+                  "Menu",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 20,
@@ -28,28 +29,23 @@ class CustomDrawer extends StatelessWidget {
               ),
             ),
           ),
-          // Lista de itens do menu
           ...menuItems.map((item) {
             return ListTile(
               leading: Icon(item.icon),
-              title: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => item.destinationPage),
-                  );
-                },
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    item.title,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                    ),
-                  ),
+              title: Text(
+                item.title,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
                 ),
               ),
+              onTap: () {
+                Navigator.pop(context); // Fecha o drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => item.destinationPage),
+                );
+              },
             );
           }).toList(),
         ],
