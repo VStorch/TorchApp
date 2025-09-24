@@ -15,6 +15,7 @@ dependencies:
   lottie: ^2.2.0
   http: ^1.5.0
   intl: ^0.20.2
+  image_picker: ^1.0.4
 
   cupertino_icons: ^1.0.2
 
@@ -33,6 +34,14 @@ flutter:
     - lib/assets/images/Moody.json
     - lib/assets/images/Patas.json
     - lib/assets/images/american.jpg
+    - lib/assets/images_profile/dog1.jpg
+    - lib/assets/images_profile/dog2.jpg
+    - lib/assets/images_profile/dog3.jpg
+    - lib/assets/images_profile/dog4.jpg
+    - lib/assets/images_profile/cat1.jpg
+    - lib/assets/images_profile/cat2.jpg
+    - lib/assets/images_profile/cat3.jpg
+    - lib/assets/images_profile/cat4.jpg
 
   fonts:
     - family: InknutAntiqua
