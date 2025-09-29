@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:torch_app/pages/promotions_page.dart';
 import 'package:torch_app/pages/settings_page.dart';
 
+import '../components/CustomDrawer.dart';
+import '../data/pet/pet.dart';
+import '../data/pet/pet_service.dart';
+import '../models/menu_item.dart';
+import '../models/page_type.dart';
 import 'about_page.dart';
 import 'favorite_petshops_page.dart';
 import 'home_page.dart';
@@ -22,6 +28,9 @@ class MyPetsPage extends StatefulWidget {
 
 // Classe que define o comportamento e aparência do widget Welcome, precisa extender o "Welcome" para poder alterá-lo
 class _MyPetsPageState extends State<MyPetsPage> {
+  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final PetService _petService = PetService();
+
   @override
 
   // Build responsável por construir a interface do usuário
@@ -64,255 +73,18 @@ class _MyPetsPageState extends State<MyPetsPage> {
           ),
         ),
       ),
-      drawer: Drawer(
-        backgroundColor: const Color(0xFFEBDD6C),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const SizedBox(
-              height: 100,
-              child: DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFFE8CA42),
-                ),
-                child: Center(
-                  child: Text(
-                    "Menu",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const HomePage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Tela Inicial',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.pets),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyPetsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meus Pets ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.business),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const FavoritePetshopsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Petshops Favoritos ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.calendar_month),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyAppointmentsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meus agendamentos ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.local_offer),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const PromotionsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Promoções ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const MyProfilePage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Meu Perfil ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const SettingsPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Configurações ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.logout),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const LoginPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Sair ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info),
-              title: TextButton(
-                  onPressed: (){
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context)=> const AboutPage()),
-                    );
-
-                  },
-                  child: const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-
-                      'Sobre ',
-
-                      style: TextStyle(
-
-                        color: Colors.black,
-                        fontSize: 16,
-                      ),
-                    ),)
-
-              ),
-            ),
-          ],
-        ),
+      drawer: CustomDrawer(
+        menuItems: [
+          MenuItem.fromType(PageType.home),
+          MenuItem.fromType(PageType.myPets),
+          MenuItem.fromType(PageType.favorites),
+          MenuItem.fromType(PageType.appointments),
+          MenuItem.fromType(PageType.promotions),
+          MenuItem.fromType(PageType.profile),
+          MenuItem.fromType(PageType.settings),
+          MenuItem.fromType(PageType.login),
+          MenuItem.fromType(PageType.about),
+        ],
       ),
     );
   }

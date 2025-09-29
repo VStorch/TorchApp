@@ -8,7 +8,8 @@ import '../models/page_type.dart';
 import '../models/menu_item.dart';
 import '../components/customdrawer.dart';
 
-class MyProfilePage extends StatelessWidget {
+// Stateful widget (alterável)
+class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
 
   @override
@@ -92,15 +93,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
   @override
   Widget build(BuildContext context) {
-    // Scaffold: layout básico do flutter
-    return Scaffold(
-      // Cor de fundo
-      backgroundColor: const Color(0xFFFBF8E1),
-
-      // Barra superior
-      appBar: AppBar(
-        toolbarHeight: 90,
-  Widget build(BuildContext context) {
     // Usa a fábrica para pegar dados como título, ícone e destino
     final menuItem = MenuItem.fromType(PageType.about);
 
@@ -162,5 +154,4 @@ class _MyProfilePageState extends State<MyProfilePage> {
       onTap: () {},
     );
   }
-}
 }

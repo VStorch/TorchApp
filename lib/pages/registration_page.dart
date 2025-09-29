@@ -3,10 +3,6 @@ import '../data/user/user.dart';
 import '../data/user/user_service.dart';
 import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/login_page.dart';
-import '../data/user.dart';
-import '../data/user_service.dart';
-
-
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
