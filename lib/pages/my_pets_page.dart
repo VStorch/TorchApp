@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../data/pet/pet.dart';
-import '../data/pet/pet_service.dart';
 import 'package:torch_app/pages/promotions_page.dart';
 import 'package:torch_app/pages/settings_page.dart';
 
@@ -14,6 +11,7 @@ import 'login_page.dart';
 import 'my_appointments_page.dart';
 import 'my_profile_page.dart';
 
+// Stateful widget (alterável)
 class MyPetsPage extends StatefulWidget {
   const MyPetsPage({super.key});
 
@@ -21,40 +19,35 @@ class MyPetsPage extends StatefulWidget {
   State<MyPetsPage> createState() => _MyPetsPageState();
 }
 
-class _MyPetsPageState extends State<MyPetsPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final PetService _petService = PetService();
 
+// Classe que define o comportamento e aparência do widget Welcome, precisa extender o "Welcome" para poder alterá-lo
+class _MyPetsPageState extends State<MyPetsPage> {
   @override
+
+  // Build responsável por construir a interface do usuário
   Widget build(BuildContext context) {
-    final pets = _petService.pets;
 
     return Scaffold(
-      key: _scaffoldKey,
 
       // Registra a cor de fundo padrão
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: AppBar(
         backgroundColor: const Color(0xFFEBDD6C),
         toolbarHeight: 90,
-        automaticallyImplyLeading: false,
 
         // Cria o ícone do menu, que neste contexto é a pata de cachorro
         leading: Builder(
-            builder: (context) {
-              return IconButton(
-                icon: const Icon(Icons.pets),
-                iconSize: 35,
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-              );
-            }
+          builder: (context) {
+            return IconButton(
+              icon: const Icon(Icons.pets),
+              iconSize: 35,
+              onPressed: () => Scaffold.of(context).openDrawer(),
+            );
+          },
         ),
 
-        // Campo de Busca
         title: SizedBox(
-          height : 50,
+          height: 50,
           child: TextField(
             style: const TextStyle(fontSize: 20),
             decoration: InputDecoration(
@@ -62,7 +55,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical : 0, horizontal : 0),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -71,8 +64,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
           ),
         ),
       ),
-
-      // Menu
       drawer: Drawer(
         backgroundColor: const Color(0xFFEBDD6C),
         child: ListView(
@@ -81,13 +72,17 @@ class _MyPetsPageState extends State<MyPetsPage> {
             const SizedBox(
               height: 100,
               child: DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFFE8CA42)),
+                decoration: BoxDecoration(color: Color(0xFFE8CA42),
+                ),
                 child: Center(
                   child: Text(
                     "Menu",
-                    style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),),
               ),
             ),
             ListTile(
@@ -318,21 +313,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
             ),
           ],
         ),
-      ),
-
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: pets.isEmpty
-              ? [_buildEmptyCard()]
-              : pets.map((pet) => _buildPetCard(pet)).toList(),
-        ),
-      ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFFEBDD6C),
-        onPressed: () => _showAddPetDialog(context),
-        child: const Icon(Icons.add, color: Colors.black, size: 32),
       ),
     );
   }
