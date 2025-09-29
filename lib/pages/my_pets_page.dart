@@ -35,6 +35,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
 
   // Build responsável por construir a interface do usuário
   Widget build(BuildContext context) {
+    final pets = _petService.pets;
 
     return Scaffold(
 
@@ -86,6 +87,21 @@ class _MyPetsPageState extends State<MyPetsPage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: pets.isEmpty
+              ? [_buildEmptyCard()]
+              : pets.map((pet) => _buildPetCard(pet)).toList(),
+        ),
+      ),
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFFEBDD6C),
+        onPressed: () => _showAddPetDialog(context),
+        child: const Icon(Icons.add, color: Colors.black, size: 32),
+      ),
+
     );
   }
 

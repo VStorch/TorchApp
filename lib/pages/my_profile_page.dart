@@ -142,6 +142,64 @@ class _MyProfilePageState extends State<MyProfilePage> {
         ],
       ),
       backgroundColor: const Color(0xFFFBF8E1),
+      // Corpo da tela de perfil
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+
+            // Dados do usuário
+            const Text(
+              "Leonardo Cortelim",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text("leo.gmail.com",
+                style: TextStyle(fontSize: 16, color: Colors.black87)),
+            const Text("(47)99678-8765",
+                style: TextStyle(fontSize: 16, color: Colors.black87)),
+            const Text("Rua Adriano Korman, nº 123 - SC",
+                style: TextStyle(fontSize: 16, color: Colors.black87)),
+            const SizedBox(height: 20),
+
+            // Lista de opções
+            const Divider(),
+            _buildProfileOption(Icons.pets, "Meus PetShops Favoritos"),
+            const Divider(),
+            _buildProfileOption(Icons.receipt_long, "Meus Pedidos"),
+            const Divider(),
+            _buildProfileOption(Icons.credit_card, "Formas De Pagamento"),
+            const Divider(),
+            _buildProfileOption(Icons.notifications, "Notificações"),
+            const Divider(),
+            _buildProfileOption(Icons.lock, "Alterar Senha"),
+            const Divider(),
+            _buildProfileOption(Icons.logout, "Sair Da Conta"),
+            const Divider(),
+
+            const SizedBox(height: 30),
+
+            // Foto do pet alterável
+            GestureDetector(
+              onTap: () {
+                _showImageOptions(context);
+              },
+              child: CircleAvatar(
+                radius: 60,
+                backgroundImage: _profileImage != null
+                    ? FileImage(_profileImage!)
+                    : _selectedAssetImage != null
+                    ? AssetImage(_selectedAssetImage!) as ImageProvider
+                    : const AssetImage("lib/assets/images/american.jpg"),
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
     );
   }
 
