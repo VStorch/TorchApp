@@ -34,6 +34,7 @@ flutter:
     - lib/assets/images/dogP.png
     - lib/assets/images/Moody.json
     - lib/assets/images/Patas.json
+    - lib/assets/images/Doodles.json
     - lib/assets/images/american.jpg
     - lib/assets/images_profile/dog1.jpg
     - lib/assets/images_profile/dog2.jpg

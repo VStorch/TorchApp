@@ -6,6 +6,8 @@ import 'package:torch_app/pages/my_pets_page.dart';
 import 'package:torch_app/pages/my_profile_page.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
 import 'package:torch_app/pages/promotions_page.dart';
+import 'package:torch_app/pages_pet_shop/registration_page_pet_shop.dart';
+import 'package:torch_app/pages_pet_shop/verification_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
         Locale('pt', 'BR'), // português do Brasil
       ],
 
-      home: PromotionsPage(),
+      home: VerificationPage(),
     );
   }
 }
