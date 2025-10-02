@@ -116,18 +116,6 @@ class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
               ),
               const SizedBox(height: 15),
 
-              // Senha
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Senha...',
-                  prefixIcon: const Icon(key),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                ),
-              ),
               const SizedBox(height: 20),
 
               // Botão de registro
@@ -138,7 +126,7 @@ class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
                   foregroundColor: Colors.black,
                   minimumSize: const Size(double.infinity, 50),
                 ),
-                child: const Text('Cadastrar', style: TextStyle(fontSize: 18)),
+                child: const Text('Continuar', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),

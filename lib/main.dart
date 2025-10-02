@@ -7,6 +7,7 @@ import 'package:torch_app/pages/my_profile_page.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
 import 'package:torch_app/pages/promotions_page.dart';
 import 'package:torch_app/pages_pet_shop/registration_page_pet_shop.dart';
+import 'package:torch_app/pages_pet_shop/user_information.dart';
 import 'package:torch_app/pages_pet_shop/verification_page.dart';
 
 void main() {
