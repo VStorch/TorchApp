@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: MyAppointmentsPage(),
+      home: LoginPage(),
     );
   }
 }
