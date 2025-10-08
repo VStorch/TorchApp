@@ -108,7 +108,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                     Container(
                       width: formWidth,
                       child: const Text(
-                        "Cadastrar pet shop",
+                        "Cadastrar Pet Shop",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

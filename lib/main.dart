@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:torch_app/pages/favorite_petshops_page.dart';
-import 'package:torch_app/pages/login_page.dart';
-import 'package:torch_app/pages/my_appointments_page.dart';
-import 'package:torch_app/pages/pet_shops_page.dart';
-import 'package:torch_app/pages/promotions_page.dart';
-import 'package:torch_app/pages_pet_shop/pet_shop_information.dart';
-import 'package:torch_app/pages_pet_shop/user_information.dart';
-import 'package:torch_app/pages_pet_shop/verification_page.dart'; // tela com o CEP autocomplete
+import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -32,7 +26,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: LoginPage(),
+      home: RegistrationSupplements(),
     );
   }
 }
