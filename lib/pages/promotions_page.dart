@@ -31,6 +31,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: AppBar(
         toolbarHeight: 90,
+        backgroundColor: const Color(0xFFEBDD6C),
         leading: Builder(
           builder: (context) => IconButton(
             icon: const Icon(Icons.pets),
