@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
-import '../components/customdrawer.dart';
 
 class MyAppointmentsPage extends StatelessWidget {
   const MyAppointmentsPage({super.key});

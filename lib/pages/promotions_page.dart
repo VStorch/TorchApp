@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
-import '../components/customdrawer.dart';
 
 class PromotionsPage extends StatelessWidget {
   const PromotionsPage({super.key});

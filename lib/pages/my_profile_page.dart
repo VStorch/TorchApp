@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/promotions_page.dart';
-import 'package:torch_app/pages/settings_page.dart';
 import 'package:image_picker/image_picker.dart';
+import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
-import '../components/customdrawer.dart';
 
 // Stateful widget (alterável)
 class MyProfilePage extends StatefulWidget {
