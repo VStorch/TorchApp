@@ -16,8 +16,8 @@ dependencies:
   http: ^1.5.0
   intl: ^0.20.2
   image_picker: ^1.0.4
-
   cupertino_icons: ^1.0.2
+
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +33,10 @@ flutter:
     - lib/assets/images/dogP.png
     - lib/assets/images/Moody.json
     - lib/assets/images/Patas.json
+    - lib/assets/images/Doodles.json
+    - lib/assets/images/CuteDog.json
+    - lib/assets/images/CatArroz.json
+    - lib/assets/images/Catk.json
     - lib/assets/images/american.jpg
     - lib/assets/images_profile/dog1.jpg
     - lib/assets/images_profile/dog2.jpg
@@ -46,14 +50,14 @@ flutter:
   fonts:
     - family: InknutAntiqua
       fonts:
-        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Black.ttf
-          weight: 700
         - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Regular.ttf
           weight: 400
-        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Bold.ttf
-          weight: 700
         - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-SemiBold.ttf
           weight: 600
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Bold.ttf
+          weight: 700
+        - asset: lib/assets/fonts/Inknut_Antiqua/InknutAntiqua-Black.ttf
+          weight: 900
 
     - family: InclusiveSans
       fonts:

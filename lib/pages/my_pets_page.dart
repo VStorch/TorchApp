@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:torch_app/pages/promotions_page.dart';
-import 'package:torch_app/pages/settings_page.dart';
 
 import '../components/CustomDrawer.dart';
 import '../data/pet/pet.dart';
 import '../data/pet/pet_service.dart';
 import '../models/menu_item.dart';
 import '../models/page_type.dart';
-import 'about_page.dart';
-import 'favorite_petshops_page.dart';
-import 'home_page.dart';
-
-import 'home_page.dart';
-import 'login_page.dart';
-import 'my_appointments_page.dart';
-import 'my_profile_page.dart';
 
 // Stateful widget (alterável)
 class MyPetsPage extends StatefulWidget {

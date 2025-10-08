@@ -16,7 +16,6 @@ class PageScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MenuItem item = MenuItem.fromType(pageType);
 
     final List<MenuItem> allMenuItems = [
       MenuItem.fromType(PageType.home),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../data/pet_shop/pet_shop_service.dart';
-import '../data/pet_shop/pet_shop.dart';
-import '../data/pet_shop/pet_shop_service.dart';
 
 class PetShopPage extends StatefulWidget {
   const PetShopPage({super.key});

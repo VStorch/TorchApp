@@ -14,16 +14,17 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      // Configurações de localização
+      // Suporte à localização (português Brasil)
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: [
-        Locale('pt', 'BR'), // português do Brasil
+        Locale('pt', 'BR'),
       ],
 
+      // Página inicial
       home: LoadingPage(),
     );
   }

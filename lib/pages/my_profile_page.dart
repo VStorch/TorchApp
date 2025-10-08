@@ -6,14 +6,12 @@ import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
-// Stateful widget (alterável)
 class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
 
   @override
   State<MyProfilePage> createState() => _MyProfilePageState();
 }
-
 class _MyProfilePageState extends State<MyProfilePage> {
   File? _profileImage; // imagem escolhida da galeria
   String? _selectedAssetImage; // imagem escolhida das padrões
@@ -89,12 +87,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
       },
     );
   }
+
   @override
   Widget build(BuildContext context) {
-    // Usa a fábrica para pegar dados como título, ícone e destino
-    final menuItem = MenuItem.fromType(PageType.about);
-
     return Scaffold(
+      backgroundColor: const Color(0xFFFBF8E1),
+
       appBar: AppBar(
         toolbarHeight: 90,
         backgroundColor: const Color(0xFFEBDD6C),
@@ -139,7 +137,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
-      backgroundColor: const Color(0xFFFBF8E1),
       // Corpo da tela de perfil
       body: SingleChildScrollView(
         child: Column(

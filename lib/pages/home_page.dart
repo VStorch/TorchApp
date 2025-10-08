@@ -9,7 +9,6 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Usa a fábrica para pegar dados como título, ícone e destino
-    final menuItem = MenuItem.fromType(PageType.about);
 
     return Scaffold(
       appBar: AppBar(

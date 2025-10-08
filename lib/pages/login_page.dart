@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../components/diagonal_clipper.dart';
+import '../pages_pet_shop/registration_page_pet_shop.dart';
 import 'password_page.dart';
 import 'registration_page.dart';
 import 'home_page.dart';
@@ -36,33 +37,111 @@ class _LoginPageState extends State<LoginPage> {
 
     final success = await UserService.loginUser(email, password);
 
-    // Verifica se o usuário existe
-    if (!success){
-      _showDialog('Erro','Usuário não encontrado');
+    if (!success) {
+      _showDialog('Erro', 'Usuário não encontrado');
       return;
-    }
-    // Joga o caboclo pro welcome
-    else {
+    } else {
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
     }
+
     _emailController.clear();
     _passwordController.clear();
   }
 
-  // Mostra o diálogo
-  void _showDialog(String title, String message){
+  void _showDialog(String title, String message) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Colors.white,
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(fontSize: 16),
+        ),
         actions: [
           TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAccountTypeDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Colors.white,
+        title: const Text(
+          "Você possui um pet shop?",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        content: const Text(
+          "Escolha o tipo de conta que deseja criar.",
+          style: TextStyle(fontSize: 16),
+        ),
+        actionsAlignment: MainAxisAlignment.spaceEvenly,
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEBDD6C),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RegistrationPagePetShop(),
+                ),
+              );
+              _emailController.clear();
+              _passwordController.clear();
+            },
+            child: const Text("Sim"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEBDD6C),
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RegistrationPage(),
+                ),
+              );
+              _emailController.clear();
+              _passwordController.clear();
+            },
+            child: const Text("Não"),
           ),
         ],
       ),
@@ -85,12 +164,8 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-
-              // Recorta a imagem do cachorro
               ClipPath(
                 clipper: DiagonalClipper(),
-                
-                // Define a posição da imagem do cachorro, seu tamanho etc.
                 child: Image.asset(
                   'lib/assets/images/dog.png',
                   height: 500,
@@ -130,8 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const PasswordPage(),
-                          ),
+                              builder: (context) => const PasswordPage()),
                         );
                       },
                       child: const Text("Esqueceu a senha?"),
@@ -145,19 +219,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: const Text('Entrar'),
                     ),
-
-                    // Botão não tem uma conta
                     const SizedBox(height: 2),
                     TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegistrationPage()),
-                        );
-                        _emailController.clear();
-                        _passwordController.clear();
-                      },
+                      onPressed: _showAccountTypeDialog,
                       child: const Text(
                         'Não tem uma conta? Clique aqui!',
                         style: TextStyle(

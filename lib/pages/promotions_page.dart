@@ -3,37 +3,54 @@ import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
-class PromotionsPage extends StatelessWidget {
+class PromotionsPage extends StatefulWidget {
   const PromotionsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Usa a fábrica para pegar dados como título, ícone e destino
-    final menuItem = MenuItem.fromType(PageType.about);
+  State<PromotionsPage> createState() => _PromotionsPageState();
+}
 
+class _PromotionsPageState extends State<PromotionsPage> {
+  // Lista de promoções para facilitar manutenção
+  final List<Map<String, String>> promotions = [
+    {
+      "title": "PetShop Realeza",
+      "description": "Banho + Tosa com 20% de desconto até 15/07!",
+      "date": "15/07"
+    },
+    {
+      "title": "Meu Melhor Amigo",
+      "description": "Primeiro Tosa com 30% off! promoção válida até 25/06",
+      "date": "25/06"
+    }
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFBF8E1),
       appBar: AppBar(
         toolbarHeight: 90,
-        backgroundColor: const Color(0xFFEBDD6C),
         leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            );
-          },
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.pets),
+            iconSize: 35,
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
+          ),
         ),
-        title: SizedBox(
+        title: Container(
           height: 50,
           child: TextField(
             style: const TextStyle(fontSize: 20),
             decoration: InputDecoration(
-              hintText: 'Busque um PetShop',
+              hintText: 'Busque um PetShop...',
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
+              contentPadding:
+              const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -55,7 +72,6 @@ class PromotionsPage extends StatelessWidget {
           MenuItem.fromType(PageType.about),
         ],
       ),
-      backgroundColor: const Color(0xFFFBF8E1),
     );
   }
 }
