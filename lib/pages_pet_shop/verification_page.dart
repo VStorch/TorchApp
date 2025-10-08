@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:torch_app/pages_pet_shop/user_information.dart';
+
+// Importe sua página UserInformationPage (ajuste o caminho)
 
 class VerificationPage extends StatefulWidget {
   const VerificationPage({super.key});
@@ -38,44 +41,32 @@ class _VerificationPageState extends State<VerificationPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            /// Faixa amarela em cima
             Align(
               alignment: Alignment.topCenter,
               child: Container(
-                height: 50, // diminuído
+                height: 50,
                 color: yellow,
               ),
             ),
-
-            /// Faixa amarela embaixo
             Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                height: 50, // diminuído
+                height: 50,
                 color: yellow,
               ),
             ),
-
-            /// Conteúdo central
             Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // linha preta em cima
                   Container(height: 1, color: Colors.black),
-
                   const SizedBox(height: 16),
-
                   const Text(
                     "Digite o código de 5 dígitos que enviamos para\nE-mail: leo********@gmail.com",
                     textAlign: TextAlign.center,
-                    style:
-                    TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                   ),
-
                   const SizedBox(height: 22),
-
-                  // caixas OTP
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(5, (i) {
@@ -112,10 +103,7 @@ class _VerificationPageState extends State<VerificationPage> {
                       );
                     }),
                   ),
-
                   const SizedBox(height: 12),
-
-                  // Reenviar Código
                   const Text(
                     "Renviar Código",
                     style: TextStyle(
@@ -124,10 +112,7 @@ class _VerificationPageState extends State<VerificationPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // botões
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -144,16 +129,18 @@ class _VerificationPageState extends State<VerificationPage> {
                         child: const Text(
                           "Voltar",
                           style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold),
+                              color: Colors.black, fontWeight: FontWeight.bold),
                         ),
                       ),
                       const SizedBox(width: 20),
                       ElevatedButton(
                         onPressed: () {
-                          final otp = getOtp();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('OTP: $otp')),
+                          // Navega para UserInformationPage
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                const UserInformationPage()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -167,26 +154,20 @@ class _VerificationPageState extends State<VerificationPage> {
                         child: const Text(
                           "Continuar",
                           style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold),
+                              color: Colors.black, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // linha preta embaixo
                   Container(height: 1, color: Colors.black),
                 ],
               ),
             ),
-
-            /// Animação Lottie no rodapé
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 50), // acompanha a faixa
+                padding: const EdgeInsets.only(bottom: 50),
                 child: SizedBox(
                   height: 200,
                   child: Lottie.asset(

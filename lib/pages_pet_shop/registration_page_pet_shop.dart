@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/user/user.dart';
-import '../data/user/user_service.dart';
+import 'verification_page.dart'; // importe a tela de verificação
 
 class RegistrationPagePetShop extends StatefulWidget {
   const RegistrationPagePetShop({super.key});
@@ -10,61 +9,12 @@ class RegistrationPagePetShop extends StatefulWidget {
 }
 
 class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
-  static const IconData key = IconData(0xf052b, fontFamily: 'MaterialIcons');
-  static const IconData email_rounded = IconData(0xf705, fontFamily: 'MaterialIcons');
-
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
 
-  void _registerUser() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      _showDialog('Erro', 'Preencha todos os campos');
-      return;
-    }
-
-    if (!UserService.isValidEmail(email)) {
-      _showDialog('Erro', 'Email inválido');
-      return;
-    }
-
-    if (!UserService.isValidPassword(password)) {
-      _showDialog('Erro', 'Senha com menos de 8 caracteres');
-      return;
-    }
-
-    if (await UserService.emailExists(email)) {
-      _showDialog('Erro', 'Email já cadastrado');
-      return;
-    }
-
-    final newUser = User("", "", email, password);
-    final success = await UserService.addUser(newUser);
-
-    if (success) {
-      _showDialog('Sucesso', 'Usuário cadastrado com sucesso');
-      _emailController.clear();
-      _passwordController.clear();
-    } else {
-      _showDialog('Erro', 'Falha ao cadastrar usuário');
-    }
-  }
-
-  void _showDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
-      ),
+  void _goToVerification() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const VerificationPage()),
     );
   }
 
@@ -91,7 +41,7 @@ class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
           padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center, // centraliza horizontalmente
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ClipOval(
                 child: Image.asset(
@@ -101,26 +51,20 @@ class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
                   fit: BoxFit.cover,
                 ),
               ),
-              const SizedBox(height: 20), // pequeno espaço entre imagem e campos
-
-              // Email
+              const SizedBox(height: 20),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email...',
-                  prefixIcon: const Icon(email_rounded),
+                  prefixIcon: Icon(Icons.email_rounded),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(50),
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
                   ),
                 ),
               ),
-              const SizedBox(height: 15),
-
               const SizedBox(height: 20),
-
-              // Botão de registro
               ElevatedButton(
-                onPressed: _registerUser,
+                onPressed: _goToVerification,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEBDD6C),
                   foregroundColor: Colors.black,
