@@ -15,19 +15,25 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
     {
       'name': 'Pet shop Realeza',
       'address': 'Rua Adriano Kormann',
-      'ratings': <double>[],
+      'ratings': <double>[4.5, 5.0, 4.2],
     },
     {
       'name': 'Pet shop Realeza',
       'address': 'Rua Adriano Kormann',
-      'ratings': <double>[],
+      'ratings': <double>[3.8, 4.0],
     },
     {
       'name': 'Pet shop Realeza',
       'address': 'Rua Adriano Kormann',
-      'ratings': <double>[],
+      'ratings': <double>[5.0],
     },
   ];
+
+  double _calculateAverageRating(List<double> ratings) {
+    if (ratings.isEmpty) return 0;
+    double sum = ratings.reduce((a, b) => a + b);
+    return sum / ratings.length;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +62,7 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color(0xFFFBF8E1),
-              contentPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -78,6 +83,78 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
           MenuItem.fromType(PageType.login),
           MenuItem.fromType(PageType.about),
         ],
+      ),
+      body: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: favoritePetshops.length,
+        itemBuilder: (context, index) {
+          final petshop = favoritePetshops[index];
+          final averageRating = _calculateAverageRating(petshop['ratings']).toStringAsFixed(1);
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEBDD6C),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 20),
+                    const SizedBox(width: 6),
+                    Text(
+                      petshop['name'],
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.star, size: 24, color: Colors.black),
+                      onPressed: () {
+                        _showRatingDialog(index);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  petshop['address'],
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text(
+                      averageRating,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const Spacer(),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Repetir Serviço: sem ação por enquanto
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 0,
+                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      child: const Text("Repetir Serviço"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
