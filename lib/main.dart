@@ -4,6 +4,7 @@ import 'package:torch_app/pages/favorite_petshops_page.dart';
 import 'package:torch_app/pages/home_page.dart';
 import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/my_appointments_page.dart';
+import 'package:torch_app/pages_pet_shop/home_page_pet_shop.dart';
 import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
 
 void main() {
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: FavoritePetshopsPage(),
+      home: HomePagePetShop(),
     );
   }
 }
