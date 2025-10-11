@@ -18,12 +18,12 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
       'ratings': <double>[4.5, 5.0, 4.2],
     },
     {
-      'name': 'Pet shop Realeza',
+      'name': 'Pet shop Bicho Feliz',
       'address': 'Rua Adriano Kormann',
       'ratings': <double>[3.8, 4.0],
     },
     {
-      'name': 'Pet shop Realeza',
+      'name': 'Pet shop Pata Amiga',
       'address': 'Rua Adriano Kormann',
       'ratings': <double>[5.0],
     },
@@ -89,7 +89,8 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
         itemCount: favoritePetshops.length,
         itemBuilder: (context, index) {
           final petshop = favoritePetshops[index];
-          final averageRating = _calculateAverageRating(petshop['ratings']).toStringAsFixed(1);
+          final averageRating =
+          _calculateAverageRating(petshop['ratings']).toStringAsFixed(1);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 16),
@@ -107,11 +108,12 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
                     const SizedBox(width: 6),
                     Text(
                       petshop['name'],
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.star, size: 24, color: Colors.black),
+                      icon: const Icon(Icons.star, size: 34, color: Colors.black),
                       onPressed: () {
                         _showRatingDialog(index);
                       },
@@ -121,7 +123,8 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
                 const SizedBox(height: 4),
                 Text(
                   petshop['address'],
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -130,22 +133,23 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
                     const SizedBox(width: 4),
                     Text(
                       averageRating,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     const Spacer(),
                     ElevatedButton(
-                      onPressed: () {
-                        // Repetir Serviço: sem ação por enquanto
-                      },
+                      onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 0,
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        textStyle:
+                        const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       child: const Text("Repetir Serviço"),
                     ),
@@ -172,16 +176,24 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(5, (i) {
-                  return IconButton(
-                    icon: Icon(
-                      Icons.star,
-                      color: i < selectedRating ? Colors.amber : Colors.grey,
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: AnimatedScale(
+                      scale: i < selectedRating ? 1.3 : 1.0, // aumenta levemente quando clicada
+                      duration: const Duration(milliseconds: 150),
+                      child: IconButton(
+                        iconSize: 30, // ⭐ maior desde o início
+                        icon: Icon(
+                          Icons.star,
+                          color: i < selectedRating ? Colors.amber : Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            selectedRating = i + 1.0;
+                          });
+                        },
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        selectedRating = i + 1.0;
-                      });
-                    },
                   );
                 }),
               );
