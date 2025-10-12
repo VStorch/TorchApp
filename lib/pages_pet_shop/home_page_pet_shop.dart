@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages_pet_shop/leave.dart';
+import 'package:lottie/lottie.dart';
+import 'package:torch_app/pages/login_page.dart';
 import 'package:torch_app/pages_pet_shop/payment_method.dart';
 import 'package:torch_app/pages_pet_shop/profile.dart';
 import 'package:torch_app/pages_pet_shop/promotions.dart';
@@ -16,29 +17,28 @@ class HomePagePetShop extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // --- Drawer apenas com nomes e ícones ---
       drawer: CustomDrawer(
         menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: Leave()),
+          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
+          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
+          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
+          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
+          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
+          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
+          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
+          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
         ],
       ),
-
       backgroundColor: const Color(0xFFFBF8E1),
-
-      // --- AppBar customizado ---
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90),
         child: Container(
           height: 90,
-          color: const Color(0xFFF4E04D),
           padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4E04D),
+            border: Border.all(color: Colors.black, width: 1),
+          ),
           child: SafeArea(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -65,15 +65,25 @@ class HomePagePetShop extends StatelessWidget {
           ),
         ),
       ),
+      body: Stack(
+        children: [
+          // --- Lottie flutuando abaixo do AppBar ---
+          Positioned(
+            top: -16,
+            left: 0,
+            right: 0,
+            height: 190,
+            child: Lottie.asset(
+              'lib/assets/images/catEscape.json',
+              fit: BoxFit.contain,
+            ),
+          ),
 
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-          child: SizedBox(
-            height: 750,
+          // --- Patinhas, gato e logo ---
+          Positioned.fill(
+            top: 0,
             child: Stack(
               children: [
-                // --- Patinhas espalhadas ---
                 _pata(150, 320, 45),
                 _pata(210, 240, 68),
                 _pata(170, 165, 60),
@@ -85,8 +95,6 @@ class HomePagePetShop extends StatelessWidget {
                 _pata(640, 95, -70),
                 _pata(670, 200, -70),
                 _pata(708, 300, -60),
-
-                // --- Foto do gato Torch ---
                 Positioned(
                   top: 300,
                   left: 85,
@@ -99,8 +107,6 @@ class HomePagePetShop extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // --- Logo TorchApp ---
                 Positioned(
                   top: 500,
                   left: 100,
@@ -114,12 +120,25 @@ class HomePagePetShop extends StatelessWidget {
               ],
             ),
           ),
-        ),
+
+          // --- Faixa amarela inferior fixa ---
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 50,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4E04D),
+                border: Border.all(color: Colors.black, width: 1),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  // Helper das patinhas
   static Widget _pata(double top, double left, double rotacao) {
     return Positioned(
       top: top,

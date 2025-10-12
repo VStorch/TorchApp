@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:torch_app/pages/login_page.dart';
 import 'package:torch_app/pages_pet_shop/schedulePage.dart';
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
@@ -11,7 +12,7 @@ import 'reviews.dart';
 import 'promotions.dart';
 import 'payment_method.dart';
 import 'settings.dart';
-import 'leave.dart';
+
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -111,7 +112,7 @@ class _ProfileState extends State<Profile> {
           MenuItem(
               title: "Sair",
               icon: Icons.logout,
-              destinationPage: const Leave()),
+              destinationPage: const LoginPage()),
         ],
       ),
       backgroundColor: const Color(0xFFFBF8E1),
@@ -139,7 +140,7 @@ class _ProfileState extends State<Profile> {
                 ),
                 const SizedBox(width: 10),
                 const Text(
-                  "Olá Leonardo!",
+                  "Pefil",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -997,4 +998,4 @@ class _ProfileState extends State<Profile> {
   }
 }
 // Linha 999
-// Linha 1000
+// 1000
