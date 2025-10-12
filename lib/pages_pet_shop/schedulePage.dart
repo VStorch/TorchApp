@@ -11,6 +11,7 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   final Color yellow = const Color(0xFFF4E04D);
 
+  // Controladores de abertura e fechamento
   final Map<String, TextEditingController> _openControllers = {
     'Seg': TextEditingController(),
     'Ter': TextEditingController(),
@@ -33,8 +34,8 @@ class _SchedulePageState extends State<SchedulePage> {
 
   @override
   void dispose() {
-    _openControllers.forEach((key, controller) => controller.dispose());
-    _closeControllers.forEach((key, controller) => controller.dispose());
+    _openControllers.forEach((_, c) => c.dispose());
+    _closeControllers.forEach((_, c) => c.dispose());
     super.dispose();
   }
 
@@ -42,18 +43,16 @@ class _SchedulePageState extends State<SchedulePage> {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
-      builder: (BuildContext context, Widget? child) {
+      builder: (context, child) {
         return Theme(
           data: ThemeData(
             colorScheme: ColorScheme.light(
-              primary: yellow, // botão OK e cabeçalho
-              onPrimary: Colors.black, // texto do botão
-              onSurface: Colors.black, // cor dos números
+              primary: yellow,
+              onPrimary: Colors.black,
+              onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: yellow, // cor dos botões
-              ),
+              style: TextButton.styleFrom(foregroundColor: yellow),
             ),
           ),
           child: child!,
@@ -63,13 +62,28 @@ class _SchedulePageState extends State<SchedulePage> {
 
     if (picked != null) {
       setState(() {
+        final formatted = picked.format(context);
         if (isOpening) {
-          _openControllers[day]!.text = picked.format(context);
+          _openControllers[day]!.text = formatted;
         } else {
-          _closeControllers[day]!.text = picked.format(context);
+          _closeControllers[day]!.text = formatted;
         }
       });
     }
+  }
+
+  void _saveAndReturn() {
+    // Cria um mapa com todos os horários
+    final Map<String, Map<String, String>> horarios = {};
+    for (var dia in _openControllers.keys) {
+      horarios[dia] = {
+        'abre': _openControllers[dia]!.text,
+        'fecha': _closeControllers[dia]!.text,
+      };
+    }
+
+    // Retorna o mapa de horários para o Profile
+    Navigator.pop(context, horarios);
   }
 
   @override
@@ -84,66 +98,75 @@ class _SchedulePageState extends State<SchedulePage> {
       backgroundColor: const Color(0xFFFBF8E1),
       body: Stack(
         children: [
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
+          ListView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 120),
+            children: [
+              const SizedBox(height: 20),
+              const Center(
+                child: Text(
                   "Defina os horários de abertura e fechamento",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 20),
-                for (var day in _openControllers.keys)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _openControllers[day],
-                            readOnly: true,
-                            onTap: () => _pickTime(day, true),
-                            decoration: InputDecoration(
-                              labelText: "$day - Abre",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              suffixIcon: const Icon(Icons.access_time),
+              ),
+              const SizedBox(height: 20),
+
+              // Campos de horários
+              for (var day in _openControllers.keys)
+                Padding(
+                  padding:
+                  const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _openControllers[day],
+                          readOnly: true,
+                          onTap: () => _pickTime(day, true),
+                          decoration: InputDecoration(
+                            labelText: "$day - Abre",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            suffixIcon: const Icon(Icons.access_time),
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextField(
-                            controller: _closeControllers[day],
-                            readOnly: true,
-                            onTap: () => _pickTime(day, false),
-                            decoration: InputDecoration(
-                              labelText: "$day - Fecha",
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              suffixIcon: const Icon(Icons.access_time),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _closeControllers[day],
+                          readOnly: true,
+                          onTap: () => _pickTime(day, false),
+                          decoration: InputDecoration(
+                            labelText: "$day - Fecha",
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            suffixIcon: const Icon(Icons.access_time),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
+                ),
+
+              const SizedBox(height: 20),
+
+              // Botão salvar
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveAndReturn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: yellow,
                     foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 60, vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -151,15 +174,15 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: const Text(
                     "Salvar Horários",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 100),
-              ],
-            ),
+              ),
+            ],
           ),
 
-          // 🔹 Lottie acima da faixa amarela
+          // Lottie cachorro
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -176,7 +199,7 @@ class _SchedulePageState extends State<SchedulePage> {
             ),
           ),
 
-          // 🔹 Faixa amarela inferior
+          // Faixa amarela inferior
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(height: 54, color: yellow),
