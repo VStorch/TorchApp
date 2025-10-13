@@ -8,7 +8,8 @@ import '../models/menu_item.dart';
 import '../models/page_type.dart';
 
 class MyPetsPage extends StatefulWidget {
-  const MyPetsPage({super.key});
+  final int currentUserId; // ID do usuário logado
+  const MyPetsPage({super.key, required this.currentUserId});
 
   @override
   State<MyPetsPage> createState() => _MyPetsPageState();
@@ -16,6 +17,7 @@ class MyPetsPage extends StatefulWidget {
 
 class _MyPetsPageState extends State<MyPetsPage> {
   List<Pet> _pets = [];
+  bool _loading = true;
 
   @override
   void initState() {
@@ -24,13 +26,14 @@ class _MyPetsPageState extends State<MyPetsPage> {
   }
 
   Future<void> _loadPets() async {
+    setState(() => _loading = true);
     try {
       final pets = await PetService.getPets();
-      setState(() {
-        _pets = pets;
-      });
+      setState(() => _pets = pets);
     } catch (e) {
-      debugPrint('Erro ao carregar pets: $e');
+      debugPrint("Erro ao carregar pets: $e");
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
@@ -42,13 +45,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
         backgroundColor: const Color(0xFFEBDD6C),
         toolbarHeight: 90,
         leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            );
-          },
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.pets),
+            iconSize: 35,
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         title: SizedBox(
           height: 50,
@@ -81,7 +82,9 @@ class _MyPetsPageState extends State<MyPetsPage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
-      body: SingleChildScrollView(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: _pets.isEmpty
@@ -117,10 +120,12 @@ class _MyPetsPageState extends State<MyPetsPage> {
               ],
             ),
             const SizedBox(height: 10),
-            Text("Raça: ${pet.breed}"),
             Text("Espécie: ${pet.species}"),
+            Text("Raça: ${pet.breed}"),
             Text("Peso: ${pet.weight} kg"),
-            Text("Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}"),
+            Text(
+              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
+            ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -131,10 +136,8 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 ),
                 OutlinedButton(
                   onPressed: () async {
-                    if (pet.id != null) {
-                      final success = await PetService.deletePet(pet.id!);
-                      if (success) _loadPets();
-                    }
+                    final success = await PetService.deletePet(pet.id!);
+                    if (success) _loadPets();
                   },
                   child: const Text("Excluir"),
                 ),
@@ -205,16 +208,17 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   "Cadastrar Pet",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildInputField("Nome", nameController),
                 const SizedBox(height: 12),
-                _buildInputField("Raça", breedController),
-                const SizedBox(height: 12),
                 _buildInputField("Espécie", speciesController),
+                const SizedBox(height: 12),
+                _buildInputField("Raça", breedController),
                 const SizedBox(height: 12),
                 _buildInputField("Peso (kg)", weightController,
                     keyboard: TextInputType.number),
@@ -230,26 +234,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   onPressed: () async {
                     final picked = await showDatePicker(
                       context: context,
-                      initialDate: DateTime.now(),
+                      initialDate: birthDate,
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now(),
-                      builder: (context, child) {
-                        return Theme(
-                          data: Theme.of(context).copyWith(
-                            colorScheme: const ColorScheme.light(
-                              primary: Color(0xFFEBDD6C),
-                              onPrimary: Colors.black,
-                              surface: Color(0xFFF6F0D1),
-                              onSurface: Colors.black,
-                            ),
-                          ),
-                          child: child!,
-                        );
-                      },
                     );
-                    if (picked != null) {
-                      birthDate = picked;
-                    }
+                    if (picked != null) birthDate = picked;
                   },
                   icon: const Icon(Icons.calendar_month),
                   label: const Text("Selecionar Data de Nascimento"),
@@ -259,13 +248,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     OutlinedButton(
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        side: const BorderSide(color: Colors.black),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                      ),
                       onPressed: () => Navigator.pop(context),
                       child: const Text("Cancelar"),
                     ),
@@ -273,9 +255,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEBDD6C),
                         foregroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
                       ),
                       onPressed: () async {
                         final pet = Pet(
@@ -284,6 +263,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           speciesController.text,
                           double.tryParse(weightController.text) ?? 0.0,
                           birthDate,
+                          widget.currentUserId,
                         );
                         final success = await PetService.addPet(pet);
                         if (success) _loadPets();
@@ -305,8 +285,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
     final nameController = TextEditingController(text: pet.name);
     final breedController = TextEditingController(text: pet.breed);
     final speciesController = TextEditingController(text: pet.species);
-    final weightController =
-    TextEditingController(text: pet.weight.toString());
+    final weightController = TextEditingController(text: pet.weight.toString());
     DateTime birthDate = pet.birthDate;
 
     showDialog(
@@ -325,16 +304,17 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   "Editar Pet",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildInputField("Nome", nameController),
                 const SizedBox(height: 12),
-                _buildInputField("Raça", breedController),
-                const SizedBox(height: 12),
                 _buildInputField("Espécie", speciesController),
+                const SizedBox(height: 12),
+                _buildInputField("Raça", breedController),
                 const SizedBox(height: 12),
                 _buildInputField("Peso (kg)", weightController,
                     keyboard: TextInputType.number),
@@ -354,9 +334,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime.now(),
                     );
-                    if (picked != null) {
-                      birthDate = picked;
-                    }
+                    if (picked != null) birthDate = picked;
                   },
                   icon: const Icon(Icons.calendar_month),
                   label: const Text("Selecionar Data de Nascimento"),
@@ -381,7 +359,8 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           speciesController.text,
                           double.tryParse(weightController.text) ?? 0.0,
                           birthDate,
-                          id: pet.id, // <-- id nomeado
+                          widget.currentUserId,
+                          id: pet.id,
                         );
                         final success =
                         await PetService.updatePet(petAtualizado);

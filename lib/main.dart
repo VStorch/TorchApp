@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:torch_app/pages/home_page.dart';
-import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/my_pets_page.dart';
-import 'package:torch_app/pages/promotions_page.dart';
-import 'package:torch_app/pages_pet_shop/home_page_pet_shop.dart';
-import 'package:torch_app/pages_pet_shop/reviews.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,21 +11,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
 
       // Suporte à localização (português Brasil)
-      localizationsDelegates: [
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: [
+      supportedLocales: const [
         Locale('pt', 'BR'),
       ],
 
       // Página inicial
-      home: MyPetsPage(),
+      home: MyPetsPage(currentUserId: 1), // <- Passe o ID
     );
   }
 }
