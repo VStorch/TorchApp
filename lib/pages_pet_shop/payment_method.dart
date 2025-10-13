@@ -274,21 +274,25 @@ class _PaymentMethodState extends State<PaymentMethod> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Builder(
-                  builder: (context) {
-                    return IconButton(
-                      icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    );
-                  },
+                Transform.translate(
+                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  child: Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 10),
                 const Text(
                   "Forma de pagamento",
                   style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87),
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ],
             ),

@@ -43,15 +43,18 @@ class HomePagePetShop extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Builder(
-                  builder: (context) {
-                    return IconButton(
-                      icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    );
-                  },
+                Transform.translate(
+                  offset: const Offset(-20, -15),
+                  child: Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 40),
                 const Text(
                   "Olá Leonardo!",
                   style: TextStyle(

@@ -52,15 +52,18 @@ class _SettingsState extends State<Settings> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Builder(
-                  builder: (context) {
-                    return IconButton(
-                      icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                      onPressed: () => Scaffold.of(context).openDrawer(),
-                    );
-                  },
+                Transform.translate(
+                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  child: Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(width: 15),
+                const SizedBox(width: 40),
                 const Text(
                   "Configurações",
                   style: TextStyle(

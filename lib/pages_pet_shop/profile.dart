@@ -129,7 +129,7 @@ class _ProfileState extends State<Profile> {
                 Builder(
                   builder: (context) {
                     return Transform.translate(
-                      offset: const Offset(-5, 0),
+                      offset: const Offset(-5, -12),
                       child: IconButton(
                         icon: const Icon(Icons.pets,
                             size: 38, color: Colors.black),
@@ -138,7 +138,7 @@ class _ProfileState extends State<Profile> {
                     );
                   },
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 110),
                 const Text(
                   "Pefil",
                   style: TextStyle(
