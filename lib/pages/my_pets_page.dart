@@ -7,7 +7,6 @@ import '../data/pet/pet_service.dart';
 import '../models/menu_item.dart';
 import '../models/page_type.dart';
 
-// Stateful widget (alterável)
 class MyPetsPage extends StatefulWidget {
   const MyPetsPage({super.key});
 
@@ -15,27 +14,33 @@ class MyPetsPage extends StatefulWidget {
   State<MyPetsPage> createState() => _MyPetsPageState();
 }
 
-
-// Classe que define o comportamento e aparência do widget Welcome, precisa extender o "Welcome" para poder alterá-lo
 class _MyPetsPageState extends State<MyPetsPage> {
-  //final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final PetService _petService = PetService();
+  List<Pet> _pets = [];
 
   @override
+  void initState() {
+    super.initState();
+    _loadPets();
+  }
 
-  // Build responsável por construir a interface do usuário
+  Future<void> _loadPets() async {
+    try {
+      final pets = await PetService.getPets();
+      setState(() {
+        _pets = pets;
+      });
+    } catch (e) {
+      debugPrint('Erro ao carregar pets: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final pets = _petService.pets;
-
     return Scaffold(
-
-      // Registra a cor de fundo padrão
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: AppBar(
         backgroundColor: const Color(0xFFEBDD6C),
         toolbarHeight: 90,
-
-        // Cria o ícone do menu, que neste contexto é a pata de cachorro
         leading: Builder(
           builder: (context) {
             return IconButton(
@@ -45,7 +50,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
             );
           },
         ),
-
         title: SizedBox(
           height: 50,
           child: TextField(
@@ -80,18 +84,16 @@ class _MyPetsPageState extends State<MyPetsPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          children: pets.isEmpty
+          children: _pets.isEmpty
               ? [_buildEmptyCard()]
-              : pets.map((pet) => _buildPetCard(pet)).toList(),
+              : _pets.map((pet) => _buildPetCard(pet)).toList(),
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFEBDD6C),
         onPressed: () => _showAddPetDialog(context),
         child: const Icon(Icons.add, color: Colors.black, size: 32),
       ),
-
     );
   }
 
@@ -110,30 +112,29 @@ class _MyPetsPageState extends State<MyPetsPage> {
                 const Icon(Icons.pets, size: 28),
                 const SizedBox(width: 8),
                 Text(pet.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18)),
               ],
             ),
             const SizedBox(height: 10),
             Text("Raça: ${pet.breed}"),
+            Text("Espécie: ${pet.species}"),
             Text("Peso: ${pet.weight} kg"),
-            Text(
-              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
-            ),
+            Text("Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}"),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 OutlinedButton(
-                  onPressed: () {
-                    _showEditPetDialog(context, pet);
-                  },
+                  onPressed: () => _showEditPetDialog(context, pet),
                   child: const Text("Editar"),
                 ),
                 OutlinedButton(
-                  onPressed: () {
-                    setState(() {
-                      _petService.removerPet(pet.id!);
-                    });
+                  onPressed: () async {
+                    if (pet.id != null) {
+                      final success = await PetService.deletePet(pet.id!);
+                      if (success) _loadPets();
+                    }
                   },
                   child: const Text("Excluir"),
                 ),
@@ -145,7 +146,6 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  /// CARD QUANDO NÃO TEM PETS
   Widget _buildEmptyCard() {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -185,6 +185,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
   void _showAddPetDialog(BuildContext context) {
     final nameController = TextEditingController();
     final breedController = TextEditingController();
+    final speciesController = TextEditingController();
     final weightController = TextEditingController();
     DateTime birthDate = DateTime.now();
 
@@ -204,21 +205,20 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   "Cadastrar Pet",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
                 const SizedBox(height: 20),
-
                 _buildInputField("Nome", nameController),
                 const SizedBox(height: 12),
                 _buildInputField("Raça", breedController),
                 const SizedBox(height: 12),
+                _buildInputField("Espécie", speciesController),
+                const SizedBox(height: 12),
                 _buildInputField("Peso (kg)", weightController,
                     keyboard: TextInputType.number),
                 const SizedBox(height: 12),
-
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEBDD6C),
@@ -254,9 +254,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   icon: const Icon(Icons.calendar_month),
                   label: const Text("Selecionar Data de Nascimento"),
                 ),
-
                 const SizedBox(height: 20),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -279,17 +277,16 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         final pet = Pet(
-                          null,
                           nameController.text,
                           breedController.text,
+                          speciesController.text,
                           double.tryParse(weightController.text) ?? 0.0,
                           birthDate,
                         );
-                        setState(() {
-                          _petService.adicionarPet(pet);
-                        });
+                        final success = await PetService.addPet(pet);
+                        if (success) _loadPets();
                         Navigator.pop(context);
                       },
                       child: const Text("Salvar"),
@@ -307,7 +304,9 @@ class _MyPetsPageState extends State<MyPetsPage> {
   void _showEditPetDialog(BuildContext context, Pet pet) {
     final nameController = TextEditingController(text: pet.name);
     final breedController = TextEditingController(text: pet.breed);
-    final weightController = TextEditingController(text: pet.weight.toString());
+    final speciesController = TextEditingController(text: pet.species);
+    final weightController =
+    TextEditingController(text: pet.weight.toString());
     DateTime birthDate = pet.birthDate;
 
     showDialog(
@@ -326,21 +325,20 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   "Editar Pet",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black),
                 ),
                 const SizedBox(height: 20),
-
                 _buildInputField("Nome", nameController),
                 const SizedBox(height: 12),
                 _buildInputField("Raça", breedController),
                 const SizedBox(height: 12),
+                _buildInputField("Espécie", speciesController),
+                const SizedBox(height: 12),
                 _buildInputField("Peso (kg)", weightController,
                     keyboard: TextInputType.number),
                 const SizedBox(height: 12),
-
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFEBDD6C),
@@ -363,9 +361,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                   icon: const Icon(Icons.calendar_month),
                   label: const Text("Selecionar Data de Nascimento"),
                 ),
-
                 const SizedBox(height: 20),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -378,17 +374,18 @@ class _MyPetsPageState extends State<MyPetsPage> {
                         backgroundColor: const Color(0xFFEBDD6C),
                         foregroundColor: Colors.black,
                       ),
-                      onPressed: () {
+                      onPressed: () async {
                         final petAtualizado = Pet(
-                          pet.id, // mantém ID
                           nameController.text,
                           breedController.text,
+                          speciesController.text,
                           double.tryParse(weightController.text) ?? 0.0,
                           birthDate,
+                          id: pet.id, // <-- id nomeado
                         );
-                        setState(() {
-                          _petService.editarPet(petAtualizado);
-                        });
+                        final success =
+                        await PetService.updatePet(petAtualizado);
+                        if (success) _loadPets();
                         Navigator.pop(context);
                       },
                       child: const Text("Salvar"),
