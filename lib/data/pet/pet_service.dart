@@ -5,19 +5,20 @@ import 'pet.dart';
 class PetService {
   static const String baseUrl = 'http://10.0.2.2:8080/pets';
 
-  /// Adiciona um novo pet no backend
   static Future<bool> addPet(Pet pet) async {
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(pet.toJson()),
     );
-    return response.statusCode == 201; // Created
+    print("ADD PET STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+    return response.statusCode == 201;
   }
 
-  /// Busca todos os pets do backend
   static Future<List<Pet>> getPets() async {
     final response = await http.get(Uri.parse(baseUrl));
+    print("GET PETS STATUS: ${response.statusCode}");
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Pet.fromJson(json)).toList();
@@ -26,7 +27,6 @@ class PetService {
     }
   }
 
-  /// Atualiza um pet existente
   static Future<bool> updatePet(Pet pet) async {
     if (pet.id == null) return false;
     final response = await http.put(
@@ -34,18 +34,13 @@ class PetService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(pet.toJson()),
     );
+    print("UPDATE PET STATUS: ${response.statusCode}");
     return response.statusCode == 200;
   }
 
-  /// Exclui um pet
   static Future<bool> deletePet(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
-    return response.statusCode == 204; // No Content
+    print("DELETE PET STATUS: ${response.statusCode}");
+    return response.statusCode == 204;
   }
-
-  // ========== Validações simples (opcional) ==========
-  static bool isValidName(String name) => name.isNotEmpty;
-  static bool isValidBreed(String breed) => breed.isNotEmpty;
-  static bool isValidSpecies(String species) => species.isNotEmpty;
-  static bool isValidWeight(double weight) => weight > 0;
 }

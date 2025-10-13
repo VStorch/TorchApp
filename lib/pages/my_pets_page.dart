@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 import '../components/CustomDrawer.dart';
 import '../data/pet/pet.dart';
 import '../data/pet/pet_service.dart';
@@ -29,7 +28,8 @@ class _MyPetsPageState extends State<MyPetsPage> {
     setState(() => _loading = true);
     try {
       final pets = await PetService.getPets();
-      setState(() => _pets = pets);
+      // mostra só os pets do usuário logado
+      setState(() => _pets = pets.where((p) => p.userId == widget.currentUserId).toList());
     } catch (e) {
       debugPrint("Erro ao carregar pets: $e");
     } finally {
@@ -266,7 +266,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           widget.currentUserId,
                         );
                         final success = await PetService.addPet(pet);
-                        if (success) _loadPets();
+                        if (success) {
+                          _loadPets();
+                        } else {
+                          debugPrint("Erro ao cadastrar pet");
+                        }
                         Navigator.pop(context);
                       },
                       child: const Text("Salvar"),
@@ -362,8 +366,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           widget.currentUserId,
                           id: pet.id,
                         );
-                        final success =
-                        await PetService.updatePet(petAtualizado);
+                        final success = await PetService.updatePet(petAtualizado);
                         if (success) _loadPets();
                         Navigator.pop(context);
                       },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:torch_app/pages/my_pets_page.dart';
-
+import 'package:torch_app/pages/my_profile_page.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -11,21 +10,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
 
       // Suporte à localização (português Brasil)
-      localizationsDelegates: const [
+      localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
+      supportedLocales:  [
         Locale('pt', 'BR'),
       ],
 
       // Página inicial
-      home: MyPetsPage(currentUserId: 1), // <- Passe o ID
+      home: MyProfilePage(),
     );
   }
 }
