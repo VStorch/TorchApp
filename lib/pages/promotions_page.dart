@@ -36,7 +36,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
           builder: (context) => IconButton(
             icon: const Icon(Icons.pets),
             iconSize: 35,
-            color: Colors.white,
+            color: Colors.black,
             onPressed: () {
               Scaffold.of(context).openDrawer();
             },
