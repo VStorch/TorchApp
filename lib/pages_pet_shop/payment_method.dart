@@ -25,7 +25,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
   final Color corFundo = const Color(0xFFFBF8E1);
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
-  final Color corSelecionado = const Color(0xFFFAF59E); // fundo do item selecionado
+  final Color corSelecionado = const Color(0xFFFAF59E);
 
   final Map<String, bool> _formasPadrao = {
     "Dinheiro": false,
@@ -33,6 +33,40 @@ class _PaymentMethodState extends State<PaymentMethod> {
     "Cartão de crédito": false,
     "Cartão de débito": false,
   };
+
+  // Função para mostrar aviso centralizado usando Overlay
+  void _mostrarAviso(String mensagem) {
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            margin: const EdgeInsets.symmetric(horizontal: 40),
+            decoration: BoxDecoration(
+              color: corPrimaria.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.black26, width: 1),
+            ),
+            child: Text(
+              mensagem,
+              style: const TextStyle(
+                  color: Colors.black87,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Overlay.of(context).insert(overlayEntry);
+
+    Future.delayed(const Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
 
   void _abrirModalMetodo({int? index}) {
     if (index != null) {
@@ -110,7 +144,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
                     ),
                     icon: const Icon(Icons.save),
                     label: Text(
-                      _editIndex == null ? 'Salvar Forma' : 'Salvar Alteração',
+                      _editIndex == null
+                          ? 'Salvar Forma'
+                          : 'Salvar Alteração',
                     ),
                     onPressed: _salvarMetodo,
                   ),
@@ -126,11 +162,20 @@ class _PaymentMethodState extends State<PaymentMethod> {
 
   void _salvarMetodo() {
     if (_selectedMetodo == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Selecione uma forma de pagamento!'),
-        ),
-      );
+      _mostrarAviso('Selecione uma forma de pagamento!');
+      return;
+    }
+
+    // Checa duplicidade ignorando o método que está sendo editado
+    bool jaExiste = _methods.asMap().entries.any((entry) {
+      int i = entry.key;
+      Map metodo = entry.value;
+      if (_editIndex != null && i == _editIndex) return false;
+      return metodo['formas'][_selectedMetodo!] == true;
+    });
+
+    if (jaExiste) {
+      _mostrarAviso('Este método já está cadastrado!');
       return;
     }
 
@@ -169,7 +214,8 @@ class _PaymentMethodState extends State<PaymentMethod> {
               setState(() => _methods.removeAt(index));
               Navigator.pop(context);
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            child:
+            const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -186,14 +232,36 @@ class _PaymentMethodState extends State<PaymentMethod> {
       backgroundColor: corFundo,
       drawer: CustomDrawer(
         menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
+          MenuItem(
+              title: "Início",
+              icon: Icons.home,
+              destinationPage: const HomePagePetShop()),
+          MenuItem(
+              title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
+          MenuItem(
+              title: "Serviços",
+              icon: Icons.build,
+              destinationPage: const Services()),
+          MenuItem(
+              title: "Avaliações",
+              icon: Icons.star,
+              destinationPage: const Reviews()),
+          MenuItem(
+              title: "Promoções",
+              icon: Icons.local_offer,
+              destinationPage: const Promotions()),
+          MenuItem(
+              title: "Forma de pagamento",
+              icon: Icons.credit_card,
+              destinationPage: const PaymentMethod()),
+          MenuItem(
+              title: "Configurações",
+              icon: Icons.settings,
+              destinationPage: const Settings()),
+          MenuItem(
+              title: "Sair",
+              icon: Icons.logout,
+              destinationPage: const LoginPage()),
         ],
       ),
       appBar: PreferredSize(
@@ -218,7 +286,9 @@ class _PaymentMethodState extends State<PaymentMethod> {
                 const Text(
                   "Forma de pagamento",
                   style: TextStyle(
-                      fontSize: 28, fontWeight: FontWeight.bold, color: Colors.black87),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87),
                 ),
               ],
             ),
@@ -231,7 +301,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ? Center(
           child: Text(
             'Nenhum método de pagamento cadastrado 💳',
-            style: TextStyle(color: corTexto.withOpacity(0.6)),
+            style: TextStyle(color: corTexto.withValues(alpha: 0.6)),
           ),
         )
             : ListView.builder(

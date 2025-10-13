@@ -430,9 +430,9 @@ class _ProfileState extends State<Profile> {
   // ------------------ CONTATO ------------------
   Widget _buildContactSection() {
     final TextEditingController cnpjController =
-    TextEditingController(text: "(47)99745-6464");
-    final TextEditingController telefoneController =
     TextEditingController(text: "73.233.352/0001-16");
+    final TextEditingController telefoneController =
+    TextEditingController(text: "(47)99745-6464");
     final TextEditingController emailController =
     TextEditingController(text: "leonardo@gmail.com");
 

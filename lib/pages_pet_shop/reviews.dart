@@ -113,7 +113,7 @@ class _ReviewsState extends State<Reviews> {
             ? Center(
           child: Text(
             'Nenhuma avaliação ainda 🐾',
-            style: TextStyle(color: corTexto.withOpacity(0.6)),
+            style: TextStyle(color: corTexto.withValues(alpha: 0.6)),
           ),
         )
             : ListView.builder(
@@ -156,12 +156,12 @@ class _ReviewsState extends State<Reviews> {
                     const SizedBox(height: 4),
                     Text(
                       review['comentario'],
-                      style: TextStyle(color: corTexto.withOpacity(0.7)),
+                      style: TextStyle(color: corTexto.withValues(alpha: 0.7)),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Data: ${review['data']}',
-                      style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: 13),
+                      style: TextStyle(color: corTexto.withValues(alpha: 0.6), fontSize: 13),
                     ),
                   ],
                 ),

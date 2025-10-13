@@ -29,7 +29,7 @@ class _PromotionsState extends State<Promotions> {
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
-  // Função para formatar a data automaticamente
+  // Formata data automaticamente
   String formatarData(String input) {
     String numeros = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (numeros.length >= 4) {
@@ -81,26 +81,32 @@ class _PromotionsState extends State<Promotions> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: corTexto,
+                      color: corTexto.withValues(alpha: 255),
                     ),
                   ),
                 ),
                 TextFormField(
                   initialValue: _titulo,
                   decoration: InputDecoration(
-                    labelText: 'Título',
+                    labelText: 'Nome do serviço',
+                    labelStyle: TextStyle(
+                      color: corTexto.withValues(alpha: 153),
+                    ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.label),
                   ),
                   validator: (value) =>
-                  value!.isEmpty ? 'Informe o título' : null,
+                  value!.isEmpty ? 'Informe o título da promoção' : null,
                   onSaved: (value) => _titulo = value!,
                 ),
                 TextFormField(
                   initialValue: _descricao,
                   decoration: InputDecoration(
                     labelText: 'Descrição',
+                    labelStyle: TextStyle(
+                      color: corTexto.withValues(alpha: 153),
+                    ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.description),
@@ -113,6 +119,9 @@ class _PromotionsState extends State<Promotions> {
                   initialValue: _validade,
                   decoration: InputDecoration(
                     labelText: 'Validade (ex: 15/07)',
+                    labelStyle: TextStyle(
+                      color: corTexto.withValues(alpha: 153),
+                    ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.calendar_today),
@@ -244,7 +253,7 @@ class _PromotionsState extends State<Promotions> {
             ? Center(
           child: Text(
             'Nenhuma promoção cadastrada ainda 🏷️',
-            style: TextStyle(color: corTexto.withOpacity(0.6)),
+            style: TextStyle(color: corTexto.withValues(alpha: 153)),
           ),
         )
             : ListView.builder(
@@ -273,7 +282,7 @@ class _PromotionsState extends State<Promotions> {
                 ),
                 subtitle: Text(
                   '${promo['descricao']!}\nVálido até ${promo['validade']!}',
-                  style: TextStyle(color: corTexto.withOpacity(0.7)),
+                  style: TextStyle(color: corTexto.withValues(alpha: 179)),
                 ),
                 isThreeLine: true,
                 trailing: Wrap(
