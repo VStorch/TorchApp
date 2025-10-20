@@ -74,9 +74,14 @@ class _UserInformationPageState extends State<UserInformationPage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Nome Completo:"),
+                          const Text("Nome:"),
                           const SizedBox(height: 6),
                           _buildTextField(hint: "Digite seu nome"),
+
+                          const SizedBox(height: 12),
+                          const Text("Sobrenome:"),
+                          const SizedBox(height: 6),
+                          _buildTextField(hint: "Digite seu sobrenome"),
 
                           const SizedBox(height: 12),
                           const Text("Celular:"),
@@ -137,7 +142,7 @@ class _UserInformationPageState extends State<UserInformationPage> {
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 50),
                 child: SizedBox(
-                  height: 100,
+                  height: 70,
                   child: Lottie.asset(
                     'lib/assets/images/CuteDog.json',
                     fit: BoxFit.contain,

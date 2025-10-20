@@ -21,6 +21,22 @@ class _VerificationPageState extends State<VerificationPage> {
   List.generate(5, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(5, (_) => FocusNode());
 
+  /// 🔒 Função para mascarar o e-mail exibido na tela
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+
+    final name = parts[0];
+    final domain = parts[1];
+
+    final maskedName = name.length > 3
+        ? '${name.substring(0, 3)}***'
+        : '${name.substring(0, 1)}***';
+
+    final domainName = domain.split('.').first;
+    return '$maskedName@${domainName}...';
+  }
+
   void _onChanged(String value, int index) {
     if (value.length == 1 && index + 1 < _focusNodes.length) {
       FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
@@ -81,9 +97,12 @@ class _VerificationPageState extends State<VerificationPage> {
                   Container(height: 1, color: Colors.black),
                   const SizedBox(height: 16),
                   Text(
-                    "Digite o código de 5 dígitos enviado para\nE-mail: ${widget.email}",
+                    "Digite o código de 5 dígitos enviado para\nE-mail: ${_maskEmail(widget.email)}",
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   const SizedBox(height: 22),
                   Row(
@@ -143,12 +162,16 @@ class _VerificationPageState extends State<VerificationPage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 36, vertical: 14),
+                            horizontal: 36,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Voltar",
                           style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 20),
@@ -160,12 +183,16 @@ class _VerificationPageState extends State<VerificationPage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 34, vertical: 14),
+                            horizontal: 34,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Continuar",
                           style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
