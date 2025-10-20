@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'verification_page.dart'; // importe a tela de verificação
+import '../data/user/verification_pet_shop/verification_services.dart';
+import 'verification_page.dart';
 
 class RegistrationPagePetShop extends StatefulWidget {
   const RegistrationPagePetShop({super.key});
@@ -11,11 +12,34 @@ class RegistrationPagePetShop extends StatefulWidget {
 class _RegistrationPagePetShopState extends State<RegistrationPagePetShop> {
   final _emailController = TextEditingController();
 
-  void _goToVerification() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const VerificationPage()),
-    );
+  void _goToVerification() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty || !email.contains('@')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Por favor, insira um e-mail válido.')),
+      );
+      return;
+    }
+
+    try {
+      await VerificationService.sendVerificationCode(email);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Código de verificação enviado!')),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VerificationPage(email: email),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
   }
 
   @override
