@@ -1,10 +1,15 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:torch_app/pages/pet_shops_page.dart';
+
 import '../components/CustomDrawer.dart';
-import '../models/page_type.dart';
 import '../models/menu_item.dart';
+import '../models/page_type.dart';
+
+// Substitua com os seus arquivos reais
+import 'login_page.dart';
+import 'password_page.dart';
 
 class MyProfilePage extends StatefulWidget {
   const MyProfilePage({super.key});
@@ -12,11 +17,11 @@ class MyProfilePage extends StatefulWidget {
   @override
   State<MyProfilePage> createState() => _MyProfilePageState();
 }
-class _MyProfilePageState extends State<MyProfilePage> {
-  File? _profileImage; // imagem escolhida da galeria
-  String? _selectedAssetImage; // imagem escolhida das padrões
 
-  // lista de imagens padrão
+class _MyProfilePageState extends State<MyProfilePage> {
+  File? _profileImage;
+  String? _selectedAssetImage;
+
   final List<String> _defaultImages = [
     "lib/assets/images_profile/dog1.jpg",
     "lib/assets/images_profile/dog2.jpg",
@@ -28,30 +33,27 @@ class _MyProfilePageState extends State<MyProfilePage> {
     "lib/assets/images_profile/cat4.jpg",
   ];
 
-  // pegar imagem da galeria
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         _profileImage = File(pickedFile.path);
-        _selectedAssetImage = null; // limpa escolha padrão
+        _selectedAssetImage = null;
       });
     }
   }
 
-  // escolher imagem padrão
   void _pickDefaultImage(String path) {
     setState(() {
       _selectedAssetImage = path;
-      _profileImage = null; // limpa escolha da galeria
+      _profileImage = null;
     });
   }
 
-  // menu para escolher imagem
   void _showImageOptions(BuildContext context) {
     showModalBottomSheet(
+      backgroundColor: const Color(0xFFFBF8E1),
       context: context,
       builder: (context) {
         return Padding(
@@ -60,6 +62,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEBDD6C),
+                  foregroundColor: Colors.black,
+                ),
                 onPressed: _pickFromGallery,
                 icon: const Icon(Icons.photo),
                 label: const Text("Escolher da Galeria"),
@@ -88,11 +94,135 @@ class _MyProfilePageState extends State<MyProfilePage> {
     );
   }
 
+  void _handleOptionTap(String title) async {
+    switch (title) {
+      case "Alterar Senha":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PasswordPage()),
+        );
+        break;
+
+      case "Sair Da Conta":
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFFFBF8E1),
+            title: const Text("Sair da conta",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            content: const Text("Tem certeza que deseja sair?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text("Cancelar"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFEBDD6C),
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text("Sair"),
+              ),
+            ],
+          ),
+        );
+
+        if (confirm == true) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+                (route) => false,
+          );
+        }
+        break;
+
+      case "Notificações":
+        _showNotificationDialog();
+        break;
+
+      case "Meus PetShops Favoritos":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const PetShopPage()),
+        );
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  void _showNotificationDialog() {
+    bool isEnabled = true;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFFFBF8E1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.notifications_active,
+                        size: 40, color: Colors.black87),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Configurar Notificações",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Ativar notificações",
+                            style: TextStyle(fontSize: 16)),
+                        Switch(
+                          activeColor: Colors.green,
+                          value: isEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              isEnabled = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFEBDD6C),
+                        foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Salvar"),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-
       appBar: AppBar(
         toolbarHeight: 90,
         backgroundColor: const Color(0xFFEBDD6C),
@@ -114,8 +244,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
               prefixIcon: const Icon(Icons.search),
               filled: true,
               fillColor: const Color(0xFFFBF8E1),
-              contentPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
@@ -137,19 +265,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
-      // Corpo da tela de perfil
       body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 20),
-
-            // Dados do usuário
             const Text(
               "Leonardo Cortelim",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             const Text("leo.gmail.com",
@@ -159,8 +281,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
             const Text("Rua Adriano Korman, nº 123 - SC",
                 style: TextStyle(fontSize: 16, color: Colors.black87)),
             const SizedBox(height: 20),
-
-            // Lista de opções
             const Divider(),
             _buildProfileOption(Icons.pets, "Meus PetShops Favoritos"),
             const Divider(),
@@ -174,14 +294,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
             const Divider(),
             _buildProfileOption(Icons.logout, "Sair Da Conta"),
             const Divider(),
-
             const SizedBox(height: 30),
-
-            // Foto do pet alterável
             GestureDetector(
-              onTap: () {
-                _showImageOptions(context);
-              },
+              onTap: () => _showImageOptions(context),
               child: CircleAvatar(
                 radius: 60,
                 backgroundImage: _profileImage != null
@@ -198,13 +313,12 @@ class _MyProfilePageState extends State<MyProfilePage> {
     );
   }
 
-  // Item da lista do perfil
   Widget _buildProfileOption(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.black),
       title: Text(title,
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-      onTap: () {},
+      onTap: () => _handleOptionTap(title),
     );
   }
 }
