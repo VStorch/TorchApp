@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
+import 'package:torch_app/pages_pet_shop/pet_shop_information.dart';
 import 'dart:convert';
 
 class UserInformationPage extends StatefulWidget {
@@ -135,7 +136,6 @@ class _UserInformationPageState extends State<UserInformationPage> {
                       ),
                     ),
                     const SizedBox(height: 14),
-
                     Container(height: 1, color: Colors.black),
                   ],
                 ),
@@ -193,11 +193,7 @@ class _UserInformationPageState extends State<UserInformationPage> {
     final password = _passwordController.text.trim();
 
     // Validação básica
-    if (name.isEmpty ||
-        surname.isEmpty ||
-        phone.isEmpty ||
-        email.isEmpty ||
-        password.length < 8) {
+    if (name.isEmpty || surname.isEmpty || phone.isEmpty || email.isEmpty || password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Preencha todos os campos corretamente.')),
       );
@@ -224,7 +220,12 @@ class _UserInformationPageState extends State<UserInformationPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cadastro realizado com sucesso!')),
         );
-        // Aqui você pode navegar para outra tela ou limpar os campos
+
+        // Navega para PetShopInformationPage
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const PetShopInformationPage()),
+        );
       } else {
         print("Erro: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
