@@ -81,53 +81,84 @@ class _PromotionsState extends State<Promotions> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: corTexto.withValues(alpha: 255),
+                      color: corTexto.withOpacity(1.0),
                     ),
                   ),
                 ),
+                // Campo Título
                 TextFormField(
                   initialValue: _titulo,
                   decoration: InputDecoration(
-                    labelText: 'Nome do serviço',
+                    labelText: 'Nome da promoção',
                     labelStyle: TextStyle(
-                      color: corTexto.withValues(alpha: 153),
+                      color: corTexto.withOpacity(0.6),
                     ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.label),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe o título da promoção' : null,
-                  onSaved: (value) => _titulo = value!,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe o título da promoção';
+                    } else if (value.trim().length < 3) {
+                      return 'O título deve ter pelo menos 3 caracteres';
+                    } else if (value.trim().length > 50) {
+                      return 'O título deve ter no máximo 50 caracteres';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _titulo = value!.trim(),
                 ),
+                // Campo Descrição
                 TextFormField(
                   initialValue: _descricao,
                   decoration: InputDecoration(
                     labelText: 'Descrição',
                     labelStyle: TextStyle(
-                      color: corTexto.withValues(alpha: 153),
+                      color: corTexto.withOpacity(0.6),
                     ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.description),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe a descrição' : null,
-                  onSaved: (value) => _descricao = value!,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe a descrição';
+                    } else if (value.trim().length > 200) {
+                      return 'A descrição deve ter no máximo 200 caracteres';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _descricao = value!.trim(),
                 ),
+                // Campo Validade
                 TextFormField(
                   initialValue: _validade,
                   decoration: InputDecoration(
                     labelText: 'Validade (ex: 15/07)',
                     labelStyle: TextStyle(
-                      color: corTexto.withValues(alpha: 153),
+                      color: corTexto.withOpacity(0.6),
                     ),
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.calendar_today),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe a validade' : null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe a validade';
+                    }
+                    final regex = RegExp(r'^(\d{2})/(\d{2})$');
+                    if (!regex.hasMatch(value)) {
+                      return 'Formato inválido (use DD/MM)';
+                    }
+                    final match = regex.firstMatch(value)!;
+                    final dia = int.parse(match.group(1)!);
+                    final mes = int.parse(match.group(2)!);
+                    if (dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+                      return 'Data inválida';
+                    }
+                    return null;
+                  },
                   onSaved: (value) => _validade = formatarData(value!),
                 ),
                 const SizedBox(height: 10),
@@ -226,7 +257,7 @@ class _PromotionsState extends State<Promotions> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Transform.translate(
-                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  offset: const Offset(-20, 0),
                   child: Builder(
                     builder: (context) {
                       return IconButton(
@@ -247,7 +278,6 @@ class _PromotionsState extends State<Promotions> {
                 ),
               ],
             ),
-
           ),
         ),
       ),
@@ -257,7 +287,7 @@ class _PromotionsState extends State<Promotions> {
             ? Center(
           child: Text(
             'Nenhuma promoção cadastrada ainda 🏷️',
-            style: TextStyle(color: corTexto.withValues(alpha: 153)),
+            style: TextStyle(color: corTexto.withOpacity(0.6)),
           ),
         )
             : ListView.builder(
@@ -286,7 +316,7 @@ class _PromotionsState extends State<Promotions> {
                 ),
                 subtitle: Text(
                   '${promo['descricao']!}\nVálido até ${promo['validade']!}',
-                  style: TextStyle(color: corTexto.withValues(alpha: 179)),
+                  style: TextStyle(color: corTexto.withOpacity(0.7)),
                 ),
                 isThreeLine: true,
                 trailing: Wrap(

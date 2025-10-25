@@ -36,29 +36,6 @@ class _ReviewsState extends State<Reviews> {
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
-  void _excluirAvaliacao(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Avaliação'),
-        content: const Text('Tem certeza que deseja remover esta avaliação?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() => _avaliacoes.removeAt(index));
-              Navigator.pop(context);
-            },
-            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,7 +63,7 @@ class _ReviewsState extends State<Reviews> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Transform.translate(
-                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  offset: const Offset(-20, 0),
                   child: Builder(
                     builder: (context) {
                       return IconButton(
@@ -107,7 +84,6 @@ class _ReviewsState extends State<Reviews> {
                 ),
               ],
             ),
-
           ),
         ),
       ),
@@ -117,7 +93,7 @@ class _ReviewsState extends State<Reviews> {
             ? Center(
           child: Text(
             'Nenhuma avaliação ainda 🐾',
-            style: TextStyle(color: corTexto.withValues(alpha: 0.6)),
+            style: TextStyle(color: corTexto.withOpacity(0.6)),
           ),
         )
             : ListView.builder(
@@ -160,20 +136,17 @@ class _ReviewsState extends State<Reviews> {
                     const SizedBox(height: 4),
                     Text(
                       review['comentario'],
-                      style: TextStyle(color: corTexto.withValues(alpha: 0.7)),
+                      style: TextStyle(color: corTexto.withOpacity(0.7)),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       'Data: ${review['data']}',
-                      style: TextStyle(color: corTexto.withValues(alpha: 0.6), fontSize: 13),
+                      style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: 13),
                     ),
                   ],
                 ),
                 isThreeLine: true,
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  onPressed: () => _excluirAvaliacao(index),
-                ),
+                // Removido o trailing com ícone de delete
               ),
             );
           },

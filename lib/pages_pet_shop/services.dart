@@ -8,7 +8,6 @@ import 'reviews.dart';
 import 'promotions.dart';
 import 'payment_method.dart';
 import 'settings.dart';
-import 'dart:math' as math;
 
 class Services extends StatefulWidget {
   const Services({super.key});
@@ -79,6 +78,7 @@ class _ServicesState extends State<Services> {
                     ),
                   ),
                 ),
+                // Nome do serviço
                 TextFormField(
                   initialValue: _nome,
                   decoration: InputDecoration(
@@ -87,14 +87,24 @@ class _ServicesState extends State<Services> {
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.text_fields),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe o nome' : null,
-                  onSaved: (value) => _nome = value!,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe o nome';
+                    } else if (value.trim().length < 3) {
+                      return 'O nome deve ter pelo menos 3 caracteres';
+                    } else if (value.trim().length > 50) {
+                      return 'O nome deve ter no máximo 50 caracteres';
+                    } else if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) {
+                      return 'O nome deve conter apenas letras e espaços';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _nome = value!.trim(),
                 ),
+                // Preço
                 TextFormField(
                   initialValue: _preco,
-                  keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
                     labelText: 'Preço',
                     prefixText: 'R\$ ',
@@ -102,10 +112,19 @@ class _ServicesState extends State<Services> {
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.attach_money),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe o preço' : null,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe o preço';
+                    }
+                    final preco = double.tryParse(value.replaceAll(',', '.'));
+                    if (preco == null || preco <= 0) {
+                      return 'Informe um preço válido';
+                    }
+                    return null;
+                  },
                   onSaved: (value) => _preco = 'R\$ ${value!.trim()}',
                 ),
+                // Duração
                 TextFormField(
                   initialValue: _duracao,
                   decoration: InputDecoration(
@@ -114,10 +133,19 @@ class _ServicesState extends State<Services> {
                         borderRadius: BorderRadius.circular(12)),
                     prefixIcon: const Icon(Icons.timer),
                   ),
-                  validator: (value) =>
-                  value!.isEmpty ? 'Informe a duração' : null,
-                  onSaved: (value) => _duracao = _formatarDuracao(value!),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Informe a duração';
+                    }
+                    final regex = RegExp(r'^(\d{1,2}(:\d{2})?|(\d{1,2}h(\d{1,2})?))$');
+                    if (!regex.hasMatch(value.trim())) {
+                      return 'Formato inválido (ex: 1h ou 1:30)';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) => _duracao = _formatarDuracao(value!.trim()),
                 ),
+                // Ícone
                 DropdownButtonFormField<IconData>(
                   value: _iconeSelecionado,
                   decoration: InputDecoration(
@@ -220,12 +248,16 @@ class _ServicesState extends State<Services> {
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: corPrimaria,
+              foregroundColor: corTexto,
+            ),
             onPressed: () {
               setState(() => _servicos.removeAt(index));
               Navigator.pop(context);
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            child: const Text('Excluir'),
           ),
         ],
       ),
@@ -262,9 +294,8 @@ class _ServicesState extends State<Services> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-
                 Transform.translate(
-                  offset: const Offset(-20, -13), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  offset: const Offset(-20, 0),
                   child: Builder(
                     builder: (context) {
                       return IconButton(
@@ -285,7 +316,6 @@ class _ServicesState extends State<Services> {
                 ),
               ],
             ),
-
           ),
         ),
       ),
@@ -310,10 +340,7 @@ class _ServicesState extends State<Services> {
               margin: const EdgeInsets.only(bottom: 12),
               color: Colors.white,
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 leading: Icon(
                   servico['icone'],
                   size: 36,
@@ -340,12 +367,10 @@ class _ServicesState extends State<Services> {
                     ),
                     IconButton(
                       icon: Icon(Icons.edit, color: corTexto),
-                      onPressed: () =>
-                          _abrirModalServico(servico: servico, index: index),
+                      onPressed: () => _abrirModalServico(servico: servico, index: index),
                     ),
                     IconButton(
-                      icon:
-                      const Icon(Icons.delete, color: Colors.redAccent),
+                      icon: Icon(Icons.delete, color: corPrimaria),
                       onPressed: () => _excluirServico(index),
                     ),
                   ],

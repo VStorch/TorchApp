@@ -49,7 +49,7 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-                SizedBox(width: screenWidth * 0.03),
+                SizedBox(width: screenWidth * 0.045),
                 Expanded(
                   child: SizedBox(
                     height: barHeight * 0.6,

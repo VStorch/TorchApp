@@ -53,7 +53,7 @@ class _SettingsState extends State<Settings> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Transform.translate(
-                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                  offset: const Offset(-20, 0), // sobe o ícone 6 pixels (use valores negativos para subir)
                   child: Builder(
                     builder: (context) {
                       return IconButton(

@@ -55,7 +55,7 @@ class HomePagePetShop extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     return Transform.translate(
-                      offset: Offset(-15, barHeight * -0.4), // Ajuste vertical
+                      offset: Offset(-15, barHeight * -0.2), // Ajuste vertical
                       child: IconButton(
                         icon: Icon(
                           Icons.pets,
