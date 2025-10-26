@@ -17,19 +17,22 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  // cores do profile
-  final Color yellow = const Color(0xFFF4E04D);
-  final Color strongYellow = const Color(0xFFFFF59D);
-  final Color lightYellow = const Color(0xFFFFF9C4);
-  final Color background = const Color(0xFFFBF8E1);
-  final Color blackText = Colors.black87;
+  final Color corFundo = const Color(0xFFFBF8E1);
+  final Color corPrimaria = const Color(0xFFF4E04D);
+  final Color corTexto = Colors.black87;
+  final Color corCardFundo = const Color(0xFFFFF59D);
+  final Color corCardIcon = const Color(0xFFFFF9C4);
 
   bool notifications = true;
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final barHeight = screenHeight * 0.05;
+
     return Scaffold(
-      backgroundColor: background,
+      backgroundColor: corFundo,
       drawer: CustomDrawer(
         menuItems: [
           MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
@@ -43,33 +46,35 @@ class _SettingsState extends State<Settings> {
         ],
       ),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(barHeight),
         child: Container(
-          height: 90,
-          color: yellow,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: corPrimaria,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
           child: SafeArea(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Stack(
               children: [
-                Transform.translate(
-                  offset: const Offset(-20, 0), // sobe o ícone 6 pixels (use valores negativos para subir)
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
                   child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      );
-                    },
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: barHeight * 0.8, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 40),
-                const Text(
-                  "Configurações",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Center(
+                  child: Text(
+                    "Configurações",
+                    style: TextStyle(
+                      fontSize: barHeight * 0.6,
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                    ),
                   ),
                 ),
               ],
@@ -77,123 +82,127 @@ class _SettingsState extends State<Settings> {
           ),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _buildCard(
-            icon: Icons.notifications_active,
-            title: "Notificações",
-            subtitle: "Ative ou desative notificações do app",
-            trailing: Switch(
-              value: notifications,
-              activeColor: Colors.black,
-              inactiveThumbColor: Colors.black,
-              inactiveTrackColor: Colors.grey[400],
-              onChanged: (val) => setState(() => notifications = val),
+      body: Padding(
+        padding: EdgeInsets.all(screenWidth * 0.04),
+        child: ListView(
+          children: [
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.notifications_active,
+              title: "Notificações",
+              subtitle: "Ative ou desative notificações do app",
+              trailing: Switch(
+                value: notifications,
+                activeColor: corPrimaria,
+                onChanged: (val) => setState(() => notifications = val),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _buildCard(
-            icon: Icons.lock_outline,
-            title: "Alterar senha",
-            subtitle: "Atualize sua senha de acesso",
-            onTap: () {},
-          ),
-          const SizedBox(height: 16),
-          _buildCard(
-            icon: Icons.language,
-            title: "Idioma",
-            subtitle: "Escolha o idioma do aplicativo",
-            onTap: () {},
-          ),
-          const SizedBox(height: 16),
-          _buildCard(
-            icon: Icons.info_outline,
-            title: "Sobre o app",
-            subtitle: "Versão 1.0.0",
-            onTap: () => showAboutDialog(
-              context: context,
-              applicationName: "PetShop App",
-              applicationVersion: "1.0.0",
-              applicationIcon: const Icon(Icons.pets, size: 50, color: Colors.black),
-              children: const [
-                Text(
-                  "Este app ajuda você a gerenciar seu pet shop com facilidade e rapidez.",
-                ),
-              ],
+            SizedBox(height: screenHeight * 0.015),
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.lock_outline,
+              title: "Alterar senha",
+              subtitle: "Atualize sua senha de acesso",
+              onTap: () {},
             ),
-          ),
-          const SizedBox(height: 16),
-          _buildCard(
-            icon: Icons.logout,
-            title: "Sair",
-            subtitle: "Voltar para a tela de login",
-            onTap: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginPage()),
-                    (route) => false,
-              );
-            },
-          ),
-        ],
+            SizedBox(height: screenHeight * 0.015),
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.language,
+              title: "Idioma",
+              subtitle: "Escolha o idioma do aplicativo",
+              onTap: () {},
+            ),
+            SizedBox(height: screenHeight * 0.015),
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.info_outline,
+              title: "Sobre o app",
+              subtitle: "Versão 1.0.0",
+              onTap: () => showAboutDialog(
+                context: context,
+                applicationName: "PetShop App",
+                applicationVersion: "1.0.0",
+                applicationIcon: Icon(Icons.pets, size: screenHeight * 0.06, color: Colors.black),
+                children: [
+                  Text(
+                    "Este app ajuda você a gerenciar seu pet shop com facilidade e rapidez.",
+                    style: TextStyle(fontSize: screenHeight * 0.02),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: screenHeight * 0.015),
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.logout,
+              title: "Sair",
+              subtitle: "Voltar para a tela de login",
+              onTap: () {
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                      (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCard({
+    required double screenHeight,
+    required double screenWidth,
     required IconData icon,
     required String title,
     String? subtitle,
     Widget? trailing,
     VoidCallback? onTap,
   }) {
-    return Material(
-      color: strongYellow,
-      borderRadius: BorderRadius.circular(16),
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 4,
-      shadowColor: Colors.black26,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Row(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: lightYellow,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(12),
-                child: Icon(icon, size: 28, color: Colors.black),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: blackText,
-                        )),
-                    if (subtitle != null)
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: blackText.withOpacity(0.6),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              if (trailing != null) trailing,
-            ],
+      margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+      color: corCardFundo,
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(
+          horizontal: screenWidth * 0.04,
+          vertical: screenHeight * 0.012,
+        ),
+        leading: Container(
+          decoration: BoxDecoration(
+            color: corCardIcon,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: EdgeInsets.all(screenHeight * 0.015),
+          child: Icon(icon, size: screenHeight * 0.035, color: Colors.black),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: corTexto,
+            fontSize: screenHeight * 0.022,
           ),
         ),
+        subtitle: subtitle != null
+            ? Text(
+          subtitle,
+          style: TextStyle(
+            color: corTexto.withOpacity(0.7),
+            fontSize: screenHeight * 0.018,
+          ),
+        )
+            : null,
+        trailing: trailing,
+        onTap: onTap,
       ),
     );
   }

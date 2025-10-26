@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/login_page.dart';
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
+import '../pages/login_page.dart';
 import 'home_page_pet_shop.dart';
 import 'profile.dart';
 import 'reviews.dart';
@@ -26,7 +26,6 @@ class _ServicesState extends State<Services> {
   IconData _iconeSelecionado = Icons.pets;
   int? _editIndex;
 
-  // Cores padrão
   final Color corFundo = const Color(0xFFFBF8E1);
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
@@ -46,6 +45,9 @@ class _ServicesState extends State<Services> {
       _iconeSelecionado = Icons.pets;
     }
 
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -56,149 +58,137 @@ class _ServicesState extends State<Services> {
       builder: (context) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-            left: 20,
-            right: 20,
-            top: 25,
+            bottom: MediaQuery.of(context).viewInsets.bottom + screenHeight * 0.02,
+            left: screenWidth * 0.05,
+            right: screenWidth * 0.05,
+            top: screenHeight * 0.02,
           ),
-          child: Form(
-            key: _formKey,
-            child: Wrap(
-              runSpacing: 12,
-              children: [
-                Center(
-                  child: Text(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
                     _editIndex == null
                         ? 'Adicionar Novo Serviço 🐾'
                         : 'Editar Serviço ✏️',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: screenHeight * 0.025,
                       fontWeight: FontWeight.bold,
                       color: corTexto,
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                // Nome do serviço
-                TextFormField(
-                  initialValue: _nome,
-                  decoration: InputDecoration(
-                    labelText: 'Nome do serviço',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.text_fields),
+                  SizedBox(height: screenHeight * 0.02),
+                  _buildTextField(
+                    label: 'Nome do serviço',
+                    icon: Icons.text_fields,
+                    initialValue: _nome,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Informe o nome';
+                      if (value.trim().length < 3) return 'O nome deve ter pelo menos 3 caracteres';
+                      if (value.trim().length > 50) return 'O nome deve ter no máximo 50 caracteres';
+                      if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) return 'O nome deve conter apenas letras e espaços';
+                      return null;
+                    },
+                    onSaved: (value) => _nome = value!.trim(),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Informe o nome';
-                    } else if (value.trim().length < 3) {
-                      return 'O nome deve ter pelo menos 3 caracteres';
-                    } else if (value.trim().length > 50) {
-                      return 'O nome deve ter no máximo 50 caracteres';
-                    } else if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) {
-                      return 'O nome deve conter apenas letras e espaços';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _nome = value!.trim(),
-                ),
-                // Preço
-                TextFormField(
-                  initialValue: _preco,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'Preço',
+                  SizedBox(height: screenHeight * 0.015),
+                  _buildTextField(
+                    label: 'Preço',
+                    icon: Icons.attach_money,
+                    initialValue: _preco,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     prefixText: 'R\$ ',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.attach_money),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Informe o preço';
+                      final preco = double.tryParse(value.replaceAll(',', '.'));
+                      if (preco == null || preco <= 0) return 'Informe um preço válido';
+                      return null;
+                    },
+                    onSaved: (value) => _preco = 'R\$ ${value!.trim()}',
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Informe o preço';
-                    }
-                    final preco = double.tryParse(value.replaceAll(',', '.'));
-                    if (preco == null || preco <= 0) {
-                      return 'Informe um preço válido';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _preco = 'R\$ ${value!.trim()}',
-                ),
-                // Duração
-                TextFormField(
-                  initialValue: _duracao,
-                  decoration: InputDecoration(
-                    labelText: 'Duração (ex: 1h ou 1:30)',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.timer),
+                  SizedBox(height: screenHeight * 0.015),
+                  _buildTextField(
+                    label: 'Duração (ex: 1h ou 1:30)',
+                    icon: Icons.timer,
+                    initialValue: _duracao,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) return 'Informe a duração';
+                      final regex = RegExp(r'^(\d{1,2}(:\d{2})?|(\d{1,2}h(\d{1,2})?))$');
+                      if (!regex.hasMatch(value.trim())) return 'Formato inválido (ex: 1h ou 1:30)';
+                      return null;
+                    },
+                    onSaved: (value) => _duracao = _formatarDuracao(value!.trim()),
                   ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Informe a duração';
-                    }
-                    final regex = RegExp(r'^(\d{1,2}(:\d{2})?|(\d{1,2}h(\d{1,2})?))$');
-                    if (!regex.hasMatch(value.trim())) {
-                      return 'Formato inválido (ex: 1h ou 1:30)';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _duracao = _formatarDuracao(value!.trim()),
-                ),
-                // Ícone
-                DropdownButtonFormField<IconData>(
-                  value: _iconeSelecionado,
-                  decoration: InputDecoration(
-                    labelText: 'Ícone',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                  SizedBox(height: screenHeight * 0.015),
+                  DropdownButtonFormField<IconData>(
+                    value: _iconeSelecionado,
+                    decoration: InputDecoration(
+                      labelText: 'Ícone',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: Icons.pets, child: Text('Banho / Tosa 🐶')),
+                      DropdownMenuItem(value: Icons.local_hotel, child: Text('Hotel 🏨')),
+                      DropdownMenuItem(value: Icons.child_friendly, child: Text('Creche 🧸')),
+                      DropdownMenuItem(value: Icons.local_shipping, child: Text('Transporte 🚗')),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) setState(() => _iconeSelecionado = value);
+                    },
                   ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: Icons.pets,
-                      child: Text('Banho / Tosa 🐶'),
-                    ),
-                    DropdownMenuItem(
-                      value: Icons.local_hotel,
-                      child: Text('Hotel 🏨'),
-                    ),
-                    DropdownMenuItem(
-                      value: Icons.child_friendly,
-                      child: Text('Creche 🧸'),
-                    ),
-                    DropdownMenuItem(
-                      value: Icons.local_shipping,
-                      child: Text('Transporte 🚗'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) setState(() => _iconeSelecionado = value);
-                  },
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: corPrimaria,
-                    foregroundColor: corTexto,
-                    minimumSize: const Size.fromHeight(50),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  SizedBox(height: screenHeight * 0.02),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: corPrimaria,
+                        foregroundColor: corTexto,
+                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      icon: const Icon(Icons.save),
+                      label: Text(
+                        _editIndex == null ? 'Salvar Serviço' : 'Salvar Alterações',
+                        style: TextStyle(fontSize: screenHeight * 0.022),
+                      ),
+                      onPressed: _salvarServico,
                     ),
                   ),
-                  icon: const Icon(Icons.save),
-                  label: Text(
-                    _editIndex == null
-                        ? 'Salvar Serviço'
-                        : 'Salvar Alterações',
-                  ),
-                  onPressed: _salvarServico,
-                ),
-                const SizedBox(height: 20),
-              ],
+                  SizedBox(height: screenHeight * 0.025),
+                ],
+              ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required IconData icon,
+    String? initialValue,
+    String? prefixText,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    void Function(String?)? onSaved,
+  }) {
+    return TextFormField(
+      initialValue: initialValue,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixText: prefixText,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        prefixIcon: Icon(icon),
+      ),
+      keyboardType: keyboardType,
+      validator: validator,
+      onSaved: onSaved,
     );
   }
 
@@ -244,15 +234,9 @@ class _ServicesState extends State<Services> {
         title: const Text('Excluir Serviço'),
         content: const Text('Tem certeza que deseja remover este serviço?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: corPrimaria,
-              foregroundColor: corTexto,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: corPrimaria, foregroundColor: corTexto),
             onPressed: () {
               setState(() => _servicos.removeAt(index));
               Navigator.pop(context);
@@ -270,6 +254,10 @@ class _ServicesState extends State<Services> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final barHeight = screenHeight * 0.05;
+
     return Scaffold(
       backgroundColor: corFundo,
       drawer: CustomDrawer(
@@ -285,33 +273,37 @@ class _ServicesState extends State<Services> {
         ],
       ),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(barHeight),
         child: Container(
-          height: 90,
-          color: corPrimaria,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: corPrimaria,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
           child: SafeArea(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Stack(
               children: [
-                Transform.translate(
-                  offset: const Offset(-20, 0),
+                // Ícone da pata responsivo
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
                   child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      );
-                    },
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: barHeight * 0.8, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 75),
-                const Text(
-                  "Serviços",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                // Título centralizado
+                Center(
+                  child: Text(
+                    "Serviços",
+                    style: TextStyle(
+                      fontSize: barHeight * 0.6,
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                    ),
                   ),
                 ),
               ],
@@ -320,12 +312,13 @@ class _ServicesState extends State<Services> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: _servicos.isEmpty
             ? Center(
           child: Text(
             'Nenhum serviço cadastrado ainda 🐕',
-            style: TextStyle(color: corTexto.withOpacity(0.6)),
+            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
+            textAlign: TextAlign.center,
           ),
         )
             : ListView.builder(
@@ -333,29 +326,20 @@ class _ServicesState extends State<Services> {
           itemBuilder: (context, index) {
             final servico = _servicos[index];
             return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 4,
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: screenHeight * 0.015),
               color: Colors.white,
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: Icon(
-                  servico['icone'],
-                  size: 36,
-                  color: corPrimaria,
-                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.012),
+                leading: Icon(servico['icone'], size: screenHeight * 0.04, color: corPrimaria),
                 title: Text(
                   servico['nome'],
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: corTexto,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: corTexto, fontSize: screenHeight * 0.022),
                 ),
                 subtitle: Text(
                   '${servico['preco']}  •  ${servico['duracao']}',
-                  style: TextStyle(color: corTexto.withOpacity(0.7)),
+                  style: TextStyle(color: corTexto.withOpacity(0.7), fontSize: screenHeight * 0.018),
                 ),
                 trailing: Wrap(
                   spacing: 4,
@@ -382,13 +366,7 @@ class _ServicesState extends State<Services> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: corPrimaria,
-        label: Text(
-          'Novo Serviço',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: corTexto,
-          ),
-        ),
+        label: Text('Novo Serviço', style: TextStyle(fontWeight: FontWeight.bold, color: corTexto)),
         icon: Icon(Icons.add, color: corTexto),
         onPressed: () => _abrirModalServico(),
       ),
