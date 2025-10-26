@@ -1,6 +1,4 @@
 import 'dart:math' as math;
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:torch_app/pages_pet_shop/payment_method.dart';
@@ -51,15 +49,14 @@ class HomePagePetShop extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // --- Pata do menu reposicionada ---
                 Builder(
                   builder: (context) {
                     return Transform.translate(
-                      offset: Offset(-15, barHeight * -0.2), // Ajuste vertical
+                      offset: Offset(-15, barHeight * -0.2),
                       child: IconButton(
                         icon: Icon(
                           Icons.pets,
-                          size: screenWidth * 0.1, // tamanho responsivo
+                          size: screenWidth * 0.07, // pata menor e proporcional
                           color: Colors.black,
                         ),
                         onPressed: () => Scaffold.of(context).openDrawer(),
@@ -67,7 +64,7 @@ class HomePagePetShop extends StatelessWidget {
                     );
                   },
                 ),
-                SizedBox(width: screenWidth * 0.14), // espaçamento horizontal ajustável
+                SizedBox(width: screenWidth * 0.14),
                 Expanded(
                   child: Text(
                     "Olá Leonardo!",
@@ -91,7 +88,6 @@ class HomePagePetShop extends StatelessWidget {
 
           return Stack(
             children: [
-              // --- Lottie totalmente responsivo ---
               Align(
                 alignment: const Alignment(0, -0.92),
                 child: Transform.translate(
@@ -106,11 +102,7 @@ class HomePagePetShop extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // --- Patinhas ---
               ..._patinhas(width, height),
-
-              // --- Gato central ---
               Align(
                 alignment: const Alignment(0, 0.1),
                 child: FractionallySizedBox(
@@ -123,8 +115,6 @@ class HomePagePetShop extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // --- Logo TorchApp ---
               Align(
                 alignment: const Alignment(0.03, 0.48),
                 child: FractionallySizedBox(
@@ -135,8 +125,6 @@ class HomePagePetShop extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // --- Faixa inferior (mesma altura que a AppBar) ---
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -154,7 +142,7 @@ class HomePagePetShop extends StatelessWidget {
     );
   }
 
-  // Lista de patinhas responsivas
+  // Lista de patinhas responsivas com tamanho menor
   static List<Widget> _patinhas(double width, double height) {
     final patinhasData = [
       [0.12, 0.90, 55.0],
@@ -172,10 +160,11 @@ class HomePagePetShop extends StatelessWidget {
     ];
 
     return patinhasData.map((e) {
-      double top = e[0] * height;
-      double left = e[1] * width;
+      double size = math.min(width * 0.06, 40); // menor tamanho e limite máximo
+      double top = (e[0] * height).clamp(0, height - size);
+      double left = (e[1] * width).clamp(0, width - size);
       double rotation = e[2];
-      double size = width * 0.08;
+
       return Positioned(
         top: top,
         left: left,

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:torch_app/pages/home_page.dart';
-import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages_pet_shop/home_page_pet_shop.dart';
-import 'package:torch_app/pages_pet_shop/pet_shop_information.dart';
-import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
+import 'package:torch_app/pages_pet_shop/schedulePage.dart';
+
 void main() {
   runApp(const MyApp());
 }
