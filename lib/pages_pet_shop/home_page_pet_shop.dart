@@ -52,11 +52,11 @@ class HomePagePetShop extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     return Transform.translate(
-                      offset: Offset(-15, barHeight * -0.2),
+                      offset: Offset(-15, barHeight * -0.1),
                       child: IconButton(
                         icon: Icon(
                           Icons.pets,
-                          size: screenWidth * 0.07, // pata menor e proporcional
+                          size: screenWidth * 0.08, // pata menor e proporcional
                           color: Colors.black,
                         ),
                         onPressed: () => Scaffold.of(context).openDrawer(),
