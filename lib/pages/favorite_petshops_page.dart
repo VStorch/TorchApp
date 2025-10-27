@@ -29,48 +29,28 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
     },
   ];
 
+  final Color yellow = const Color(0xFFF4E04D);
+
   double _calculateAverageRating(List<double> ratings) {
     if (ratings.isEmpty) return 0;
     double sum = ratings.reduce((a, b) => a + b);
     return sum / ratings.length;
   }
 
+  double clampFont(double size, {double min = 12, double max = 20}) {
+    return size.clamp(min, max);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final barHeight = screenHeight * 0.07; // AppBar um pouco menor
+    final iconSize = barHeight * 0.6;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: const Color(0xFFEBDD6C),
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: SizedBox(
-          height: 50,
-          child: TextField(
-            style: const TextStyle(fontSize: 20),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-      ),
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),
@@ -84,8 +64,46 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
+
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(barHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            color: yellow,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: iconSize, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "PetShops Favoritos",
+                    style: TextStyle(
+                      fontSize: clampFont(screenWidth * 0.05, min: 18, max: 24),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         itemCount: favoritePetshops.length,
         itemBuilder: (context, index) {
           final petshop = favoritePetshops[index];
@@ -93,63 +111,74 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
           _calculateAverageRating(petshop['ratings']).toStringAsFixed(1);
 
           return Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+            padding: EdgeInsets.all(screenWidth * 0.04),
             decoration: BoxDecoration(
-              color: const Color(0xFFEBDD6C),
+              color: yellow,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black, width: 1),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.location_on, size: 20),
-                    const SizedBox(width: 6),
-                    Text(
-                      petshop['name'],
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold),
+                    Icon(Icons.location_on, size: clampFont(screenWidth * 0.05, min: 18, max: 24)),
+                    SizedBox(width: screenWidth * 0.02),
+                    Expanded(
+                      child: Text(
+                        petshop['name'],
+                        style: TextStyle(
+                          fontSize: clampFont(screenWidth * 0.045, min: 16, max: 22),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    const Spacer(),
                     IconButton(
-                      icon: const Icon(Icons.star, size: 34, color: Colors.black),
+                      icon: Icon(Icons.star, size: clampFont(screenWidth * 0.07, min: 20, max: 30), color: Colors.black),
                       onPressed: () {
                         _showRatingDialog(index);
                       },
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: screenHeight * 0.006),
                 Text(
                   petshop['address'],
-                  style: const TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: clampFont(screenWidth * 0.04, min: 14, max: 20),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: screenHeight * 0.012),
                 Row(
                   children: [
-                    const Icon(Icons.star, color: Colors.amber),
-                    const SizedBox(width: 4),
+                    Icon(Icons.star, color: Colors.amber, size: clampFont(screenWidth * 0.045, min: 16, max: 22)),
+                    SizedBox(width: screenWidth * 0.01),
                     Text(
                       averageRating,
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: clampFont(screenWidth * 0.04, min: 14, max: 20),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const Spacer(),
+                    Spacer(),
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 10),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.05,
+                            vertical: screenHeight * 0.01),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
                         elevation: 0,
-                        textStyle:
-                        const TextStyle(fontWeight: FontWeight.bold),
+                        textStyle: TextStyle(
+                          fontSize: clampFont(screenWidth * 0.04, min: 14, max: 20),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       child: const Text("Repetir Serviço"),
                     ),
@@ -179,10 +208,10 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: AnimatedScale(
-                      scale: i < selectedRating ? 1.3 : 1.0, // aumenta levemente quando clicada
+                      scale: i < selectedRating ? 1.2 : 1.0,
                       duration: const Duration(milliseconds: 150),
                       child: IconButton(
-                        iconSize: 30, // ⭐ maior desde o início
+                        iconSize: 26,
                         icon: Icon(
                           Icons.star,
                           color: i < selectedRating ? Colors.amber : Colors.grey,

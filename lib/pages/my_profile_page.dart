@@ -6,8 +6,6 @@ import 'package:torch_app/pages/pet_shops_page.dart';
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
 import '../models/page_type.dart';
-
-// Substitua com os seus arquivos reais
 import 'login_page.dart';
 import 'password_page.dart';
 
@@ -32,6 +30,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
     "lib/assets/images_profile/cat3.jpg",
     "lib/assets/images_profile/cat4.jpg",
   ];
+
+  final Color yellow = const Color(0xFFF4E04D);
 
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
@@ -61,16 +61,21 @@ class _MyProfilePageState extends State<MyProfilePage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              const Text(
+                "Escolher Foto do Perfil",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEBDD6C),
+                  backgroundColor: yellow,
                   foregroundColor: Colors.black,
                 ),
                 onPressed: _pickFromGallery,
                 icon: const Icon(Icons.photo),
-                label: const Text("Escolher da Galeria"),
+                label: const Text("Galeria"),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
@@ -108,8 +113,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: const Color(0xFFFBF8E1),
-            title: const Text("Sair da conta",
-                style: TextStyle(fontWeight: FontWeight.bold)),
+            title: const Text(
+              "Sair da conta",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             content: const Text("Tem certeza que deseja sair?"),
             actions: [
               TextButton(
@@ -118,7 +125,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEBDD6C),
+                  backgroundColor: yellow,
                   foregroundColor: Colors.black,
                 ),
                 onPressed: () => Navigator.pop(context, true),
@@ -149,6 +156,9 @@ class _MyProfilePageState extends State<MyProfilePage> {
         break;
 
       default:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("$title clicado!")),
+        );
         break;
     }
   }
@@ -176,10 +186,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     const SizedBox(height: 12),
                     const Text(
                       "Configurar Notificações",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                      TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -201,7 +209,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     const SizedBox(height: 20),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEBDD6C),
+                        backgroundColor: yellow,
                         foregroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
@@ -221,37 +229,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final avatarRadius = (screenWidth * 0.2).clamp(50.0, 80.0);
+    final titleFontSize = (screenWidth * 0.06).clamp(18.0, 28.0);
+    final optionFontSize = (screenWidth * 0.045).clamp(14.0, 20.0);
+    final spacing = screenHeight * 0.03;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: const Color(0xFFEBDD6C),
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            );
-          },
-        ),
-        title: SizedBox(
-          height: 50,
-          child: TextField(
-            style: const TextStyle(fontSize: 20),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFFBF8E1),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-      ),
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),
@@ -265,59 +252,106 @@ class _MyProfilePageState extends State<MyProfilePage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
+
+      // --- AppBar amarela com borda preta e ícone da pata ---
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(screenHeight * 0.08),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: yellow,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets,
+                          size: screenHeight * 0.04, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "Meu Perfil",
+                    style: TextStyle(
+                        fontSize: screenHeight * 0.03,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              "Leonardo Cortelim",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text("leo.gmail.com",
-                style: TextStyle(fontSize: 16, color: Colors.black87)),
-            const Text("(47)99678-8765",
-                style: TextStyle(fontSize: 16, color: Colors.black87)),
-            const Text("Rua Adriano Korman, nº 123 - SC",
-                style: TextStyle(fontSize: 16, color: Colors.black87)),
-            const SizedBox(height: 20),
-            const Divider(),
-            _buildProfileOption(Icons.pets, "Meus PetShops Favoritos"),
-            const Divider(),
-            _buildProfileOption(Icons.receipt_long, "Meus Pedidos"),
-            const Divider(),
-            _buildProfileOption(Icons.credit_card, "Formas De Pagamento"),
-            const Divider(),
-            _buildProfileOption(Icons.notifications, "Notificações"),
-            const Divider(),
-            _buildProfileOption(Icons.lock, "Alterar Senha"),
-            const Divider(),
-            _buildProfileOption(Icons.logout, "Sair Da Conta"),
-            const Divider(),
-            const SizedBox(height: 30),
-            GestureDetector(
-              onTap: () => _showImageOptions(context),
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: _profileImage != null
-                    ? FileImage(_profileImage!)
-                    : _selectedAssetImage != null
-                    ? AssetImage(_selectedAssetImage!) as ImageProvider
-                    : const AssetImage("lib/assets/images/american.jpg"),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: spacing),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: spacing),
+              GestureDetector(
+                onTap: () => _showImageOptions(context), // ✅ Corrigido
+                child: CircleAvatar(
+                  radius: avatarRadius,
+                  backgroundColor: Colors.black,
+                  child: CircleAvatar(
+                    radius: avatarRadius - 3,
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : _selectedAssetImage != null
+                        ? AssetImage(_selectedAssetImage!) as ImageProvider
+                        : const AssetImage(
+                        "lib/assets/images/american.jpg"),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              SizedBox(height: spacing),
+              Text(
+                "Leonardo Cortelim",
+                style: TextStyle(
+                    fontSize: titleFontSize, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: spacing),
+              const Divider(thickness: 1),
+              _buildProfileOption(
+                  Icons.pets, "Meus PetShops Favoritos", optionFontSize),
+              const Divider(thickness: 1),
+              _buildProfileOption(
+                  Icons.receipt_long, "Meus Pedidos", optionFontSize),
+              const Divider(thickness: 1),
+              _buildProfileOption(
+                  Icons.credit_card, "Formas De Pagamento", optionFontSize),
+              const Divider(thickness: 1),
+              _buildProfileOption(
+                  Icons.notifications, "Notificações", optionFontSize),
+              const Divider(thickness: 1),
+              _buildProfileOption(Icons.lock, "Alterar Senha", optionFontSize),
+              const Divider(thickness: 1),
+              _buildProfileOption(Icons.logout, "Sair Da Conta", optionFontSize),
+              const Divider(thickness: 1),
+              SizedBox(height: spacing),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildProfileOption(IconData icon, String title) {
+  Widget _buildProfileOption(IconData icon, String title, double fontSize) {
     return ListTile(
       leading: Icon(icon, color: Colors.black),
       title: Text(title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+          style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500)),
       onTap: () => _handleOptionTap(title),
     );
   }

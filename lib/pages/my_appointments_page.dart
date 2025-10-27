@@ -11,42 +11,35 @@ class MyAppointmentsPage extends StatefulWidget {
 }
 
 class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
+  final Color yellow = const Color(0xFFF4E04D);
+
+  final List<Map<String, String>> appointments = [
+    {
+      'shopName': 'Pet shop Realeza',
+      'address': 'Rua Adriano Kormann',
+      'date': '28/06/2025',
+      'time': '14:00',
+      'service': 'Banho + Tosa',
+    },
+    {
+      'shopName': 'Pet shop Realeza',
+      'address': 'Rua Adriano Kormann',
+      'date': '28/06/2025',
+      'time': '15:00',
+      'service': 'Banho + Tosa',
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    final barHeight = screenHeight * 0.07;
+    final iconSize = barHeight * 0.6; // mesma pata do PetShops Favoritos
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: const Color(0xFFEBDD6C),
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () {
-                Scaffold.of(context).openDrawer();
-              },
-            );
-          },
-        ),
-        title: Container(
-          height: 50,
-          child: TextField(
-            style: const TextStyle(fontSize: 18),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop...',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-      ),
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),
@@ -61,123 +54,141 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         ],
       ),
 
-      // Corpo da tela com os agendamentos
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildAppointmentCard(
-              shopName: "Pet shop Realeza",
-              address: "Rua Adriano Kormann",
-              date: "28 /06 /2025",
-              time: "14:00",
-              service: "Banho + Tosa",
-            ),
-            const SizedBox(height: 20),
-            _buildAppointmentCard(
-              shopName: "Pet shop Realeza",
-              address: "Rua Adriano Kormann",
-              date: "28 /06 /2025",
-              time: "15:00",
-              service: "Banho + Tosa",
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Widget auxiliar para criar os cartões de agendamento
-  Widget _buildAppointmentCard({
-    required String shopName,
-    required String address,
-    required String date,
-    required String time,
-    required String service,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            blurRadius: 4,
-            offset: const Offset(0, 3),
+      // --- AppBar responsivo ---
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(barHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            color: yellow,
+            border: Border.all(color: Colors.black, width: 1),
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          // Cabeçalho do cartão
-          Container(
-            width: double.infinity,
-            color: const Color(0xFFEBDD6C),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            child: Row(
+          child: SafeArea(
+            child: Stack(
               children: [
-                const Icon(Icons.location_on, size: 18),
-                const SizedBox(width: 5),
-                Expanded(
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: iconSize, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ),
+                Center(
                   child: Text(
-                    "$shopName\n$address",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                    "Meus Agendamentos",
+                    style: TextStyle(
+                      fontSize: barHeight * 0.4,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
 
+      // --- Corpo da tela com ListView ---
+      body: ListView.builder(
+        padding: EdgeInsets.all(screenWidth * 0.04),
+        itemCount: appointments.length,
+        itemBuilder: (context, index) {
+          final appointment = appointments[index];
+          return _buildAppointmentCard(appointment, screenWidth, screenHeight);
+        },
+      ),
+    );
+  }
+
+  Widget _buildAppointmentCard(
+      Map<String, String> appointment, double screenWidth, double screenHeight) {
+    return Container(
+      margin: EdgeInsets.only(bottom: screenHeight * 0.02),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black, width: 1),
+      ),
+      child: Column(
+        children: [
+          // Cabeçalho do cartão
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.008),
+            color: yellow,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.location_on, size: screenHeight * 0.025),
+                SizedBox(width: screenWidth * 0.02),
+                Flexible(
+                  child: Text(
+                    "${appointment['shopName']}\n${appointment['address']}",
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: screenHeight * 0.022,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           // Corpo do cartão
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.015),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 16),
-                    const SizedBox(width: 5),
-                    Text(date),
-                    const Spacer(),
+                    Icon(Icons.calendar_today, size: screenHeight * 0.02),
+                    SizedBox(width: screenWidth * 0.02),
                     Text(
-                      time,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      appointment['date']!,
+                      style: TextStyle(fontSize: screenHeight * 0.02),
+                    ),
+                    Spacer(),
+                    Text(
+                      appointment['time']!,
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenHeight * 0.02),
                     ),
                   ],
                 ),
-                const SizedBox(height: 5),
-                Text("Serviço: $service"),
-                const SizedBox(height: 10),
-
-                // Botões
+                SizedBox(height: screenHeight * 0.01),
+                Text(
+                  "Serviço: ${appointment['service']}",
+                  style: TextStyle(fontSize: screenHeight * 0.02),
+                ),
+                SizedBox(height: screenHeight * 0.015),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.cancel, size: 16),
-                      label: const Text("Cancelar"),
+                      icon: Icon(Icons.cancel, size: screenHeight * 0.02),
+                      label: Text("Cancelar", style: TextStyle(fontSize: screenHeight * 0.018)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.black,
                         side: const BorderSide(color: Colors.black),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        textStyle: const TextStyle(fontSize: 13),
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.008),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: screenWidth * 0.02),
                     OutlinedButton.icon(
                       onPressed: () {},
-                      icon: const Icon(Icons.refresh, size: 16),
-                      label: const Text("Reagendar"),
+                      icon: Icon(Icons.refresh, size: screenHeight * 0.02),
+                      label: Text("Reagendar", style: TextStyle(fontSize: screenHeight * 0.018)),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.black,
                         side: const BorderSide(color: Colors.black),
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        textStyle: const TextStyle(fontSize: 13),
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: screenHeight * 0.008),
                       ),
                     ),
                   ],
