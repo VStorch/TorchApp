@@ -66,22 +66,25 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
       ),
 
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(barHeight),
+        preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.08),
         child: Container(
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
           decoration: BoxDecoration(
-            color: yellow,
+            color: const Color(0xFFF4E04D),
             border: Border.all(color: Colors.black, width: 1),
           ),
           child: SafeArea(
             child: Stack(
               children: [
                 Positioned(
-                  left: 0,
-                  top: 0,
+                  left: -10,
+                  top: -6,
                   bottom: 0,
                   child: Builder(
                     builder: (context) => IconButton(
-                      icon: Icon(Icons.pets, size: iconSize, color: Colors.black),
+                      icon: Icon(Icons.pets,
+                          size: MediaQuery.of(context).size.height * 0.04,
+                          color: Colors.black),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
@@ -90,9 +93,9 @@ class _FavoritePetshopsPageState extends State<FavoritePetshopsPage> {
                   child: Text(
                     "PetShops Favoritos",
                     style: TextStyle(
-                      fontSize: clampFont(screenWidth * 0.05, min: 18, max: 24),
+                      fontSize: (MediaQuery.of(context).size.width * 0.06).clamp(18.0, 28.0),
                       fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                      color: Colors.black87,
                     ),
                   ),
                 ),
