@@ -40,34 +40,46 @@ class _MyPetsPageState extends State<MyPetsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFFEBDD6C),
-        toolbarHeight: 90,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.pets),
-            iconSize: 35,
-            onPressed: () => Scaffold.of(context).openDrawer(),
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.08),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF4E04D),
+            border: Border.all(color: Colors.black, width: 1),
           ),
-        ),
-        title: SizedBox(
-          height: 50,
-          child: TextField(
-            style: const TextStyle(fontSize: 20),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets,
+                          size: MediaQuery.of(context).size.height * 0.04,
+                          color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "Meus Pets",
+                    style: TextStyle(
+                      fontSize: (MediaQuery.of(context).size.width * 0.06).clamp(18.0, 28.0),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
       ),
+
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),

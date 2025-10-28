@@ -21,51 +21,27 @@ class _PromotionsPageState extends State<PromotionsPage> {
       "title": "Meu Melhor Amigo",
       "description": "Primeiro Tosa com 30% off! Promoção válida até 25/06",
       "date": "25/06"
-    }
+    },
   ];
+
+  final Color yellow = const Color(0xFFF4E04D);
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    // === Valores responsivos baseados no tamanho da tela ===
+    final titleFontSize = (screenWidth * 0.06).clamp(18.0, 28.0);
+    final descFontSize = (screenWidth * 0.045).clamp(14.0, 20.0);
+    final dateFontSize = (screenWidth * 0.04).clamp(13.0, 18.0);
+    final buttonFontSize = (screenWidth * 0.045).clamp(14.0, 18.0);
+    final cardPadding = screenWidth * 0.05;
+    final cardMargin = screenHeight * 0.015;
+    final spacing = screenHeight * 0.015;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      appBar: AppBar(
-        toolbarHeight: 100,
-        backgroundColor: const Color(0xFFEBDD6C),
-        elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
-            icon: const Icon(Icons.pets),
-            iconSize: 35,
-            color: Colors.black,
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
-        ),
-        title: Container(
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: const TextField(
-            style:  TextStyle(fontSize: 18),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop...',
-              prefixIcon:  Icon(Icons.search, color: Colors.grey),
-              border: InputBorder.none,
-              contentPadding:  EdgeInsets.symmetric(vertical: 15),
-            ),
-          ),
-        ),
-      ),
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),
@@ -79,13 +55,55 @@ class _PromotionsPageState extends State<PromotionsPage> {
           MenuItem.fromType(PageType.about),
         ],
       ),
+
+      // === AppBar amarela com borda preta (igual à MyProfilePage) ===
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(screenHeight * 0.08),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: yellow,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
+                  child: Builder(
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets,
+                          size: screenHeight * 0.04, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: Text(
+                    "Promoções",
+                    style: TextStyle(
+                      fontSize: screenHeight * 0.03,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
+      // === Corpo responsivo ===
       body: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         itemCount: promotions.length,
         itemBuilder: (context, index) {
           final promo = promotions[index];
           return Container(
-            margin: const EdgeInsets.symmetric(vertical: 12),
+            margin: EdgeInsets.symmetric(vertical: cardMargin),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(25),
               gradient: const LinearGradient(
@@ -104,34 +122,34 @@ class _PromotionsPageState extends State<PromotionsPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(25),
               child: Padding(
-                padding: const EdgeInsets.all(20.0),
+                padding: EdgeInsets.all(cardPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       promo["title"]!,
-                      style: const TextStyle(
-                        fontSize: 22,
+                      style: TextStyle(
+                        fontSize: titleFontSize,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: spacing),
                     Text(
                       promo["description"]!,
-                      style: const TextStyle(
-                        fontSize: 17,
+                      style: TextStyle(
+                        fontSize: descFontSize,
                         color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: spacing * 1.2),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           promo["date"]!,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: dateFontSize,
                             fontWeight: FontWeight.w600,
                             color: Colors.black87,
                           ),
@@ -142,18 +160,22 @@ class _PromotionsPageState extends State<PromotionsPage> {
                             backgroundColor: Colors.white,
                             foregroundColor: Colors.black87,
                             elevation: 5,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25, vertical: 12),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.06,
+                              vertical: screenHeight * 0.015,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                               side: const BorderSide(
-                                  color: Color(0xFFEBDD6C), width: 2),
+                                color: Color(0xFFEBDD6C),
+                                width: 2,
+                              ),
                             ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Agendar',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: buttonFontSize,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
