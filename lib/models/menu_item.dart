@@ -21,7 +21,8 @@ class MenuItem {
     required this.destinationPage,
   });
 
-  factory MenuItem.fromType(PageType type) {
+  /// Factory corrigida para aceitar currentUserId
+  factory MenuItem.fromType(PageType type, {int? currentUserId}) {
     switch (type) {
       case PageType.home:
         return MenuItem(
@@ -33,7 +34,7 @@ class MenuItem {
         return MenuItem(
           title: 'Meus Pets',
           icon: Icons.pets,
-          destinationPage: const MyPetsPage(),
+          destinationPage: MyPetsPage(currentUserId: currentUserId ?? 1),
         );
       case PageType.favorites:
         return MenuItem(

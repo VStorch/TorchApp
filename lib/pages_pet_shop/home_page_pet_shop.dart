@@ -1,21 +1,28 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:torch_app/pages/login_page.dart';
 import 'package:torch_app/pages_pet_shop/payment_method.dart';
 import 'package:torch_app/pages_pet_shop/profile.dart';
 import 'package:torch_app/pages_pet_shop/promotions.dart';
 import 'package:torch_app/pages_pet_shop/reviews.dart';
 import 'package:torch_app/pages_pet_shop/services.dart';
 import 'package:torch_app/pages_pet_shop/settings.dart';
+
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
-import 'dart:math' as math;
+import '../pages/login_page.dart';
 
 class HomePagePetShop extends StatelessWidget {
   const HomePagePetShop({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth > 600;
+
+    final barHeight = screenHeight * 0.05; // altura responsiva igual para cima e baixo
+
     return Scaffold(
       drawer: CustomDrawer(
         menuItems: [
@@ -31,10 +38,9 @@ class HomePagePetShop extends StatelessWidget {
       ),
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(barHeight),
         child: Container(
-          height: 90,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
           decoration: BoxDecoration(
             color: const Color(0xFFF4E04D),
             border: Border.all(color: Colors.black, width: 1),
@@ -43,24 +49,31 @@ class HomePagePetShop extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Transform.translate(
-                  offset: const Offset(-20, -15),
-                  child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
+                Builder(
+                  builder: (context) {
+                    return Transform.translate(
+                      offset: Offset(-15, barHeight * -0.1),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.pets,
+                          size: screenWidth * 0.08, // pata menor e proporcional
+                          color: Colors.black,
+                        ),
                         onPressed: () => Scaffold.of(context).openDrawer(),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
-                const SizedBox(width: 40),
-                const Text(
-                  "Olá Leonardo!",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                SizedBox(width: screenWidth * 0.14),
+                Expanded(
+                  child: Text(
+                    "Olá Leonardo!",
+                    style: TextStyle(
+                      fontSize: isTablet ? 34 : 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
@@ -68,93 +81,103 @@ class HomePagePetShop extends StatelessWidget {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // --- Lottie flutuando abaixo do AppBar ---
-          Positioned(
-            top: -16,
-            left: 0,
-            right: 0,
-            height: 190,
-            child: Lottie.asset(
-              'lib/assets/images/catEscape.json',
-              fit: BoxFit.contain,
-            ),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final height = constraints.maxHeight;
+          final width = constraints.maxWidth;
 
-          // --- Patinhas, gato e logo ---
-          Positioned.fill(
-            top: 0,
-            child: Stack(
-              children: [
-                _pata(150, 320, 45),
-                _pata(210, 240, 68),
-                _pata(170, 165, 60),
-                _pata(230, 80, 48),
-                _pata(280, 0, 25),
-                _pata(370, 0, 0),
-                _pata(470, 20, -10),
-                _pata(570, 40, -40),
-                _pata(640, 95, -70),
-                _pata(670, 200, -70),
-                _pata(708, 300, -60),
-                Positioned(
-                  top: 300,
-                  left: 85,
+          return Stack(
+            children: [
+              Align(
+                alignment: const Alignment(0, -0.92),
+                child: Transform.translate(
+                  offset: Offset(0, -height * 0.05),
+                  child: FractionallySizedBox(
+                    widthFactor: 0.5,
+                    heightFactor: 0.2,
+                    child: Lottie.asset(
+                      'lib/assets/images/catEscape.json',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+              ..._patinhas(width, height),
+              Align(
+                alignment: const Alignment(0, 0.1),
+                child: FractionallySizedBox(
+                  widthFactor: 0.45,
                   child: ClipOval(
                     child: Image.asset(
                       'lib/assets/images/Gato bugado.png',
-                      width: 200,
-                      height: 200,
                       fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 500,
-                  left: 100,
+              ),
+              Align(
+                alignment: const Alignment(0.03, 0.48),
+                child: FractionallySizedBox(
+                  widthFactor: 0.35,
                   child: Image.asset(
                     'lib/assets/images/torchapp.png',
-                    width: 166,
-                    height: 100,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   ),
                 ),
-              ],
-            ),
-          ),
-
-          // --- Faixa amarela inferior fixa ---
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 50,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4E04D),
-                border: Border.all(color: Colors.black, width: 1),
               ),
-            ),
-          ),
-        ],
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: barHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF4E04D),
+                    border: Border.all(color: Colors.black, width: 1),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  static Widget _pata(double top, double left, double rotacao) {
-    return Positioned(
-      top: top,
-      left: left,
-      child: Transform.rotate(
-        angle: rotacao * (math.pi / 180),
-        child: Image.asset(
-          'lib/assets/images/pata de cachorro.png',
-          width: 40,
-          height: 40,
-          fit: BoxFit.cover,
+  // Lista de patinhas responsivas com tamanho menor
+  static List<Widget> _patinhas(double width, double height) {
+    final patinhasData = [
+      [0.12, 0.90, 55.0],
+      [0.17, 0.74, 45.0],
+      [0.25, 0.60, 50.0],
+      [0.29, 0.38, 60.0],
+      [0.33, 0.17, 50.0],
+      [0.42, 0.12, 30.0],
+      [0.52, 0.07, 0.0],
+      [0.62, 0.15, -10.0],
+      [0.71, 0.22, -40.0],
+      [0.78, 0.355, -50.0],
+      [0.82, 0.50, -55.0],
+      [0.89, 0.61, -55.0],
+    ];
+
+    return patinhasData.map((e) {
+      double size = math.min(width * 0.06, 40); // menor tamanho e limite máximo
+      double top = (e[0] * height).clamp(0, height - size);
+      double left = (e[1] * width).clamp(0, width - size);
+      double rotation = e[2];
+
+      return Positioned(
+        top: top,
+        left: left,
+        child: Transform.rotate(
+          angle: rotation * (math.pi / 180),
+          child: Image.asset(
+            'lib/assets/images/pata de cachorro.png',
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
         ),
-      ),
-    );
+      );
+    }).toList();
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/login_page.dart';
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
+import '../pages/login_page.dart';
 import 'home_page_pet_shop.dart';
 import 'profile.dart';
 import 'services.dart';
@@ -36,31 +36,12 @@ class _ReviewsState extends State<Reviews> {
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
-  void _excluirAvaliacao(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir Avaliação'),
-        content: const Text('Tem certeza que deseja remover esta avaliação?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() => _avaliacoes.removeAt(index));
-              Navigator.pop(context);
-            },
-            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final barHeight = screenHeight * 0.05; // mesma altura da faixa do Services
+
     return Scaffold(
       backgroundColor: corFundo,
       drawer: CustomDrawer(
@@ -68,56 +49,60 @@ class _ReviewsState extends State<Reviews> {
           MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
           MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
           MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-          MenuItem(title: "Avaliações", icon: Icons.local_offer, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.star, destinationPage: const Promotions()),
+          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
+          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
           MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
           MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
           MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
         ],
       ),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(barHeight),
         child: Container(
-          height: 90,
-          color: corPrimaria,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: corPrimaria,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
           child: SafeArea(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Stack(
               children: [
-                Transform.translate(
-                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                // Ícone da pata responsivo
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
                   child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      );
-                    },
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: barHeight * 0.8, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 60),
-                const Text(
-                  "Avaliações",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                // Título centralizado
+                Center(
+                  child: Text(
+                    "Avaliações",
+                    style: TextStyle(
+                      fontSize: barHeight * 0.6, // mesmo tamanho responsivo do Services
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                    ),
                   ),
                 ),
               ],
             ),
-
           ),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: _avaliacoes.isEmpty
             ? Center(
           child: Text(
             'Nenhuma avaliação ainda 🐾',
-            style: TextStyle(color: corTexto.withValues(alpha: 0.6)),
+            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
+            textAlign: TextAlign.center,
           ),
         )
             : ListView.builder(
@@ -125,23 +110,18 @@ class _ReviewsState extends State<Reviews> {
           itemBuilder: (context, index) {
             final review = _avaliacoes[index];
             return Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 4,
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: screenHeight * 0.015),
               color: Colors.white,
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.012),
                 title: Text(
                   review['cliente'],
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: corTexto,
-                    fontSize: 16,
+                    fontSize: screenHeight * 0.022, // mesmo tamanho do nome do serviço
                   ),
                 ),
                 subtitle: Column(
@@ -152,28 +132,24 @@ class _ReviewsState extends State<Reviews> {
                         5,
                             (i) => Icon(
                           i < review['nota'] ? Icons.star : Icons.star_border,
-                          size: 18,
+                          size: screenHeight * 0.018,
                           color: Colors.amber,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: screenHeight * 0.005),
                     Text(
                       review['comentario'],
-                      style: TextStyle(color: corTexto.withValues(alpha: 0.7)),
+                      style: TextStyle(color: corTexto.withOpacity(0.7), fontSize: screenHeight * 0.018),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: screenHeight * 0.005),
                     Text(
                       'Data: ${review['data']}',
-                      style: TextStyle(color: corTexto.withValues(alpha: 0.6), fontSize: 13),
+                      style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.015),
                     ),
                   ],
                 ),
                 isThreeLine: true,
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  onPressed: () => _excluirAvaliacao(index),
-                ),
               ),
             );
           },

@@ -21,7 +21,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
   int? _editIndex;
   String? _selectedMetodo;
 
-  // Cores padrão
   final Color corFundo = const Color(0xFFFBF8E1);
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
@@ -34,7 +33,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
     "Cartão de débito": false,
   };
 
-  // Função para mostrar aviso centralizado usando Overlay
   void _mostrarAviso(String mensagem) {
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Center(
@@ -44,7 +42,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             margin: const EdgeInsets.symmetric(horizontal: 40),
             decoration: BoxDecoration(
-              color: corPrimaria.withValues(alpha: 0.9),
+              color: corPrimaria.withOpacity(0.9),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.black26, width: 1),
             ),
@@ -72,8 +70,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     if (index != null) {
       _editIndex = index;
       _selectedMetodo = _methods[index]['formas'].entries
-          .firstWhere((e) => e.value == true,
-          orElse: () => const MapEntry('', false))
+          .firstWhere((e) => e.value == true, orElse: () => const MapEntry('', false))
           .key;
       if (_selectedMetodo == '') _selectedMetodo = null;
     } else {
@@ -93,7 +90,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
           builder: (BuildContext context, StateSetter setModalState) {
             return Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
                 left: 20,
                 right: 20,
                 top: 25,
@@ -166,7 +163,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
       return;
     }
 
-    // Checa duplicidade ignorando o método que está sendo editado
     bool jaExiste = _methods.asMap().entries.any((entry) {
       int i = entry.key;
       Map metodo = entry.value;
@@ -214,8 +210,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
               setState(() => _methods.removeAt(index));
               Navigator.pop(context);
             },
-            child:
-            const Text('Excluir', style: TextStyle(color: Colors.red)),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -228,6 +223,10 @@ class _PaymentMethodState extends State<PaymentMethod> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final barHeight = screenHeight * 0.05;
+
     return Scaffold(
       backgroundColor: corFundo,
       drawer: CustomDrawer(
@@ -265,33 +264,35 @@ class _PaymentMethodState extends State<PaymentMethod> {
         ],
       ),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(90),
+        preferredSize: Size.fromHeight(barHeight),
         child: Container(
-          height: 90,
-          color: corPrimaria,
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: corPrimaria,
+            border: Border.all(color: Colors.black, width: 1),
+          ),
           child: SafeArea(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: Stack(
               children: [
-                Transform.translate(
-                  offset: const Offset(-20, -15), // sobe o ícone 6 pixels (use valores negativos para subir)
+                Positioned(
+                  left: -10,
+                  top: -6,
+                  bottom: 0,
                   child: Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.pets, size: 38, color: Colors.black),
-                        onPressed: () => Scaffold.of(context).openDrawer(),
-                      );
-                    },
+                    builder: (context) => IconButton(
+                      icon: Icon(Icons.pets, size: barHeight * 0.8, color: Colors.black),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                const Text(
-                  "Forma de pagamento",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Center(
+                  child: Text(
+                    "Forma de pagamento",
+                    style: TextStyle(
+                      fontSize: barHeight * 0.6,
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                    ),
                   ),
                 ),
               ],
@@ -300,12 +301,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(screenWidth * 0.04),
         child: _methods.isEmpty
             ? Center(
           child: Text(
             'Nenhum método de pagamento cadastrado 💳',
-            style: TextStyle(color: corTexto.withValues(alpha: 0.6)),
+            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
+            textAlign: TextAlign.center,
           ),
         )
             : ListView.builder(
@@ -323,13 +325,14 @@ class _PaymentMethodState extends State<PaymentMethod> {
                 borderRadius: BorderRadius.circular(16),
               ),
               elevation: 4,
-              margin: const EdgeInsets.only(bottom: 12),
+              margin: EdgeInsets.only(bottom: screenHeight * 0.015),
               color: Colors.white,
               child: ListTile(
+                contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.012),
                 title: Text(
                   formasAtivas,
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: corTexto),
+                      fontWeight: FontWeight.bold, color: corTexto, fontSize: screenHeight * 0.022),
                 ),
                 trailing: Wrap(
                   spacing: 4,

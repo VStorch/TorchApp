@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../components/CustomDrawer.dart';
 import '../models/page_type.dart';
@@ -8,39 +9,13 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Usa a fábrica para pegar dados como título, ícone e destino
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTablet = screenWidth > 600;
+
+    final barHeight = screenHeight * 0.06;
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 90,
-        backgroundColor: const Color(0xFFEBDD6C),
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              icon: const Icon(Icons.pets),
-              iconSize: 35,
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            );
-          },
-        ),
-        title: SizedBox(
-          height: 50,
-          child: TextField(
-            style: const TextStyle(fontSize: 20),
-            decoration: InputDecoration(
-              hintText: 'Busque um PetShop',
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: const Color(0xFFFBF8E1),
-              contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-        ),
-      ),
       drawer: CustomDrawer(
         menuItems: [
           MenuItem.fromType(PageType.home),
@@ -55,221 +30,159 @@ class HomePage extends StatelessWidget {
         ],
       ),
       backgroundColor: const Color(0xFFFBF8E1),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-          child: SizedBox(
-            height: 750,
-
-            child: Stack(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(barHeight),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEBDD6C),
+            border: Border.all(color: Colors.black, width: 1),
+          ),
+          child: SafeArea(
+            child: Row(
               children: [
-                Positioned(
-                  top: 100,
-                  left: 55,
+                Builder(
+                  builder: (context) {
+                    return IconButton(
+                      icon: Icon(Icons.pets, size: screenWidth * 0.08),
+                      onPressed: () => Scaffold.of(context).openDrawer(),
+                    );
+                  },
+                ),
+                SizedBox(width: screenWidth * 0.045),
+                Expanded(
                   child: SizedBox(
-                    width: 250,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEBDD6C),
-                        foregroundColor: Colors.black,
-                        shape: const RoundedRectangleBorder(),
+                    height: barHeight * 0.6,
+                    child: TextField(
+                      style: TextStyle(fontSize: isTablet ? 22 : 16),
+                      decoration: InputDecoration(
+                        hintText: 'Busque um PetShop',
+                        prefixIcon: const Icon(Icons.search),
+                        filled: true,
+                        fillColor: const Color(0xFFFBF8E1),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
-                      child: const Text(
-                          style: TextStyle(fontSize: 18),
-                          'Repetir o último serviço'),
                     ),
-
-                  ),
-
-
-                ),
-                Positioned(
-                  top: 150,
-                  left: 320,
-                  child: Transform.rotate(
-                    angle: 45 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 210,
-                  left: 240,
-                  child: Transform.rotate(
-                    angle: 68 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 170,
-                  left: 165,
-                  child: Transform.rotate(
-                    angle: 60 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 230,
-                  left: 80,
-                  child: Transform.rotate(
-                    angle: 48 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 280,
-                  left: 0,
-                  child: Transform.rotate(
-                    angle: 25 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 370,
-                  left: 0,
-                  child: Transform.rotate(
-                    angle: 0 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 470,
-                  left: 20,
-                  child: Transform.rotate(
-                    angle: -10 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 570,
-                  left: 40,
-                  child: Transform.rotate(
-                    angle: -40 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 640,
-                  left: 95,
-                  child: Transform.rotate(
-                    angle: -70 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 670,
-                  left: 200,
-                  child: Transform.rotate(
-                    angle: -70 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 708,
-                  left: 300,
-                  child: Transform.rotate(
-                    angle: -60 * (3.14159 / 180),
-                    child: Image.asset
-                      (
-                        'lib/assets/images/pata de cachorro.png',
-                        width: 40,
-                        height : 40,
-                        fit: BoxFit.cover),
-                  ),
-                ),
-                Positioned(
-                  top: 520,
-                  left: 100,
-
-
-                  child: Image.asset
-                    (
-                      'lib/assets/images/torchapp.png',
-                      width: 166.6666666666667,
-                      height : 100,
-                      fit: BoxFit.cover),
-
-                ),
-
-                Positioned(
-                  top: 300,
-                  left: 85,
-
-
-                  child: ClipOval(
-
-
-                    child: Image.asset
-                      (
-
-                        'lib/assets/images/Gato bugado.png',
-                        width: 200,
-                        height : 200,
-
-
-                        fit: BoxFit.cover),
-
                   ),
                 ),
               ],
-
             ),
           ),
-
         ),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final height = constraints.maxHeight;
 
+          return Stack(
+            children: [
+              // --- Botão "Repetir o último serviço" ---
+              Align(
+                alignment: Alignment(0.0, -0.80),
+                child: FractionallySizedBox(
+                  widthFactor: 0.6,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFEBDD6C),
+                      foregroundColor: Colors.black,
+                      shape: const RoundedRectangleBorder(),
+                    ),
+                    child: Text(
+                      'Repetir o último serviço',
+                      style: TextStyle(fontSize: isTablet ? 20 : 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+
+              // --- Patinhas ---
+              ..._patinhas(width, height),
+
+              // --- Gato central ---
+              Align(
+                alignment: const Alignment(0, 0.0),
+                child: FractionallySizedBox(
+                  widthFactor: 0.4,
+                  child: ClipOval(
+                    child: Image.asset(
+                      'lib/assets/images/Gato bugado.png',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+
+              // --- Logo TorchApp ---
+              Align(
+                alignment: const Alignment(0.05, 0.4),
+                child: FractionallySizedBox(
+                  widthFactor: 0.35,
+                  child: Image.asset(
+                    'lib/assets/images/torchapp.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+
+              // --- Faixa inferior com borda ---
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  height: barHeight,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEBDD6C),
+                    border: Border.all(color: Colors.black, width: 1),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
+  }
+
+  static List<Widget> _patinhas(double width, double height) {
+    final patinhasData = [
+      [0.12, 0.90, 55.0],
+      [0.17, 0.74, 45.0],
+      [0.25, 0.60, 50.0],
+      [0.29, 0.38, 60.0],
+      [0.33, 0.17, 50.0],
+      [0.42, 0.12, 30.0],
+      [0.52, 0.07, 0.0],
+      [0.62, 0.15, -10.0],
+      [0.71, 0.22, -40.0],
+      [0.78, 0.355, -50.0],
+      [0.82, 0.50, -55.0],
+      [0.88, 0.62, -54.0],
+    ];
+
+    return patinhasData.map((e) {
+      double top = e[0] * height;
+      double left = e[1] * width;
+      double rotation = e[2];
+      double size = width * 0.08;
+      return Positioned(
+        top: top,
+        left: left,
+        child: Transform.rotate(
+          angle: rotation * (math.pi / 180),
+          child: Image.asset(
+            'lib/assets/images/pata de cachorro.png',
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }).toList();
   }
 }

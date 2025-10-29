@@ -1,30 +1,46 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'pet.dart';
 
 class PetService {
-  final List<Pet> _pets = [];
-  int _nextId = 1; // gera IDs únicos
+  static const String baseUrl = 'http://10.0.2.2:8080/pets';
 
-  void adicionarPet(Pet pet) {
-    final petComId = Pet(
-      _nextId++, // gera id único
-      pet.name,
-      pet.breed,
-      pet.weight,
-      pet.birthDate,
+  static Future<bool> addPet(Pet pet) async {
+    final response = await http.post(
+      Uri.parse(baseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(pet.toJson()),
     );
-    _pets.add(petComId);
+    print("ADD PET STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+    return response.statusCode == 201;
   }
 
-  void editarPet(Pet petAtualizado) {
-    int index = _pets.indexWhere((pet) => pet.id == petAtualizado.id);
-    if (index != -1) {
-      _pets[index] = petAtualizado;
+  static Future<List<Pet>> getPets() async {
+    final response = await http.get(Uri.parse(baseUrl));
+    print("GET PETS STATUS: ${response.statusCode}");
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Pet.fromJson(json)).toList();
+    } else {
+      throw Exception('Erro ao buscar pets');
     }
   }
 
-  void removerPet(int id) {
-    _pets.removeWhere((pet) => pet.id == id);
+  static Future<bool> updatePet(Pet pet) async {
+    if (pet.id == null) return false;
+    final response = await http.put(
+      Uri.parse('$baseUrl/${pet.id}'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(pet.toJson()),
+    );
+    print("UPDATE PET STATUS: ${response.statusCode}");
+    return response.statusCode == 200;
   }
 
-  List<Pet> get pets => _pets;
+  static Future<bool> deletePet(int id) async {
+    final response = await http.delete(Uri.parse('$baseUrl/$id'));
+    print("DELETE PET STATUS: ${response.statusCode}");
+    return response.statusCode == 204;
+  }
 }

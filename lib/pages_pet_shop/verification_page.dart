@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
-import 'package:torch_app/pages_pet_shop/user_information.dart';
-
-// Importe sua página UserInformationPage (ajuste o caminho)
+import '../data/user/verification_pet_shop/verification_services.dart';
+import 'user_information.dart';
 
 class VerificationPage extends StatefulWidget {
-  const VerificationPage({super.key});
+  final String email;
+
+  const VerificationPage({super.key, required this.email});
 
   @override
   State<VerificationPage> createState() => _VerificationPageState();
@@ -20,19 +21,59 @@ class _VerificationPageState extends State<VerificationPage> {
   List.generate(5, (_) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(5, (_) => FocusNode());
 
+  /// 🔒 Função para mascarar o e-mail exibido na tela
+  String _maskEmail(String email) {
+    final parts = email.split('@');
+    if (parts.length != 2) return email;
+
+    final name = parts[0];
+    final domain = parts[1];
+
+    final maskedName = name.length > 3
+        ? '${name.substring(0, 3)}***'
+        : '${name.substring(0, 1)}***';
+
+    final domainName = domain.split('.').first;
+    return '$maskedName@${domainName}...';
+  }
+
   void _onChanged(String value, int index) {
-    if (value.length == 1) {
-      if (index + 1 < _focusNodes.length) {
-        FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
-      } else {
-        _focusNodes[index].unfocus();
-      }
+    if (value.length == 1 && index + 1 < _focusNodes.length) {
+      FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
     } else if (value.isEmpty && index > 0) {
       FocusScope.of(context).requestFocus(_focusNodes[index - 1]);
     }
   }
 
   String getOtp() => _controllers.map((c) => c.text).join();
+
+  Future<void> _verifyCode() async {
+    final code = getOtp();
+
+    if (code.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Digite o código completo de 5 dígitos.')),
+      );
+      return;
+    }
+
+    try {
+      await VerificationService.checkVerificationCode(widget.email, code);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Código verificado com sucesso!')),
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const UserInformationPage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,17 +84,11 @@ class _VerificationPageState extends State<VerificationPage> {
           children: [
             Align(
               alignment: Alignment.topCenter,
-              child: Container(
-                height: 50,
-                color: yellow,
-              ),
+              child: Container(height: 50, color: yellow),
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: Container(
-                height: 50,
-                color: yellow,
-              ),
+              child: Container(height: 50, color: yellow),
             ),
             Center(
               child: Column(
@@ -61,10 +96,13 @@ class _VerificationPageState extends State<VerificationPage> {
                 children: [
                   Container(height: 1, color: Colors.black),
                   const SizedBox(height: 16),
-                  const Text(
-                    "Digite o código de 5 dígitos que enviamos para\nE-mail: leo********@gmail.com",
+                  Text(
+                    "Digite o código de 5 dígitos enviado para\nE-mail: ${_maskEmail(widget.email)}",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                    ),
                   ),
                   const SizedBox(height: 22),
                   Row(
@@ -105,7 +143,7 @@ class _VerificationPageState extends State<VerificationPage> {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    "Renviar Código",
+                    "Reenviar Código",
                     style: TextStyle(
                       color: Colors.red,
                       fontSize: 14,
@@ -124,37 +162,37 @@ class _VerificationPageState extends State<VerificationPage> {
                             borderRadius: BorderRadius.circular(30),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 36, vertical: 14),
+                            horizontal: 36,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Voltar",
                           style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 20),
                       ElevatedButton(
-                        onPressed: () {
-                          // Navega para UserInformationPage
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                const UserInformationPage()),
-                          );
-                        },
+                        onPressed: _verifyCode,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: yellow,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 34, vertical: 14),
+                            horizontal: 34,
+                            vertical: 14,
+                          ),
                         ),
                         child: const Text(
                           "Continuar",
                           style: TextStyle(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],
