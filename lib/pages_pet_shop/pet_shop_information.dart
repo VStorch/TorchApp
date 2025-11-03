@@ -293,7 +293,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
     final number = _numberController.text.trim();
     final complement = _complementController.text.trim();
 
-    final cnpj = "00000000000000"; // temporário até adicionar campo
+    final cnpj = "00.000.000/0000-00"; // temporário até adicionar campo
 
     if (cep.isEmpty || state.isEmpty || city.isEmpty || neighborhood.isEmpty || street.isEmpty || number.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -317,7 +317,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
           "street": street,
           "number": number,
           "addressComplement": complement.isEmpty ? null : complement,
-          "ownerId": widget.ownerId, // 👈 aqui o vínculo com o dono
+          "ownerId": widget.ownerId,
         }),
       );
 
