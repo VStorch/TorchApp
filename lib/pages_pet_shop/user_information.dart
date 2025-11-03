@@ -217,6 +217,9 @@ class _UserInformationPageState extends State<UserInformationPage> {
       );
 
       if (response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        final ownerId = responseData['id'];
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cadastro realizado com sucesso!')),
         );
@@ -224,7 +227,7 @@ class _UserInformationPageState extends State<UserInformationPage> {
         // Navega para PetShopInformationPage
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const PetShopInformationPage()),
+          MaterialPageRoute(builder: (context) => PetShopInformationPage(ownerId: ownerId)),
         );
       } else {
         print("Erro: ${response.body}");

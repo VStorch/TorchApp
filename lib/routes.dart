@@ -10,7 +10,7 @@ import 'package:torch_app/pages_pet_shop/registration_page_pet_shop.dart';
 import 'package:torch_app/pages_pet_shop/user_information.dart';
 
 final Map<String, WidgetBuilder> appRoutes = {
-  '/': (context) => const PetShopInformationPage(),
+  // '/': (context) => const PetShopInformationPage(),
   '/loading': (context) => const LoadingPage(),
   '/meus-pets': (context) => const MyPetsPage(currentUserId: 1),
   '/perfil': (context) => const MyProfilePage(),
