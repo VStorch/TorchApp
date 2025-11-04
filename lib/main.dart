@@ -26,8 +26,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: PetShopInformationPage(ownerId: 4,
-      ),
+      home: PetShopInformationPage(ownerId: 1)
     );
   }
 }

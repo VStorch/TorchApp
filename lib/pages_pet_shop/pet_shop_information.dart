@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 import 'dart:convert';
+
+import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
 
 class PetShopInformationPage extends StatefulWidget {
   final int ownerId;
@@ -211,7 +214,38 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
 
                           Center(
                             child: ElevatedButton(
-                              onPressed: _registerPetShop,
+                              onPressed: () {
+                                final cep = _cepController.text.trim();
+                                final state = _ufController.text.trim();
+                                final city = _cityController.text.trim();
+                                final neighborhood = _districtController.text.trim();
+                                final street = _addressController.text.trim();
+                                final number = _numberController.text.trim();
+
+                                if (cep.isEmpty || state.isEmpty || city.isEmpty || neighborhood.isEmpty || street.isEmpty || number.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
+                                  );
+                                  return;
+                                }
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RegistrationSupplements(
+                                    petShop: PetShopDto(
+                                      cep: _cepController.text,
+                                      state: _ufController.text,
+                                      city: _cityController.text,
+                                      neighborhood: _districtController.text,
+                                      street: _addressController.text,
+                                      number: _numberController.text,
+                                      complement: _complementController.text,
+                                      cnpj: "00.000.000/0000-00",
+                                      ownerId: widget.ownerId,
+                                    ),
+                                  )),
+                                );
+                              },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: yellow,
                                 shape: RoundedRectangleBorder(
@@ -283,61 +317,4 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
       ),
     );
   }
-
-  Future<void> _registerPetShop() async {
-    final cep = _cepController.text.trim();
-    final state = _ufController.text.trim();
-    final city = _cityController.text.trim();
-    final neighborhood = _districtController.text.trim();
-    final street = _addressController.text.trim();
-    final number = _numberController.text.trim();
-    final complement = _complementController.text.trim();
-
-    final cnpj = "00.000.000/0000-00"; // temporário até adicionar campo
-
-    if (cep.isEmpty || state.isEmpty || city.isEmpty || neighborhood.isEmpty || street.isEmpty || number.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
-      );
-      return;
-    }
-
-    final url = Uri.parse("http://10.0.2.2:8080/petshops");
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "cnpj": cnpj,
-          "cep": cep,
-          "state": state,
-          "city": city,
-          "neighborhood": neighborhood,
-          "street": street,
-          "number": number,
-          "addressComplement": complement.isEmpty ? null : complement,
-          "ownerId": widget.ownerId,
-        }),
-      );
-
-      if (response.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Pet Shop cadastrado com sucesso!")),
-        );
-        // Navegar para próxima tela se houver
-      } else {
-        print("Erro: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro ao cadastrar Pet Shop: ${response.body}")),
-        );
-      }
-    } catch (e) {
-      print("Erro de rede: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erro de conexão com o servidor.")),
-      );
-    }
-  }
-
 }

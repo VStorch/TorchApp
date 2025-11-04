@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 
 class RegistrationSupplements extends StatefulWidget {
-  const RegistrationSupplements({super.key});
+  final PetShopDto petShop;
+
+  const RegistrationSupplements({super.key, required this.petShop});
 
   @override
   State<RegistrationSupplements> createState() =>
@@ -16,6 +21,12 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
   String? personType;
   bool accepted = false;
   final TextEditingController cnpjController = TextEditingController();
+
+  @override
+  void dispose() {
+    cnpjController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +53,13 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
 
             // Lottie acima da faixa inferior
             Positioned(
-              bottom: -5, // acima da faixa amarela inferior
+              bottom: -5,
               left: 0,
               right: 0,
               child: SizedBox(
-                height: 250, // ajuste a altura da animação
+                height: 250,
                 child: Lottie.asset(
-                  'lib/assets/images/CatArroz.json', // substitua pelo caminho do seu Lottie
+                  'lib/assets/images/CatArroz.json',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -140,13 +151,38 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
                           Center(
                             child: ElevatedButton(
                               onPressed: accepted
-                                  ? () {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          "Registro enviado com sucesso!")),
+                                  ? () async {
+                                if (personType == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Selecione o tipo de pessoa.')),
+                                  );
+                                  return;
+                                }
+
+                                if (personType == 'juridica' && cnpjController.text.trim().isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Digite o CNPJ.')),
+                                  );
+                                  return;
+                                }
+
+                                final finalCnpj = personType == 'juridica'
+                                    ? cnpjController.text.trim()
+                                    : widget.petShop.cnpj;
+
+                                final updatedPetShop = PetShopDto(
+                                  cep: widget.petShop.cep,
+                                  state: widget.petShop.state,
+                                  city: widget.petShop.city,
+                                  neighborhood: widget.petShop.neighborhood,
+                                  street: widget.petShop.street,
+                                  number: widget.petShop.number,
+                                  complement: widget.petShop.complement,
+                                  cnpj: finalCnpj,
+                                  ownerId: widget.petShop.ownerId,
                                 );
+
+                                await _registerPetShop(updatedPetShop);
                               }
                                   : null,
                               style: ElevatedButton.styleFrom(
@@ -209,5 +245,37 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
         ),
       ),
     );
+  }
+
+  Future<void> _registerPetShop(PetShopDto petShop) async {
+    final url = Uri.parse("http://10.0.2.2:8080/petshops");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(petShop.toJson()),
+      );
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Pet Shop cadastrado com sucesso!")),
+        );
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          '/',
+            (Route<dynamic> route) => false,
+        );
+      } else {
+        print("Erro: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Erro ao cadastrar: ${response.body}")),
+        );
+      }
+    } catch (e) {
+      print("Erro de rede: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erro de conexão com o servidor.")),
+      );
+    }
   }
 }
