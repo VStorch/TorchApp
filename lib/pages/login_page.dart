@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../components/diagonal_clipper.dart';
 import '../pages_pet_shop/registration_page_pet_shop.dart';
+import '../pages_pet_shop/home_page_pet_shop.dart';
 import 'password_page.dart';
 import 'registration_page.dart';
 import 'home_page.dart';
 
-import '../data/user/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +21,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -35,20 +38,86 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    final success = await UserService.loginUser(email, password);
-
-    if (!success) {
-      _showDialog('Erro', 'Usuário não encontrado');
+    if (email.isEmpty || password.isEmpty) {
+      _showDialog('Erro', 'Preencha email e senha');
       return;
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
     }
 
-    _emailController.clear();
-    _passwordController.clear();
+    setState(() => _isLoading = true);
+
+    try {
+      // Passo 1: Fazer login
+      final loginUrl = Uri.parse('http://10.0.2.2:8080/users/login');
+
+      final loginResponse = await http.post(
+        loginUrl,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": email,
+          "password": password,
+        }),
+      );
+
+      ("===== LOGIN =====");
+      ("Status: ${loginResponse.statusCode}");
+      ("Body: ${loginResponse.body}");
+
+      if (loginResponse.statusCode != 200) {
+        _showDialog('Erro', 'Email ou senha incorretos');
+        return;
+      }
+
+      final userData = jsonDecode(loginResponse.body);
+      final userId = userData['id'];
+
+      // Passo 2: Verificar se o usuário tem Pet Shop
+      // CORREÇÃO: URL correta do endpoint
+      final petShopUrl = Uri.parse('http://10.0.2.2:8080/users/owner/$userId');
+
+      ("===== VERIFICANDO PET SHOP =====");
+      ("URL: $petShopUrl");
+
+      final petShopResponse = await http.get(petShopUrl);
+
+      ("Status Pet Shop: ${petShopResponse.statusCode}");
+      ("Body Pet Shop: ${petShopResponse.body}");
+
+      bool isPetShopOwner = petShopResponse.statusCode == 200;
+
+      (isPetShopOwner ? "🏪 Usuário é DONO de Pet Shop" : "👤 Usuário é CLIENTE");
+
+      // Passo 3: Navegar para a tela correta
+      if (mounted) {
+        if (isPetShopOwner) {
+          // Tem Pet Shop - vai para interface do Pet Shop
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePagePetShop(),
+            ),
+          );
+        } else {
+          // Não tem Pet Shop - vai para interface do Cliente
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ),
+          );
+        }
+      }
+
+      _emailController.clear();
+      _passwordController.clear();
+
+    } catch (e) {
+      ("Erro de conexão: $e");
+      _showDialog('Erro', 'Erro de conexão com o servidor');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   void _showDialog(String title, String message) {
@@ -181,6 +250,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 20),
                     TextField(
                       controller: _emailController,
+                      enabled: !_isLoading,
                       decoration: InputDecoration(
                         labelText: 'Email...',
                         border: OutlineInputBorder(
@@ -191,6 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(height: 10),
                     TextField(
                       controller: _passwordController,
+                      enabled: !_isLoading,
                       obscureText: true,
                       decoration: InputDecoration(
                         labelText: 'Senha...',
@@ -201,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 7),
                     TextButton(
-                      onPressed: () {
+                      onPressed: _isLoading ? null : () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -212,16 +283,25 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
-                      onPressed: _login,
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFEBDD6C),
                         foregroundColor: Colors.black,
                       ),
-                      child: const Text('Entrar'),
+                      child: _isLoading
+                          ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black,
+                        ),
+                      )
+                          : const Text('Entrar'),
                     ),
                     const SizedBox(height: 2),
                     TextButton(
-                      onPressed: _showAccountTypeDialog,
+                      onPressed: _isLoading ? null : _showAccountTypeDialog,
                       child: const Text(
                         'Não tem uma conta? Clique aqui!',
                         style: TextStyle(
