@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:torch_app/pages/loading_page.dart';
-import 'package:torch_app/pages_pet_shop/pet_shop_information.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: PetShopInformationPage(ownerId: 1)
+      home:  LoadingPage()
     );
   }
 }

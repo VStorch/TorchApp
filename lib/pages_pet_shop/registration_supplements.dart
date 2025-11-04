@@ -18,8 +18,8 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
   static const Color bgColor = Color(0xFFFBF8E1);
   static const Color yellow = Color(0xFFF7E34D);
 
-  String? personType;
   bool accepted = false;
+  bool _isLoading = false;
   final TextEditingController cnpjController = TextEditingController();
 
   @override
@@ -102,42 +102,18 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Tipo de pessoa:"),
-                          RadioListTile<String>(
-                            title: const Text("Pessoa Física"),
-                            value: 'fisica',
-                            groupValue: personType,
-                            onChanged: (value) {
-                              setState(() {
-                                personType = value;
-                              });
-                            },
+                          const Text("CNPJ:"),
+                          const SizedBox(height: 6),
+                          _buildTextField(
+                            controller: cnpjController,
+                            hint: "00.000.000/0000-00",
+                            keyboardType: TextInputType.number,
                           ),
-                          RadioListTile<String>(
-                            title: const Text("Pessoa Jurídica"),
-                            value: 'juridica',
-                            groupValue: personType,
-                            onChanged: (value) {
-                              setState(() {
-                                personType = value;
-                              });
-                            },
-                          ),
-
-                          if (personType == 'juridica') ...[
-                            const SizedBox(height: 6),
-                            const Text("CNPJ:"),
-                            const SizedBox(height: 6),
-                            _buildTextField(
-                                controller: cnpjController,
-                                hint: "Digite o CNPJ",
-                                keyboardType: TextInputType.number),
-                          ],
 
                           const SizedBox(height: 12),
                           CheckboxListTile(
                             value: accepted,
-                            onChanged: (value) {
+                            onChanged: _isLoading ? null : (value) {
                               setState(() {
                                 accepted = value ?? false;
                               });
@@ -150,41 +126,7 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
                           const SizedBox(height: 18),
                           Center(
                             child: ElevatedButton(
-                              onPressed: accepted
-                                  ? () async {
-                                if (personType == null) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Selecione o tipo de pessoa.')),
-                                  );
-                                  return;
-                                }
-
-                                if (personType == 'juridica' && cnpjController.text.trim().isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Digite o CNPJ.')),
-                                  );
-                                  return;
-                                }
-
-                                final finalCnpj = personType == 'juridica'
-                                    ? cnpjController.text.trim()
-                                    : widget.petShop.cnpj;
-
-                                final updatedPetShop = PetShopDto(
-                                  cep: widget.petShop.cep,
-                                  state: widget.petShop.state,
-                                  city: widget.petShop.city,
-                                  neighborhood: widget.petShop.neighborhood,
-                                  street: widget.petShop.street,
-                                  number: widget.petShop.number,
-                                  complement: widget.petShop.complement,
-                                  cnpj: finalCnpj,
-                                  ownerId: widget.petShop.ownerId,
-                                );
-
-                                await _registerPetShop(updatedPetShop);
-                              }
-                                  : null,
+                              onPressed: (accepted && !_isLoading) ? _submitForm : null,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: yellow,
                                 shape: RoundedRectangleBorder(
@@ -193,7 +135,16 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 36, vertical: 12),
                               ),
-                              child: const Text(
+                              child: _isLoading
+                                  ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                                  : const Text(
                                 "Concluir",
                                 style: TextStyle(
                                   color: Colors.black,
@@ -220,7 +171,7 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
   }
 
   Widget _buildTextField({
-    TextEditingController? controller,
+    required TextEditingController controller,
     bool obscure = false,
     TextInputType keyboardType = TextInputType.text,
     String hint = '',
@@ -247,35 +198,103 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
     );
   }
 
+  Future<void> _submitForm() async {
+    final cnpj = cnpjController.text.trim();
+
+    if (cnpj.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Digite o CNPJ.')),
+      );
+      return;
+    }
+
+    // Validação básica de CNPJ (14 dígitos)
+    final cnpjNumbers = cnpj.replaceAll(RegExp(r'[^\d]'), '');
+    if (cnpjNumbers.length != 14) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('CNPJ deve conter 14 dígitos.')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final updatedPetShop = PetShopDto(
+      cep: widget.petShop.cep,
+      state: widget.petShop.state,
+      city: widget.petShop.city,
+      neighborhood: widget.petShop.neighborhood,
+      street: widget.petShop.street,
+      number: widget.petShop.number,
+      complement: widget.petShop.complement,
+      cnpj: cnpj,
+      ownerId: widget.petShop.ownerId,
+    );
+
+    await _registerPetShop(updatedPetShop);
+  }
+
   Future<void> _registerPetShop(PetShopDto petShop) async {
     final url = Uri.parse("http://10.0.2.2:8080/petshops");
 
     try {
+      print("===== ENVIANDO PETSHOP =====");
+      print("URL: $url");
+      print("Body: ${jsonEncode(petShop.toJson())}");
+
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(petShop.toJson()),
       );
 
+      print("Status: ${response.statusCode}");
+      print("Response: ${response.body}");
+      print("============================");
+
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Pet Shop cadastrado com sucesso!")),
+          const SnackBar(
+            content: Text("Pet Shop cadastrado com sucesso!"),
+            backgroundColor: Colors.green,
+          ),
         );
-        Navigator.of(context).pushNamedAndRemoveUntil(
-          '/',
-            (Route<dynamic> route) => false,
-        );
+
+        // Aguarda um pouco para mostrar o snackbar
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Remove todas as telas e volta para a home
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/',
+                (Route<dynamic> route) => false,
+          );
+        }
       } else {
-        print("Erro: ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Erro ao cadastrar: ${response.body}")),
-        );
+        print("Erro no cadastro: ${response.body}");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Erro ao cadastrar: ${response.body}"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       print("Erro de rede: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erro de conexão com o servidor.")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Erro de conexão com o servidor."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 }

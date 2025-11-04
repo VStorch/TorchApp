@@ -192,7 +192,6 @@ class _UserInformationPageState extends State<UserInformationPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    // Validação básica
     if (name.isEmpty || surname.isEmpty || phone.isEmpty || email.isEmpty || password.length < 8) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Preencha todos os campos corretamente.')),
@@ -203,7 +202,8 @@ class _UserInformationPageState extends State<UserInformationPage> {
     setState(() => _isLoading = true);
 
     try {
-      final url = Uri.parse('http://10.0.2.2:8080/users/petshop-owner'); // Emulador Android usa 10.0.2.2
+      final url = Uri.parse('http://10.0.2.2:8080/users/petshop-owner');
+
       final response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -216,29 +216,40 @@ class _UserInformationPageState extends State<UserInformationPage> {
         }),
       );
 
+      print("Status: ${response.statusCode}");
+      print("Body: ${response.body}");
+
       if (response.statusCode == 201) {
-        final responseData = json.decode(response.body);
+        final responseData = jsonDecode(response.body);
+
         final ownerId = responseData['id'];
+
+        if (ownerId == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro: ID não retornado pelo servidor')),
+          );
+          return;
+        }
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cadastro realizado com sucesso!')),
         );
 
-        // Navega para PetShopInformationPage
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => PetShopInformationPage(ownerId: ownerId)),
+          MaterialPageRoute(
+            builder: (context) => PetShopInformationPage(ownerId: ownerId),
+          ),
         );
       } else {
-        print("Erro: ${response.body}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao cadastrar: ${response.body}')),
         );
       }
     } catch (e) {
-      print("Erro de rede: $e");
+      print("Erro: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro de conexão com o servidor.')),
+        SnackBar(content: Text('Erro de conexão: $e')),
       );
     } finally {
       setState(() => _isLoading = false);
