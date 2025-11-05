@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
 
 import '../components/CustomDrawer.dart';
@@ -19,6 +20,7 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   File? _profileImage;
   String? _selectedAssetImage;
+  String _userName = "Carregando..."; // ✅ Valor inicial
 
   final List<String> _defaultImages = [
     "lib/assets/images_profile/dog1.jpg",
@@ -32,6 +34,25 @@ class _MyProfilePageState extends State<MyProfilePage> {
   ];
 
   final Color yellow = const Color(0xFFF4E04D);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  // ✅ Carrega os dados salvos localmente
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('user_name') ?? '';
+    final surname = prefs.getString('user_surname') ?? '';
+
+    setState(() {
+      _userName = name.isNotEmpty && surname.isNotEmpty
+          ? "$name $surname"
+          : "Usuário";
+    });
+  }
 
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
@@ -136,6 +157,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
         );
 
         if (confirm == true) {
+          // ✅ Limpa os dados salvos ao sair
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
+
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -253,7 +278,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
         ],
       ),
 
-      // --- AppBar amarela com borda preta e ícone da pata ---
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(screenHeight * 0.08),
         child: Container(
@@ -300,7 +324,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             children: [
               SizedBox(height: spacing),
               GestureDetector(
-                onTap: () => _showImageOptions(context), // ✅ Corrigido
+                onTap: () => _showImageOptions(context),
                 child: CircleAvatar(
                   radius: avatarRadius,
                   backgroundColor: Colors.black,
@@ -317,7 +341,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               SizedBox(height: spacing),
               Text(
-                "Leonardo Cortelim",
+                _userName, // ✅ Nome carregado do SharedPreferences
                 style: TextStyle(
                     fontSize: titleFontSize, fontWeight: FontWeight.bold),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart'; // ✅ ADICIONE ESTE IMPORT
 
 import '../components/diagonal_clipper.dart';
 import '../pages_pet_shop/registration_page_pet_shop.dart';
@@ -32,6 +33,18 @@ class _LoginPageState extends State<LoginPage> {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
+  }
+
+  // ✅ NOVO MÉTODO: Salvar dados do usuário localmente
+  Future<void> _saveUserData(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setInt('user_id', userData['id']);
+    await prefs.setString('user_name', userData['name'] ?? '');
+    await prefs.setString('user_surname', userData['surname'] ?? '');
+    await prefs.setString('user_email', userData['email'] ?? '');
+
+    ("✅ Dados salvos: ${userData['name']} ${userData['surname']}");
   }
 
   Future<void> _login() async {
@@ -70,8 +83,10 @@ class _LoginPageState extends State<LoginPage> {
       final userData = jsonDecode(loginResponse.body);
       final userId = userData['id'];
 
+      // ✅ SALVAR OS DADOS DO USUÁRIO
+      await _saveUserData(userData);
+
       // Passo 2: Verificar se o usuário tem Pet Shop
-      // CORREÇÃO: URL correta do endpoint
       final petShopUrl = Uri.parse('http://10.0.2.2:8080/users/owner/$userId');
 
       ("===== VERIFICANDO PET SHOP =====");

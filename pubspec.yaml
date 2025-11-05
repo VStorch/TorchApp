@@ -19,6 +19,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_maps_flutter: ^2.5.0
   dio: ^5.7.0
+  shared_preferences: ^2.2.2
+
 
 
 
