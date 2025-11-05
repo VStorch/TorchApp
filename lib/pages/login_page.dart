@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
     await prefs.setString('user_surname', userData['surname'] ?? '');
     await prefs.setString('user_email', userData['email'] ?? '');
 
-    ("✅ Dados salvos: ${userData['name']} ${userData['surname']}");
+    (" Dados salvos: ${userData['name']} ${userData['surname']}");
   }
 
   Future<void> _login() async {
@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
       final userData = jsonDecode(loginResponse.body);
       final userId = userData['id'];
 
-      // ✅ SALVAR OS DADOS DO USUÁRIO
+      //  SALVAR OS DADOS DO USUÁRIO
       await _saveUserData(userData);
 
       // Passo 2: Verificar se o usuário tem Pet Shop
@@ -99,7 +99,7 @@ class _LoginPageState extends State<LoginPage> {
 
       bool isPetShopOwner = petShopResponse.statusCode == 200;
 
-      (isPetShopOwner ? "🏪 Usuário é DONO de Pet Shop" : "👤 Usuário é CLIENTE");
+      (isPetShopOwner ? " Usuário é DONO de Pet Shop" : " Usuário é CLIENTE");
 
       // Passo 3: Navegar para a tela correta
       if (mounted) {
