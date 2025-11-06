@@ -35,7 +35,7 @@ class PetShopServiceService {
 
 
   static Future<bool> deleteService(int id) async {
-    final response = await http.get(Uri.parse('$baseUrl/$id'));
+    final response = await http.delete(Uri.parse('$baseUrl/$id'));
     return response.statusCode == 204;
   }
 
