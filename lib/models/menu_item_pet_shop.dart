@@ -38,7 +38,7 @@ class MenuItemPetShop {
         return MenuItemPetShop(
           title: 'Serviços',
           icon: Icons.build,
-          destinationPage: const Services(),
+          destinationPage: Services(petShopId: widget.petShopId),
         );
       case PageTypePetShop.reviews:
         return MenuItemPetShop(
