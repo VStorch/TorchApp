@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ✅ ADICIONE
 import '../components/CustomDrawer.dart';
 import '../data/pet/pet.dart';
 import '../data/pet/pet_service.dart';
@@ -7,8 +8,7 @@ import '../models/menu_item.dart';
 import '../models/page_type.dart';
 
 class MyPetsPage extends StatefulWidget {
-  final int currentUserId; // ID do usuário logado
-  const MyPetsPage({super.key, required this.currentUserId});
+  const MyPetsPage({super.key}); // ✅ REMOVIDO currentUserId
 
   @override
   State<MyPetsPage> createState() => _MyPetsPageState();
@@ -17,27 +17,69 @@ class MyPetsPage extends StatefulWidget {
 class _MyPetsPageState extends State<MyPetsPage> {
   List<Pet> _pets = [];
   bool _loading = true;
+  int? _currentUserId; // ✅ ADICIONADO
 
   @override
   void initState() {
     super.initState();
-    _loadPets();
+    _loadUserAndPets(); // ✅ MODIFICADO
   }
 
-  Future<void> _loadPets() async {
+  // ✅ NOVO MÉTODO: Busca o userId do SharedPreferences
+  Future<void> _loadUserAndPets() async {
     setState(() => _loading = true);
+
     try {
-      final pets = await PetService.getPets();
-      setState(() => _pets = pets.where((p) => p.userId == widget.currentUserId).toList());
+      // Buscar userId do SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final userId = prefs.getInt('user_id');
+
+      if (userId == null) {
+        debugPrint("ERRO: Usuário não está logado!");
+        return;
+      }
+
+      setState(() => _currentUserId = userId);
+      debugPrint("UserId carregado: $userId");
+
+      // Agora carregar os pets
+      await _loadPets();
+
     } catch (e) {
-      debugPrint("Erro ao carregar pets: $e");
+      debugPrint("Erro ao carregar dados: $e");
     } finally {
       setState(() => _loading = false);
     }
   }
 
+  Future<void> _loadPets() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final pets = await PetService.getPets();
+      debugPrint("=== DEBUG PETS ===");
+      debugPrint("CurrentUserId: $_currentUserId");
+      debugPrint("Total pets carregados: ${pets.length}");
+      for (var pet in pets) {
+        debugPrint("Pet: ${pet.name}, UserId: ${pet.userId}");
+      }
+      final filteredPets = pets.where((p) => p.userId == _currentUserId).toList();
+      debugPrint("Pets filtrados para este usuário: ${filteredPets.length}");
+      setState(() => _pets = filteredPets);
+    } catch (e) {
+      debugPrint("Erro ao carregar pets: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Se ainda não carregou o userId, mostra loading
+    if (_currentUserId == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: PreferredSize(
@@ -196,25 +238,22 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
-  // Função para tema customizado do DatePicker
   ThemeData _datePickerTheme(BuildContext context) {
     return ThemeData(
       colorScheme: ColorScheme.light(
-        primary: const Color(0xFFFFF200), // amarelo forte para header e seleção
-        onPrimary: Colors.black, // texto preto no header e botões OK/Cancelar
-        onSurface: Colors.black, // texto preto no calendário
-        surface: const Color(0xFFFFFDD2), // fundo do calendário
+        primary: const Color(0xFFFFF200),
+        onPrimary: Colors.black,
+        onSurface: Colors.black,
+        surface: const Color(0xFFFFFDD2),
       ),
-      dialogBackgroundColor: const Color(0xFFFFFDD2), // fundo do dialog
+      dialogBackgroundColor: const Color(0xFFFFFDD2),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: Colors.black, // texto preto para botões Cancelar e OK
+          foregroundColor: Colors.black,
         ),
       ),
     );
   }
-
-
 
   void _showAddPetDialog(BuildContext context) {
     final nameController = TextEditingController();
@@ -326,8 +365,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
                               speciesController.text,
                               double.parse(weightController.text),
                               birthDate,
-                              widget.currentUserId,
+                              _currentUserId!, // ✅ USA O userId DO SharedPreferences
                             );
+                            debugPrint("=== CRIANDO PET ===");
+                            debugPrint("UserId sendo enviado: $_currentUserId");
+                            debugPrint("Pet: ${pet.toJson()}");
                             final success = await PetService.addPet(pet);
                             if (success) {
                               _loadPets();
@@ -462,7 +504,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                               speciesController.text,
                               double.parse(weightController.text),
                               birthDate,
-                              widget.currentUserId,
+                              _currentUserId!, // ✅ USA O userId DO SharedPreferences
                               id: pet.id,
                             );
                             final success = await PetService.updatePet(petAtualizado);
