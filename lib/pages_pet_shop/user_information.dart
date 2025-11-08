@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
 import 'package:torch_app/pages_pet_shop/pet_shop_information.dart';
 import 'dart:convert';
 
@@ -221,7 +222,6 @@ class _UserInformationPageState extends State<UserInformationPage> {
 
       if (response.statusCode == 201) {
         final responseData = jsonDecode(response.body);
-
         final ownerId = responseData['id'];
 
         if (ownerId == null) {
@@ -230,6 +230,16 @@ class _UserInformationPageState extends State<UserInformationPage> {
           );
           return;
         }
+
+        // ======= SALVAR DADOS NO SHARED PREFERENCES =======
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_id', ownerId.toString());
+        await prefs.setString('user_name', name);
+        await prefs.setString('user_surname', surname);
+        await prefs.setString('user_phone', phone);
+        await prefs.setString('user_email', email);
+        // Não salve a senha em texto puro por segurança
+        // ===================================================
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Cadastro realizado com sucesso!')),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 import 'dart:convert';
 
@@ -70,6 +71,20 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
       SnackBar(content: Text(message)),
     );
   }
+
+  // ======= SALVAR DADOS DO ENDEREÇO NO SHARED PREFERENCES =======
+  Future<void> _saveAddressData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('petshop_cep', _cepController.text.trim());
+    await prefs.setString('petshop_state', _ufController.text.trim());
+    await prefs.setString('petshop_city', _cityController.text.trim());
+    await prefs.setString('petshop_neighborhood', _districtController.text.trim());
+    await prefs.setString('petshop_street', _addressController.text.trim());
+    await prefs.setString('petshop_number', _numberController.text.trim());
+    await prefs.setString('petshop_complement', _complementController.text.trim());
+  }
+  // ==============================================================
 
   @override
   void dispose() {
@@ -214,7 +229,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
 
                           Center(
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 final cep = _cepController.text.trim();
                                 final state = _ufController.text.trim();
                                 final city = _cityController.text.trim();
@@ -228,6 +243,10 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                                   );
                                   return;
                                 }
+
+                                // ======= SALVAR DADOS ANTES DE NAVEGAR =======
+                                await _saveAddressData();
+                                // =============================================
 
                                 Navigator.push(
                                   context,

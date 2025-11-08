@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
 import 'dart:convert';
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 
@@ -253,6 +254,11 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
       print("============================");
 
       if (response.statusCode == 201) {
+        // ======= SALVAR CNPJ NO SHARED PREFERENCES =======
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('petshop_cnpj', petShop.cnpj);
+        // =================================================
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Pet Shop cadastrado com sucesso!"),
