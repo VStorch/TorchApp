@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../components/CustomDrawer.dart';
-import '../models/menu_item.dart';
-import '../pages/login_page.dart';
+import 'package:torch_app/components/custom_drawer_pet_shop.dart';
 import 'petshop_info_section.dart';
 import 'contact_section.dart';
 import 'location_section.dart';
@@ -11,15 +9,12 @@ import 'social_media_section.dart';
 import 'services_section.dart';
 import 'horario_box.dart';
 import 'user_tab.dart';
-import 'home_page_pet_shop.dart';
-import 'services.dart';
-import 'reviews.dart';
-import 'promotions.dart';
-import 'payment_method.dart';
-import 'settings.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  final int petShopId;
+  final int userId;
+
+  const Profile({super.key, required this.petShopId, required this.userId});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -86,16 +81,10 @@ class _ProfileState extends State<Profile> {
     final bottomBarHeight = barHeight;
 
     return Scaffold(
-      drawer: CustomDrawer(menuItems: [
-        MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-        MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-        MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-        MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-        MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-        MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-        MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-        MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-      ]),
+      drawer: CustomDrawerPetShop(
+          petShopId: widget.petShopId,
+          userId: widget.userId,
+      ),
       backgroundColor: const Color(0xFFFBF8E1),
 
       // --- AppBar ---

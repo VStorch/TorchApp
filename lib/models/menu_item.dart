@@ -28,7 +28,7 @@ class MenuItem {
         return MenuItem(
           title: 'Tela Inicial',
           icon: Icons.home,
-          destinationPage: const HomePage(),
+          destinationPage: HomePage(userId: currentUserId,),
         );
       case PageType.myPets:
         return MenuItem(

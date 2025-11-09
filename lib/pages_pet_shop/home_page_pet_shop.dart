@@ -23,7 +23,6 @@ class HomePagePetShop extends StatelessWidget {
     final barHeight = screenHeight * 0.05;
 
     return Scaffold(
-      // SIMPLIFICADO: apenas passa os IDs pro drawer
       drawer: CustomDrawerPetShop(
         petShopId: petShopId,
         userId: userId,

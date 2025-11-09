@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:torch_app/components/custom_drawer_pet_shop.dart';
 import 'package:torch_app/data/pet_shop_services/petshop_service.dart';
-import '../components/CustomDrawer.dart';
 import '../data/pet_shop_services/pet_shop_service_service.dart';
-import '../models/menu_item.dart';
-import '../pages/login_page.dart';
-import 'home_page_pet_shop.dart';
-import 'profile.dart';
-import 'reviews.dart';
-import 'promotions.dart';
-import 'payment_method.dart';
-import 'settings.dart';
 
 class Services extends StatefulWidget {
   final int petShopId;
-  const Services({super.key, required this.petShopId});
+  final int userId;
+
+  const Services({super.key, required this.petShopId, required this.userId});
 
   @override
   State<Services> createState() => _ServicesState();
@@ -291,18 +285,7 @@ class _ServicesState extends State<Services> {
 
     return Scaffold(
       backgroundColor: corFundo,
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: Services(petShopId: widget.petShopId,)),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-        ],
-      ),
+      drawer: CustomDrawerPetShop(petShopId: widget.petShopId, userId: widget.userId),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
         child: Container(

@@ -26,43 +26,43 @@ class MenuItemPetShop {
         return MenuItemPetShop(
           title: 'Início',
           icon: Icons.home,
-          destinationPage: const HomePagePetShop(),
+          destinationPage: HomePagePetShop(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.profile:
         return MenuItemPetShop(
           title: 'Perfil',
           icon: Icons.person,
-          destinationPage: const Profile(),
+          destinationPage: Profile(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.services:
         return MenuItemPetShop(
           title: 'Serviços',
           icon: Icons.build,
-          destinationPage: Services(petShopId: petShopId),
+          destinationPage: Services(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.reviews:
         return MenuItemPetShop(
           title: 'Avaliações',
           icon: Icons.star,
-          destinationPage: const Reviews(),
+          destinationPage: Reviews(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.promotions:
         return MenuItemPetShop(
           title: 'Promoções',
           icon: Icons.local_offer,
-          destinationPage: const Promotions(),
+          destinationPage: Promotions(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.paymentMethod:
         return MenuItemPetShop(
           title: 'Forma de pagamento',
           icon: Icons.credit_card,
-          destinationPage: const PaymentMethod(),
+          destinationPage: PaymentMethod(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.settings:
         return MenuItemPetShop(
           title: 'Configurações',
           icon: Icons.settings,
-          destinationPage: const Settings(),
+          destinationPage: Settings(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.logout:
         return MenuItemPetShop(
