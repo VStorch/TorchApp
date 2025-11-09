@@ -20,7 +20,7 @@ class MenuItemPetShop {
     required this.destinationPage,
   });
 
-  factory MenuItemPetShop.fromType(PageTypePetShop type) {
+  factory MenuItemPetShop.fromType(PageTypePetShop type, {required int petShopId, required int userId}) {
     switch (type) {
       case PageTypePetShop.home:
         return MenuItemPetShop(
@@ -38,7 +38,7 @@ class MenuItemPetShop {
         return MenuItemPetShop(
           title: 'Serviços',
           icon: Icons.build,
-          destinationPage: Services(petShopId: widget.petShopId),
+          destinationPage: Services(petShopId: petShopId),
         );
       case PageTypePetShop.reviews:
         return MenuItemPetShop(
@@ -68,7 +68,7 @@ class MenuItemPetShop {
         return MenuItemPetShop(
           title: 'Sair',
           icon: Icons.logout,
-          destinationPage: const LoginPage(), // Pode ser LoginPage se preferir
+          destinationPage: const LoginPage(),
         );
     }
   }
