@@ -11,7 +11,6 @@ import 'password_page.dart';
 import 'registration_page.dart';
 import 'home_page.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -71,9 +70,9 @@ class _LoginPageState extends State<LoginPage> {
         }),
       );
 
-      ("===== LOGIN =====");
-      ("Status: ${loginResponse.statusCode}");
-      ("Body: ${loginResponse.body}");
+      print("===== LOGIN =====");
+      print("Status: ${loginResponse.statusCode}");
+      print("Body: ${loginResponse.body}");
 
       if (loginResponse.statusCode != 200) {
         _showDialog('Erro', 'Email ou senha incorretos');
@@ -89,13 +88,13 @@ class _LoginPageState extends State<LoginPage> {
       // Passo 2: Verificar se o usuário tem Pet Shop
       final petShopUrl = Uri.parse('http://10.0.2.2:8080/users/owner/$userId');
 
-      ("===== VERIFICANDO PET SHOP =====");
-      ("URL: $petShopUrl");
+      print("===== VERIFICANDO PET SHOP =====");
+      print("URL: $petShopUrl");
 
       final petShopResponse = await http.get(petShopUrl);
 
-      ("Status Pet Shop: ${petShopResponse.statusCode}");
-      ("Body Pet Shop: ${petShopResponse.body}");
+      print("Status Pet Shop: ${petShopResponse.statusCode}");
+      print("Body Pet Shop: ${petShopResponse.body}");
 
       bool isPetShopOwner = petShopResponse.statusCode == 200;
 
@@ -104,11 +103,19 @@ class _LoginPageState extends State<LoginPage> {
       // Passo 3: Navegar para a tela correta
       if (mounted) {
         if (isPetShopOwner) {
-          // Tem Pet Shop - vai para interface do Pet Shop
+          final petShopData = jsonDecode(petShopResponse.body);
+          final petShopId = petShopData['id']; // ID do PetShop
+
+          print("✅ PetShop ID: $petShopId");
+          print("✅ User ID: $userId");
+
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const HomePagePetShop(),
+              builder: (context) => HomePagePetShop(
+                petShopId: petShopId,
+                userId: userId,
+              ),
             ),
           );
         } else {
@@ -116,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const HomePage(),
+              builder: (context) => HomePage(userId: userId), // Passa userId para cliente também
             ),
           );
         }
@@ -126,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
       _passwordController.clear();
 
     } catch (e) {
-      ("Erro de conexão: $e");
+      print("Erro de conexão: $e");
       _showDialog('Erro', 'Erro de conexão com o servidor');
     } finally {
       if (mounted) {

@@ -1,48 +1,80 @@
 import 'package:flutter/material.dart';
-import '../components/CustomDrawer.dart';
-import '../models/menu_item.dart';
-import '../pages/login_page.dart';
-import 'home_page_pet_shop.dart';
-import 'profile.dart';
-import 'reviews.dart';
-import 'promotions.dart';
-import 'payment_method.dart';
-import 'settings.dart';
+import 'package:torch_app/components/custom_drawer_pet_shop.dart';
+import 'package:torch_app/data/pet_shop_services/petshop_service.dart';
+import '../data/pet_shop_services/pet_shop_service_service.dart';
 
 class Services extends StatefulWidget {
-  const Services({super.key});
+  final int petShopId;
+  final int userId;
+
+  const Services({super.key, required this.petShopId, required this.userId});
 
   @override
   State<Services> createState() => _ServicesState();
 }
 
 class _ServicesState extends State<Services> {
-  final List<Map<String, dynamic>> _servicos = [];
+  List<PetShopService> _servicos = [];
+  bool _isLoading = true;
 
   final _formKey = GlobalKey<FormState>();
   String _nome = '';
   String _preco = '';
-  String _duracao = '';
-  IconData _iconeSelecionado = Icons.pets;
-  int? _editIndex;
+  int? _editId;
 
   final Color corFundo = const Color(0xFFFBF8E1);
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
-  void _abrirModalServico({Map<String, dynamic>? servico, int? index}) {
+  @override
+  void initState() {
+    super.initState();
+    _carregarServicos();
+  }
+
+  Future<void> _carregarServicos() async {
+    setState(() => _isLoading = true);
+    try {
+      final servicos = await PetShopServiceService.getByPetShopId(widget.petShopId);
+      setState(() {
+        _servicos = servicos;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      print('Erro ao carregar serviços: $e');
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(mensagem),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3)
+        )
+    );
+  }
+
+  void _mostrarSucesso(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(mensagem),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3)
+        )
+    );
+  }
+
+  void _abrirModalServico({PetShopService? servico}) {
     if (servico != null) {
-      _editIndex = index;
-      _nome = servico['nome'];
-      _preco = servico['preco'].replaceAll('R\$', '').trim();
-      _duracao = servico['duracao'];
-      _iconeSelecionado = servico['icone'];
+      _editId = servico.id;
+      _nome = servico.name;
+      _preco = servico.price.toStringAsFixed(2).replaceAll('.', ',');
     } else {
-      _editIndex = null;
+      _editId = null;
       _nome = '';
       _preco = '';
-      _duracao = '';
-      _iconeSelecionado = Icons.pets;
     }
 
     final screenHeight = MediaQuery.of(context).size.height;
@@ -70,7 +102,7 @@ class _ServicesState extends State<Services> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _editIndex == null
+                    _editId == null
                         ? 'Adicionar Novo Serviço 🐾'
                         : 'Editar Serviço ✏️',
                     style: TextStyle(
@@ -89,7 +121,7 @@ class _ServicesState extends State<Services> {
                       if (value == null || value.trim().isEmpty) return 'Informe o nome';
                       if (value.trim().length < 3) return 'O nome deve ter pelo menos 3 caracteres';
                       if (value.trim().length > 50) return 'O nome deve ter no máximo 50 caracteres';
-                      if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) return 'O nome deve conter apenas letras e espaços';
+                      if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) return 'O nome deve conter apenas letras e espaços'; // Manter?
                       return null;
                     },
                     onSaved: (value) => _nome = value!.trim(),
@@ -107,37 +139,7 @@ class _ServicesState extends State<Services> {
                       if (preco == null || preco <= 0) return 'Informe um preço válido';
                       return null;
                     },
-                    onSaved: (value) => _preco = 'R\$ ${value!.trim()}',
-                  ),
-                  SizedBox(height: screenHeight * 0.015),
-                  _buildTextField(
-                    label: 'Duração (ex: 1h ou 1:30)',
-                    icon: Icons.timer,
-                    initialValue: _duracao,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Informe a duração';
-                      final regex = RegExp(r'^(\d{1,2}(:\d{2})?|(\d{1,2}h(\d{1,2})?))$');
-                      if (!regex.hasMatch(value.trim())) return 'Formato inválido (ex: 1h ou 1:30)';
-                      return null;
-                    },
-                    onSaved: (value) => _duracao = _formatarDuracao(value!.trim()),
-                  ),
-                  SizedBox(height: screenHeight * 0.015),
-                  DropdownButtonFormField<IconData>(
-                    value: _iconeSelecionado,
-                    decoration: InputDecoration(
-                      labelText: 'Ícone',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: Icons.pets, child: Text('Banho / Tosa 🐶')),
-                      DropdownMenuItem(value: Icons.local_hotel, child: Text('Hotel 🏨')),
-                      DropdownMenuItem(value: Icons.child_friendly, child: Text('Creche 🧸')),
-                      DropdownMenuItem(value: Icons.local_shipping, child: Text('Transporte 🚗')),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) setState(() => _iconeSelecionado = value);
-                    },
+                    onSaved: (value) => _preco = value!.trim(),
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   SizedBox(
@@ -153,7 +155,7 @@ class _ServicesState extends State<Services> {
                       ),
                       icon: const Icon(Icons.save),
                       label: Text(
-                        _editIndex == null ? 'Salvar Serviço' : 'Salvar Alterações',
+                        _editId == null ? 'Salvar Serviço' : 'Salvar Alterações',
                         style: TextStyle(fontSize: screenHeight * 0.022),
                       ),
                       onPressed: _salvarServico,
@@ -192,64 +194,87 @@ class _ServicesState extends State<Services> {
     );
   }
 
-  String _formatarDuracao(String valor) {
-    if (valor.contains(':')) {
-      final partes = valor.split(':');
-      return '${partes[0]}h${partes[1]}min';
-    } else if (valor.contains('h')) {
-      return valor;
-    } else {
-      return '${valor}h';
-    }
-  }
-
-  void _salvarServico() {
+  void _salvarServico() async{
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      final novoServico = {
-        'icone': _iconeSelecionado,
-        'nome': _nome,
-        'preco': _preco,
-        'duracao': _duracao,
-        'ativo': true,
-      };
+      final preco = double.parse(_preco.replaceAll(',', '.'));
 
-      setState(() {
-        if (_editIndex == null) {
-          _servicos.add(novoServico);
-        } else {
-          _servicos[_editIndex!] = novoServico;
-        }
-      });
-
+      final novoServico = PetShopService(
+          id: _editId,
+          name: _nome,
+          price: preco,
+          petShopId: widget.petShopId
+      );
+      
       Navigator.pop(context);
+
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(child: CircularProgressIndicator())
+      );
+
+      try {
+        if (_editId == null) {
+          final resultado = await PetShopServiceService.addService(novoServico);
+          Navigator.pop(context);
+
+          if (resultado != null) {
+            _mostrarSucesso('Serviço atualizado com sucesso!');
+            await _carregarServicos();
+          } else {
+            Navigator.pop(context);
+            _mostrarErro('Erro ao atualizar serviço ');
+          }
+        }
+      }catch (e) {
+        Navigator.pop(context);
+        _mostrarErro('Erro ao atualizar serviço: $e');
+      }
     }
   }
 
-  void _excluirServico(int index) {
+  void _excluirServico(PetShopService servico) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Serviço'),
-        content: const Text('Tem certeza que deseja remover este serviço?'),
+        content: Text('Tem certeza que deseja remover "${servico.name}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar')
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: corPrimaria, foregroundColor: corTexto),
-            onPressed: () {
-              setState(() => _servicos.removeAt(index));
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white
+            ),
+            onPressed: () async {
               Navigator.pop(context);
+
+              showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (context) => const Center(child: CircularProgressIndicator()),
+              );
+
+              final sucesso = await PetShopServiceService.deleteService(servico.id!);
+              Navigator.pop(context);
+
+              if (sucesso) {
+                _mostrarSucesso('Serviço excluído com sucesso!');
+                await _carregarServicos();
+              } else {
+                _mostrarErro('Erro ao excluir serviço');
+              }
             },
             child: const Text('Excluir'),
           ),
         ],
       ),
     );
-  }
-
-  void _alternarAtivo(int index, bool value) {
-    setState(() => _servicos[index]['ativo'] = value);
   }
 
   @override
@@ -260,18 +285,7 @@ class _ServicesState extends State<Services> {
 
     return Scaffold(
       backgroundColor: corFundo,
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-        ],
-      ),
+      drawer: CustomDrawerPetShop(petShopId: widget.petShopId, userId: widget.userId),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
         child: Container(
@@ -311,62 +325,94 @@ class _ServicesState extends State<Services> {
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        child: _servicos.isEmpty
-            ? Center(
-          child: Text(
-            'Nenhum serviço cadastrado ainda 🐕',
-            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
-            textAlign: TextAlign.center,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+        onRefresh: _carregarServicos,
+        child: Padding(
+          padding: EdgeInsets.all(screenWidth * 0.04),
+          child: _servicos.isEmpty
+              ? Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.pets, size: 64, color: corTexto.withOpacity(0.3)),
+                SizedBox(height: 16),
+                Text(
+                  'Nenhum serviço cadastrado ainda 🐕',
+                  style: TextStyle(
+                    color: corTexto.withOpacity(0.6),
+                    fontSize: screenHeight * 0.02,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Arraste para baixo para atualizar',
+                  style: TextStyle(
+                    color: corTexto.withOpacity(0.4),
+                    fontSize: screenHeight * 0.016,
+                  ),
+                ),
+              ],
+            ),
+          )
+              : ListView.builder(
+            itemCount: _servicos.length,
+            itemBuilder: (context, index) {
+              final servico = _servicos[index];
+              return Card(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 4,
+                margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+                color: Colors.white,
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.012,
+                  ),
+                  leading: Icon(Icons.pets, size: screenHeight * 0.04, color: corPrimaria),
+                  title: Text(
+                    servico.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                      fontSize: screenHeight * 0.022,
+                    ),
+                  ),
+                  subtitle: Text(
+                    servico.formattedPrice,
+                    style: TextStyle(
+                      color: corTexto.withOpacity(0.7),
+                      fontSize: screenHeight * 0.018,
+                    ),
+                  ),
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit, color: corTexto),
+                        onPressed: () => _abrirModalServico(servico: servico),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () => _excluirServico(servico),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
-        )
-            : ListView.builder(
-          itemCount: _servicos.length,
-          itemBuilder: (context, index) {
-            final servico = _servicos[index];
-            return Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-              margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-              color: Colors.white,
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.012),
-                leading: Icon(servico['icone'], size: screenHeight * 0.04, color: corPrimaria),
-                title: Text(
-                  servico['nome'],
-                  style: TextStyle(fontWeight: FontWeight.bold, color: corTexto, fontSize: screenHeight * 0.022),
-                ),
-                subtitle: Text(
-                  '${servico['preco']}  •  ${servico['duracao']}',
-                  style: TextStyle(color: corTexto.withOpacity(0.7), fontSize: screenHeight * 0.018),
-                ),
-                trailing: Wrap(
-                  spacing: 4,
-                  children: [
-                    Switch(
-                      value: servico['ativo'],
-                      onChanged: (v) => _alternarAtivo(index, v),
-                      activeColor: corPrimaria,
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.edit, color: corTexto),
-                      onPressed: () => _abrirModalServico(servico: servico, index: index),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: corPrimaria),
-                      onPressed: () => _excluirServico(index),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
         ),
       ),
+
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: corPrimaria,
-        label: Text('Novo Serviço', style: TextStyle(fontWeight: FontWeight.bold, color: corTexto)),
+        label: Text(
+            'Novo Serviço',
+            style: TextStyle(fontWeight: FontWeight.bold, color: corTexto)
+        ),
         icon: Icon(Icons.add, color: corTexto),
         onPressed: () => _abrirModalServico(),
       ),

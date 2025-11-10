@@ -1,19 +1,18 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:torch_app/pages_pet_shop/payment_method.dart';
-import 'package:torch_app/pages_pet_shop/profile.dart';
-import 'package:torch_app/pages_pet_shop/promotions.dart';
-import 'package:torch_app/pages_pet_shop/reviews.dart';
-import 'package:torch_app/pages_pet_shop/services.dart';
-import 'package:torch_app/pages_pet_shop/settings.dart';
 
-import '../components/CustomDrawer.dart';
-import '../models/menu_item.dart';
-import '../pages/login_page.dart';
+import '../components/custom_drawer_pet_shop.dart';
 
 class HomePagePetShop extends StatelessWidget {
-  const HomePagePetShop({super.key});
+  final int petShopId;
+  final int userId;
+
+  const HomePagePetShop({
+    super.key,
+    required this.petShopId,
+    required this.userId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,20 +20,12 @@ class HomePagePetShop extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
     final isTablet = screenWidth > 600;
 
-    final barHeight = screenHeight * 0.05; // altura responsiva igual para cima e baixo
+    final barHeight = screenHeight * 0.05;
 
     return Scaffold(
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-        ],
+      drawer: CustomDrawerPetShop(
+        petShopId: petShopId,
+        userId: userId,
       ),
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: PreferredSize(
@@ -56,7 +47,7 @@ class HomePagePetShop extends StatelessWidget {
                       child: IconButton(
                         icon: Icon(
                           Icons.pets,
-                          size: screenWidth * 0.08, // pata menor e proporcional
+                          size: screenWidth * 0.08,
                           color: Colors.black,
                         ),
                         onPressed: () => Scaffold.of(context).openDrawer(),
@@ -142,7 +133,6 @@ class HomePagePetShop extends StatelessWidget {
     );
   }
 
-  // Lista de patinhas responsivas com tamanho menor
   static List<Widget> _patinhas(double width, double height) {
     final patinhasData = [
       [0.12, 0.90, 55.0],
@@ -160,7 +150,7 @@ class HomePagePetShop extends StatelessWidget {
     ];
 
     return patinhasData.map((e) {
-      double size = math.min(width * 0.06, 40); // menor tamanho e limite máximo
+      double size = math.min(width * 0.06, 40);
       double top = (e[0] * height).clamp(0, height - size);
       double left = (e[1] * width).clamp(0, width - size);
       double rotation = e[2];
