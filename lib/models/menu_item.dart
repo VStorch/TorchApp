@@ -22,8 +22,9 @@ class MenuItem {
   });
 
   /// Factory que cria MenuItem baseado no PageType
-  factory MenuItem.fromType(PageType type) {
+  factory MenuItem.fromType(PageType type, {int? currentUserId}) {
     switch (type) {
+      case PageType.home:
       case PageType.home:
         return MenuItem(
           title: 'Tela Inicial',
@@ -34,7 +35,7 @@ class MenuItem {
         return MenuItem(
           title: 'Meus Pets',
           icon: Icons.pets,
-          destinationPage: const MyPetsPage(), // ✅ SEM currentUserId
+          destinationPage: const MyPetsPage(),
         );
       case PageType.favorites:
         return MenuItem(
