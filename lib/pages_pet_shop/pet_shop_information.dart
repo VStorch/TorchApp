@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 import 'dart:convert';
 
@@ -24,7 +24,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
   final TextEditingController _cepController = TextEditingController();
   final TextEditingController _ufController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _districtController = TextEditingController();
+  final TextEditingController _neighborhoodController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _numberController = TextEditingController();
   final TextEditingController _complementController = TextEditingController();
@@ -55,7 +55,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
         setState(() {
           _ufController.text = data['uf'] ?? '';
           _cityController.text = data['localidade'] ?? '';
-          _districtController.text = data['bairro'] ?? '';
+          _neighborhoodController.text = data['bairro'] ?? '';
           _addressController.text = data['logradouro'] ?? '';
         });
       } else {
@@ -72,27 +72,25 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
     );
   }
 
-  // ======= SALVAR DADOS DO ENDEREÇO NO SHARED PREFERENCES =======
+  // Salvar dados do endereço no shared preferences
   Future<void> _saveAddressData() async {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('petshop_cep', _cepController.text.trim());
     await prefs.setString('petshop_state', _ufController.text.trim());
     await prefs.setString('petshop_city', _cityController.text.trim());
-    await prefs.setString('petshop_neighborhood', _districtController.text.trim());
+    await prefs.setString('petshop_neighborhood', _neighborhoodController.text.trim());
     await prefs.setString('petshop_street', _addressController.text.trim());
     await prefs.setString('petshop_number', _numberController.text.trim());
     await prefs.setString('petshop_complement', _complementController.text.trim());
   }
-  // ==============================================================
 
   @override
   void dispose() {
-    // Dispose dos controllers
     _cepController.dispose();
     _ufController.dispose();
     _cityController.dispose();
-    _districtController.dispose();
+    _neighborhoodController.dispose();
     _addressController.dispose();
     _numberController.dispose();
     _complementController.dispose();
@@ -125,7 +123,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                   children: [
                     Container(height: 1, color: Colors.black),
                     const SizedBox(height: 10),
-                    Container(
+                    SizedBox(
                       width: formWidth,
                       child: const Text(
                         "Cadastrar Pet Shop",
@@ -137,7 +135,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Container(
+                    SizedBox(
                       width: formWidth,
                       child: const Text(
                         "Informe o CEP e complete as informações.",
@@ -148,7 +146,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Container(
+                    SizedBox(
                       width: formWidth,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +187,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                           const SizedBox(height: 12),
                           const Text("Bairro:"),
                           const SizedBox(height: 6),
-                          _buildTextField(controller: _districtController, hint: "Bairro"),
+                          _buildTextField(controller: _neighborhoodController, hint: "Bairro"),
 
                           const SizedBox(height: 12),
                           const Text("Endereço:"),
@@ -233,7 +231,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                                 final cep = _cepController.text.trim();
                                 final state = _ufController.text.trim();
                                 final city = _cityController.text.trim();
-                                final neighborhood = _districtController.text.trim();
+                                final neighborhood = _neighborhoodController.text.trim();
                                 final street = _addressController.text.trim();
                                 final number = _numberController.text.trim();
 
@@ -255,7 +253,7 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                                       cep: _cepController.text,
                                       state: _ufController.text,
                                       city: _cityController.text,
-                                      neighborhood: _districtController.text,
+                                      neighborhood: _neighborhoodController.text,
                                       street: _addressController.text,
                                       number: _numberController.text,
                                       complement: _complementController.text,

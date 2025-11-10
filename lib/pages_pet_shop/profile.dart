@@ -11,7 +11,7 @@ import 'contact_section.dart';
 import 'location_section.dart';
 import 'social_media_section.dart';
 import 'services_section.dart';
-import 'horario_box.dart';
+import 'schedule_box.dart';
 import 'user_tab.dart';
 
 class Profile extends StatefulWidget {
@@ -219,8 +219,8 @@ class _ProfileState extends State<Profile> {
                           pickLogo: _pickLogo,
                         ),
                         SizedBox(height: screenHeight * 0.03),
-                        HorarioBox(
-                          horarios: _horarios,
+                        ScheduleBox(
+                          schedules: _horarios,
                           onEdit: (result) {
                             if (result != null && mounted) {
                               setState(() {
@@ -247,12 +247,12 @@ class _ProfileState extends State<Profile> {
                         SizedBox(height: screenHeight * 0.03),
                         LocationSection(
                           cepController: cepController,
-                          estadoController: estadoController,
-                          cidadeController: cidadeController,
-                          bairroController: bairroController,
-                          enderecoController: enderecoController,
-                          numeroController: numeroController,
-                          complementoController: complementoController,
+                          stateController: estadoController,
+                          cityController: cidadeController,
+                          neighborhoodController: bairroController,
+                          streetController: enderecoController,
+                          numberController: numeroController,
+                          addressComplementController: complementoController,
                         ),
                         SizedBox(height: screenHeight * 0.03),
 

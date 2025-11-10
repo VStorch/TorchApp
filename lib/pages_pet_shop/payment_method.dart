@@ -18,21 +18,21 @@ class PaymentMethod extends StatefulWidget {
 class _PaymentMethodState extends State<PaymentMethod> {
   final List<Map<String, dynamic>> _methods = [];
   int? _editIndex;
-  String? _selectedMetodo;
+  String? _selectedMethod;
 
-  final Color corFundo = const Color(0xFFFBF8E1);
-  final Color corPrimaria = const Color(0xFFF4E04D);
-  final Color corTexto = Colors.black87;
-  final Color corSelecionado = const Color(0xFFFAF59E);
+  final Color backgroundColor = const Color(0xFFFBF8E1);
+  final Color primaryColor = const Color(0xFFF4E04D);
+  final Color textColor = Colors.black87;
+  final Color selectedColor = const Color(0xFFFAF59E);
 
-  final Map<String, bool> _formasPadrao = {
+  final Map<String, bool> _defaultPaymentMethods = {
     "Dinheiro": false,
     "PIX": false,
     "Cartão de crédito": false,
     "Cartão de débito": false,
   };
 
-  void _mostrarAviso(String mensagem) {
+  void _showAlert(String message) {
     OverlayEntry overlayEntry = OverlayEntry(
       builder: (context) => Center(
         child: Material(
@@ -41,12 +41,12 @@ class _PaymentMethodState extends State<PaymentMethod> {
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
             margin: const EdgeInsets.symmetric(horizontal: 40),
             decoration: BoxDecoration(
-              color: corPrimaria.withOpacity(0.9),
+              color: primaryColor.withOpacity(0.9),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.black26, width: 1),
             ),
             child: Text(
-              mensagem,
+              message,
               style: const TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
@@ -65,22 +65,22 @@ class _PaymentMethodState extends State<PaymentMethod> {
     });
   }
 
-  void _abrirModalMetodo({int? index}) {
+  void _showPaymentMethodModal({int? index}) {
     if (index != null) {
       _editIndex = index;
-      _selectedMetodo = _methods[index]['formas'].entries
+      _selectedMethod = _methods[index]['formas'].entries
           .firstWhere((e) => e.value == true, orElse: () => const MapEntry('', false))
           .key;
-      if (_selectedMetodo == '') _selectedMetodo = null;
+      if (_selectedMethod == '') _selectedMethod = null;
     } else {
       _editIndex = null;
-      _selectedMetodo = null;
+      _selectedMethod = null;
     }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: corFundo,
+      backgroundColor: backgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -104,25 +104,25 @@ class _PaymentMethodState extends State<PaymentMethod> {
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: corTexto),
+                        color: textColor),
                   ),
                   const SizedBox(height: 20),
-                  ..._formasPadrao.keys.map((key) {
-                    final bool isSelected = _selectedMetodo == key;
+                  ..._defaultPaymentMethods.keys.map((key) {
+                    final bool isSelected = _selectedMethod == key;
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 4),
                       decoration: BoxDecoration(
-                        color: isSelected ? corSelecionado : Colors.transparent,
+                        color: isSelected ? selectedColor : Colors.transparent,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: RadioListTile<String>(
                         title: Text(key),
                         value: key,
-                        groupValue: _selectedMetodo,
-                        activeColor: corPrimaria,
+                        groupValue: _selectedMethod,
+                        activeColor: primaryColor,
                         onChanged: (val) {
                           setModalState(() {
-                            _selectedMetodo = val;
+                            _selectedMethod = val;
                           });
                         },
                       ),
@@ -131,8 +131,8 @@ class _PaymentMethodState extends State<PaymentMethod> {
                   const SizedBox(height: 20),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: corPrimaria,
-                      foregroundColor: corTexto,
+                      backgroundColor: primaryColor,
+                      foregroundColor: textColor,
                       minimumSize: const Size.fromHeight(50),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -144,7 +144,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                           ? 'Salvar Forma'
                           : 'Salvar Alteração',
                     ),
-                    onPressed: _salvarMetodo,
+                    onPressed: _saveMethod,
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -156,44 +156,44 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
-  void _salvarMetodo() {
-    if (_selectedMetodo == null) {
-      _mostrarAviso('Selecione uma forma de pagamento!');
+  void _saveMethod() {
+    if (_selectedMethod == null) {
+      _showAlert('Selecione uma forma de pagamento!');
       return;
     }
 
-    bool jaExiste = _methods.asMap().entries.any((entry) {
+    bool alreadyExists = _methods.asMap().entries.any((entry) {
       int i = entry.key;
-      Map metodo = entry.value;
+      Map method = entry.value;
       if (_editIndex != null && i == _editIndex) return false;
-      return metodo['formas'][_selectedMetodo!] == true;
+      return method['formas'][_selectedMethod!] == true;
     });
 
-    if (jaExiste) {
-      _mostrarAviso('Este método já está cadastrado!');
+    if (alreadyExists) {
+      _showAlert('Este método já está cadastrado!');
       return;
     }
 
-    Map<String, bool> novoMetodoMap = Map.from(_formasPadrao);
-    novoMetodoMap.updateAll((key, value) => key == _selectedMetodo);
+    Map<String, bool> newMethodMap = Map.from(_defaultPaymentMethods);
+    newMethodMap.updateAll((key, value) => key == _selectedMethod);
 
-    final novoMetodo = {
-      'formas': novoMetodoMap,
+    final newMethod = {
+      'formas': newMethodMap,
       'ativo': true,
     };
 
     setState(() {
       if (_editIndex == null) {
-        _methods.add(novoMetodo);
+        _methods.add(newMethod);
       } else {
-        _methods[_editIndex!] = novoMetodo;
+        _methods[_editIndex!] = newMethod;
       }
     });
 
     Navigator.pop(context);
   }
 
-  void _excluirMetodo(int index) {
+  void _removePaymentMethod(int index) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -216,7 +216,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 
-  void _alternarAtivo(int index, bool value) {
+  void _togglePaymentMethodStatus(int index, bool value) {
     setState(() => _methods[index]['ativo'] = value);
   }
 
@@ -227,7 +227,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
     final barHeight = screenHeight * 0.05;
 
     return Scaffold(
-      backgroundColor: corFundo,
+      backgroundColor: backgroundColor,
       drawer: CustomDrawerPetShop(
         petShopId: widget.petShopId,
         userId: widget.userId,
@@ -237,7 +237,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
           decoration: BoxDecoration(
-            color: corPrimaria,
+            color: primaryColor,
             border: Border.all(color: Colors.black, width: 1),
           ),
           child: SafeArea(
@@ -260,7 +260,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
                     style: TextStyle(
                       fontSize: barHeight * 0.6,
                       fontWeight: FontWeight.bold,
-                      color: corTexto,
+                      color: textColor,
                     ),
                   ),
                 ),
@@ -275,7 +275,7 @@ class _PaymentMethodState extends State<PaymentMethod> {
             ? Center(
           child: Text(
             'Nenhum método de pagamento cadastrado 💳',
-            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
+            style: TextStyle(color: textColor.withOpacity(0.6), fontSize: screenHeight * 0.02),
             textAlign: TextAlign.center,
           ),
         )
@@ -301,23 +301,23 @@ class _PaymentMethodState extends State<PaymentMethod> {
                 title: Text(
                   formasAtivas,
                   style: TextStyle(
-                      fontWeight: FontWeight.bold, color: corTexto, fontSize: screenHeight * 0.022),
+                      fontWeight: FontWeight.bold, color: textColor, fontSize: screenHeight * 0.022),
                 ),
                 trailing: Wrap(
                   spacing: 4,
                   children: [
                     Switch(
                       value: metodo['ativo'],
-                      onChanged: (v) => _alternarAtivo(index, v),
-                      activeColor: corPrimaria,
+                      onChanged: (v) => _togglePaymentMethodStatus(index, v),
+                      activeColor: primaryColor,
                     ),
                     IconButton(
-                      icon: Icon(Icons.edit, color: corTexto),
-                      onPressed: () => _abrirModalMetodo(index: index),
+                      icon: Icon(Icons.edit, color: textColor),
+                      onPressed: () => _showPaymentMethodModal(index: index),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => _excluirMetodo(index),
+                      onPressed: () => _removePaymentMethod(index),
                     ),
                   ],
                 ),
@@ -327,13 +327,13 @@ class _PaymentMethodState extends State<PaymentMethod> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: corPrimaria,
+        backgroundColor: primaryColor,
         label: Text(
           'Novo Método',
-          style: TextStyle(fontWeight: FontWeight.bold, color: corTexto),
+          style: TextStyle(fontWeight: FontWeight.bold, color: textColor),
         ),
-        icon: Icon(Icons.add, color: corTexto),
-        onPressed: () => _abrirModalMetodo(),
+        icon: Icon(Icons.add, color: textColor),
+        onPressed: () => _showPaymentMethodModal(),
       ),
     );
   }

@@ -93,7 +93,7 @@ class HomePagePetShop extends StatelessWidget {
                   ),
                 ),
               ),
-              ..._patinhas(width, height),
+              ..._paws(width, height),
               Align(
                 alignment: const Alignment(0, 0.1),
                 child: FractionallySizedBox(
@@ -133,8 +133,8 @@ class HomePagePetShop extends StatelessWidget {
     );
   }
 
-  static List<Widget> _patinhas(double width, double height) {
-    final patinhasData = [
+  static List<Widget> _paws(double width, double height) {
+    final pawsData = [
       [0.12, 0.90, 55.0],
       [0.17, 0.74, 45.0],
       [0.25, 0.60, 50.0],
@@ -149,7 +149,7 @@ class HomePagePetShop extends StatelessWidget {
       [0.89, 0.61, -55.0],
     ];
 
-    return patinhasData.map((e) {
+    return pawsData.map((e) {
       double size = math.min(width * 0.06, 40);
       double top = (e[0] * height).clamp(0, height - size);
       double left = (e[1] * width).clamp(0, width - size);

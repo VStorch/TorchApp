@@ -3,22 +3,22 @@ import 'custom_widgets.dart';
 
 class LocationSection extends StatelessWidget {
   final TextEditingController cepController;
-  final TextEditingController estadoController;
-  final TextEditingController cidadeController;
-  final TextEditingController bairroController;
-  final TextEditingController enderecoController;
-  final TextEditingController numeroController;
-  final TextEditingController complementoController;
+  final TextEditingController stateController;
+  final TextEditingController cityController;
+  final TextEditingController neighborhoodController;
+  final TextEditingController streetController;
+  final TextEditingController numberController;
+  final TextEditingController addressComplementController;
 
   const LocationSection({
     super.key,
     required this.cepController,
-    required this.estadoController,
-    required this.cidadeController,
-    required this.bairroController,
-    required this.enderecoController,
-    required this.numeroController,
-    required this.complementoController,
+    required this.stateController,
+    required this.cityController,
+    required this.neighborhoodController,
+    required this.streetController,
+    required this.numberController,
+    required this.addressComplementController,
   });
 
   @override
@@ -59,17 +59,17 @@ class LocationSection extends StatelessWidget {
             const LabelText("CEP:"),
             CustomTextField(controller: cepController),
             const LabelText("Estado:"),
-            CustomTextField(controller: estadoController),
+            CustomTextField(controller: stateController),
             const LabelText("Cidade:"),
-            CustomTextField(controller: cidadeController),
+            CustomTextField(controller: cityController),
             const LabelText("Bairro:"),
-            CustomTextField(controller: bairroController),
-            const LabelText("Endereço:"),
-            CustomTextField(controller: enderecoController),
+            CustomTextField(controller: neighborhoodController),
+            const LabelText("Rua:"),
+            CustomTextField(controller: streetController),
             const LabelText("Número:"),
-            CustomTextField(controller: numeroController),
+            CustomTextField(controller: numberController),
             const LabelText("Complemento:"),
-            CustomTextField(controller: complementoController),
+            CustomTextField(controller: addressComplementController),
           ],
         ),
       ),

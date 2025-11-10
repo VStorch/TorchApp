@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'schedulePage.dart';
 
-class HorarioBox extends StatelessWidget {
-  final Map<String, Map<String, String>>? horarios;
+class ScheduleBox extends StatelessWidget {
+  final Map<String, Map<String, String>>? schedules;
   final Function(dynamic) onEdit;
 
-  const HorarioBox({super.key, required this.horarios, required this.onEdit});
+  const ScheduleBox({super.key, required this.schedules, required this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class HorarioBox extends StatelessWidget {
     final buttonVerticalPadding = screenWidth * 0.035;
     final spacing = screenWidth * 0.03;
 
-    if (horarios == null) {
+    if (schedules == null) {
       return ElevatedButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -61,10 +61,10 @@ class HorarioBox extends StatelessWidget {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: horarios!.entries.map((entry) {
-              final dia = entry.key;
-              final abre = entry.value['abre'] ?? '';
-              final fecha = entry.value['fecha'] ?? '';
+            children: schedules!.entries.map((entry) {
+              final day = entry.key;
+              final openTime = entry.value['abre'] ?? '';
+              final closeTime = entry.value['fecha'] ?? '';
 
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: spacing / 2),
@@ -75,7 +75,7 @@ class HorarioBox extends StatelessWidget {
                       children: [
                         Icon(Icons.calendar_today, size: iconSize, color: Colors.black54),
                         SizedBox(width: spacing / 2),
-                        Text(dia,
+                        Text(day,
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: screenWidth * 0.038)),
                       ],
@@ -84,7 +84,7 @@ class HorarioBox extends StatelessWidget {
                       children: [
                         Icon(Icons.schedule, size: iconSize, color: Colors.black54),
                         SizedBox(width: spacing / 3),
-                        Text("$abre - $fecha", style: TextStyle(fontSize: screenWidth * 0.036)),
+                        Text("$openTime - $closeTime", style: TextStyle(fontSize: screenWidth * 0.036)),
                       ],
                     ),
                   ],

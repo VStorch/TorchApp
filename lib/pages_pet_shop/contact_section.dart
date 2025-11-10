@@ -11,7 +11,7 @@ class ContactSection extends StatefulWidget {
 
 class _ContactSectionState extends State<ContactSection> {
   final TextEditingController cnpjController = TextEditingController();
-  final TextEditingController telefoneController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
   @override
@@ -28,7 +28,7 @@ class _ContactSectionState extends State<ContactSection> {
       cnpjController.text = prefs.getString('petshop_cnpj') ?? '';
 
       // Telefone e email ficam vazios (serão preenchidos depois pelo usuário)
-      telefoneController.text = '';
+      phoneController.text = '';
       emailController.text = '';
     });
   }
@@ -36,7 +36,7 @@ class _ContactSectionState extends State<ContactSection> {
   @override
   void dispose() {
     cnpjController.dispose();
-    telefoneController.dispose();
+    phoneController.dispose();
     emailController.dispose();
     super.dispose();
   }
@@ -76,7 +76,7 @@ class _ContactSectionState extends State<ContactSection> {
             CustomTextField(controller: cnpjController),
             const LabelText("Telefone comercial:"),
             CustomTextField(
-              controller: telefoneController,
+              controller: phoneController,
               hint: "Digite o telefone comercial",
             ),
             const LabelText("Email comercial:"),

@@ -47,7 +47,7 @@ class CustomTextField extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SizedBox(
-      width: double.infinity, // ocupa toda a largura disponível do pai
+      width: double.infinity, // Ocupa toda a largura disponível do pai
       child: TextField(
         controller: controller,
         readOnly: readOnly,
