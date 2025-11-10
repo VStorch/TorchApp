@@ -1,9 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
 import '../components/CustomDrawer.dart';
 import '../models/menu_item.dart';
 import '../pages/login_page.dart';
+import 'package:torch_app/components/custom_drawer_pet_shop.dart';
 import 'petshop_info_section.dart';
 import 'contact_section.dart';
 import 'location_section.dart';
@@ -11,15 +13,12 @@ import 'social_media_section.dart';
 import 'services_section.dart';
 import 'horario_box.dart';
 import 'user_tab.dart';
-import 'home_page_pet_shop.dart';
-import 'services.dart';
-import 'reviews.dart';
-import 'promotions.dart';
-import 'payment_method.dart';
-import 'settings.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  final int petShopId;
+  final int userId;
+
+  const Profile({super.key, required this.petShopId, required this.userId});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -30,32 +29,20 @@ class _ProfileState extends State<Profile> {
   final Color yellow = const Color(0xFFF4E04D);
 
   // --- Controladores do usuário ---
-  final TextEditingController nameController =
-  TextEditingController(text: "Leonardo Cortelim Dos Santos");
-  final TextEditingController phoneController =
-  TextEditingController(text: "(47)99745-6526");
-  final TextEditingController birthController =
-  TextEditingController(text: "18/06/2008");
-  final TextEditingController emailController =
-  TextEditingController(text: "leonardo@gmail.com");
-  final TextEditingController passwordController =
-  TextEditingController(text: "*********");
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController birthController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController(text: "*********");
 
   // --- Controladores de localização ---
-  final TextEditingController cepController =
-  TextEditingController(text: "89200-000");
-  final TextEditingController estadoController =
-  TextEditingController(text: "SC");
-  final TextEditingController cidadeController =
-  TextEditingController(text: "Joinville");
-  final TextEditingController bairroController =
-  TextEditingController(text: "Centro");
-  final TextEditingController enderecoController =
-  TextEditingController(text: "Rua dos Pets");
-  final TextEditingController numeroController =
-  TextEditingController(text: "123");
-  final TextEditingController complementoController =
-  TextEditingController(text: "Próximo ao mercado");
+  final TextEditingController cepController = TextEditingController();
+  final TextEditingController estadoController = TextEditingController();
+  final TextEditingController cidadeController = TextEditingController();
+  final TextEditingController bairroController = TextEditingController();
+  final TextEditingController enderecoController = TextEditingController();
+  final TextEditingController numeroController = TextEditingController();
+  final TextEditingController complementoController = TextEditingController();
 
   // --- Controladores de PetShop ---
   final TextEditingController petNameController = TextEditingController();
@@ -72,6 +59,40 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _siteController = TextEditingController();
   final TextEditingController _whatsappController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData(); // CARREGAR DADOS AO INICIAR
+  }
+
+  // ======= CARREGAR DADOS DO SHARED PREFERENCES =======
+  Future<void> _loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      // Dados do usuário
+      final name = prefs.getString('user_name') ?? '';
+      final surname = prefs.getString('user_surname') ?? '';
+      nameController.text = '$name $surname'.trim();
+
+      phoneController.text = prefs.getString('user_phone') ?? '';
+      emailController.text = prefs.getString('user_email') ?? '';
+      birthController.text = prefs.getString('user_birth') ?? '';
+
+      // Dados do endereço do Pet Shop
+      cepController.text = prefs.getString('petshop_cep') ?? '';
+      estadoController.text = prefs.getString('petshop_state') ?? '';
+      cidadeController.text = prefs.getString('petshop_city') ?? '';
+      bairroController.text = prefs.getString('petshop_neighborhood') ?? '';
+      enderecoController.text = prefs.getString('petshop_street') ?? '';
+      numeroController.text = prefs.getString('petshop_number') ?? '';
+      complementoController.text = prefs.getString('petshop_complement') ?? '';
+
+      // CNPJ será carregado automaticamente pelo ContactSection
+    });
+  }
+  // ====================================================
+
   Future<void> _pickLogo() async {
     final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) setState(() => _petLogo = File(pickedImage.path));
@@ -86,19 +107,12 @@ class _ProfileState extends State<Profile> {
     final bottomBarHeight = barHeight;
 
     return Scaffold(
-      drawer: CustomDrawer(menuItems: [
-        MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-        MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-        MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-        MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-        MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-        MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-        MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-        MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-      ]),
+      drawer: CustomDrawerPetShop(
+          petShopId: widget.petShopId,
+          userId: widget.userId,
+      ),
       backgroundColor: const Color(0xFFFBF8E1),
 
-      // --- AppBar ---
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
         child: Container(
@@ -139,7 +153,6 @@ class _ProfileState extends State<Profile> {
 
       body: Column(
         children: [
-          // --- Toggle PetShop / Usuário ---
           Row(
             children: [
               Expanded(
@@ -190,11 +203,9 @@ class _ProfileState extends State<Profile> {
             ],
           ),
 
-          // --- Conteúdo ---
           Expanded(
             child: Stack(
               children: [
-                // Aba PetShop → scrollável
                 if (isPetShopActive)
                   SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
@@ -245,7 +256,6 @@ class _ProfileState extends State<Profile> {
                         ),
                         SizedBox(height: screenHeight * 0.03),
 
-                        // --- BOTÃO DE SALVAR ALTERAÇÕES ---
                         SizedBox(
                           width: screenWidth * 0.9,
                           height: 50,
@@ -277,7 +287,6 @@ class _ProfileState extends State<Profile> {
                     ),
                   ),
 
-                // Aba Usuário → fixa, sem scroll
                 if (!isPetShopActive)
                   UserTab(
                     nameController: nameController,
@@ -287,7 +296,6 @@ class _ProfileState extends State<Profile> {
                     passwordController: passwordController,
                   ),
 
-                // Faixa inferior igual AppBar
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(

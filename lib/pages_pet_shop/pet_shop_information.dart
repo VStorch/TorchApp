@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
+import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 import 'dart:convert';
 
+import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
+
 class PetShopInformationPage extends StatefulWidget {
-  const PetShopInformationPage({super.key});
+  final int ownerId;
+
+  const PetShopInformationPage({super.key, required this.ownerId});
 
   @override
   State<PetShopInformationPage> createState() => _PetShopInformationPageState();
@@ -65,6 +71,20 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
       SnackBar(content: Text(message)),
     );
   }
+
+  // ======= SALVAR DADOS DO ENDEREÇO NO SHARED PREFERENCES =======
+  Future<void> _saveAddressData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString('petshop_cep', _cepController.text.trim());
+    await prefs.setString('petshop_state', _ufController.text.trim());
+    await prefs.setString('petshop_city', _cityController.text.trim());
+    await prefs.setString('petshop_neighborhood', _districtController.text.trim());
+    await prefs.setString('petshop_street', _addressController.text.trim());
+    await prefs.setString('petshop_number', _numberController.text.trim());
+    await prefs.setString('petshop_complement', _complementController.text.trim());
+  }
+  // ==============================================================
 
   @override
   void dispose() {
@@ -209,8 +229,41 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
 
                           Center(
                             child: ElevatedButton(
-                              onPressed: () {
-                                // Aqui você pode adicionar a ação do botão "Continuar"
+                              onPressed: () async {
+                                final cep = _cepController.text.trim();
+                                final state = _ufController.text.trim();
+                                final city = _cityController.text.trim();
+                                final neighborhood = _districtController.text.trim();
+                                final street = _addressController.text.trim();
+                                final number = _numberController.text.trim();
+
+                                if (cep.isEmpty || state.isEmpty || city.isEmpty || neighborhood.isEmpty || street.isEmpty || number.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Preencha todos os campos obrigatórios.')),
+                                  );
+                                  return;
+                                }
+
+                                // ======= SALVAR DADOS ANTES DE NAVEGAR =======
+                                await _saveAddressData();
+                                // =============================================
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RegistrationSupplements(
+                                    petShop: PetShopDto(
+                                      cep: _cepController.text,
+                                      state: _ufController.text,
+                                      city: _cityController.text,
+                                      neighborhood: _districtController.text,
+                                      street: _addressController.text,
+                                      number: _numberController.text,
+                                      complement: _complementController.text,
+                                      cnpj: "00.000.000/0000-00",
+                                      ownerId: widget.ownerId,
+                                    ),
+                                  )),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: yellow,

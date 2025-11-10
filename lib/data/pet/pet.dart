@@ -30,14 +30,20 @@ class Pet {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
+    final Map<String, dynamic> json = {
       'name': name,
       'breed': breed,
       'species': species,
       'weight': weight,
       'birthDate': birthDate.toIso8601String(),
-      'userId': userId, // corrigido
+      'userId': userId,
     };
+
+    // Só inclui o id se ele não for null (para edição)
+    if (id != null) {
+      json['id'] = id!;
+    }
+
+    return json;
   }
 }

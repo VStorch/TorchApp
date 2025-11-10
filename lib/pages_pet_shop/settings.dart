@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/pages/login_page.dart';
-import '../components/CustomDrawer.dart';
-import '../models/menu_item.dart';
+import '../components/custom_drawer_pet_shop.dart';
 import 'home_page_pet_shop.dart';
 import 'profile.dart';
 import 'services.dart';
@@ -10,7 +9,14 @@ import 'promotions.dart';
 import 'payment_method.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({super.key});
+  final int petShopId;
+  final int userId;
+
+  const Settings({
+    super.key,
+    required this.petShopId,
+    required this.userId,
+  });
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -33,17 +39,9 @@ class _SettingsState extends State<Settings> {
 
     return Scaffold(
       backgroundColor: corFundo,
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-        ],
+      drawer: CustomDrawerPetShop(
+        petShopId: widget.petShopId,
+        userId: widget.userId,
       ),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
@@ -105,7 +103,12 @@ class _SettingsState extends State<Settings> {
               icon: Icons.lock_outline,
               title: "Alterar senha",
               subtitle: "Atualize sua senha de acesso",
-              onTap: () {},
+              onTap: () {
+                // TODO: Implementar alteração de senha
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Função em desenvolvimento')),
+                );
+              },
             ),
             SizedBox(height: screenHeight * 0.015),
             _buildCard(
@@ -114,7 +117,12 @@ class _SettingsState extends State<Settings> {
               icon: Icons.language,
               title: "Idioma",
               subtitle: "Escolha o idioma do aplicativo",
-              onTap: () {},
+              onTap: () {
+                // TODO: Implementar seleção de idioma
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Função em desenvolvimento')),
+                );
+              },
             ),
             SizedBox(height: screenHeight * 0.015),
             _buildCard(
@@ -143,11 +151,36 @@ class _SettingsState extends State<Settings> {
               icon: Icons.logout,
               title: "Sair",
               subtitle: "Voltar para a tela de login",
+              iconColor: Colors.red,
+              titleColor: Colors.red,
               onTap: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                      (route) => false,
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Sair'),
+                    content: const Text('Deseja realmente sair da sua conta?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancelar'),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context); // Fecha o dialog
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (_) => const LoginPage()),
+                                (route) => false,
+                          );
+                        },
+                        child: const Text('Sair'),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -165,6 +198,8 @@ class _SettingsState extends State<Settings> {
     String? subtitle,
     Widget? trailing,
     VoidCallback? onTap,
+    Color? iconColor,
+    Color? titleColor,
   }) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -182,13 +217,17 @@ class _SettingsState extends State<Settings> {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: EdgeInsets.all(screenHeight * 0.015),
-          child: Icon(icon, size: screenHeight * 0.035, color: Colors.black),
+          child: Icon(
+            icon,
+            size: screenHeight * 0.035,
+            color: iconColor ?? Colors.black,
+          ),
         ),
         title: Text(
           title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: corTexto,
+            color: titleColor ?? corTexto,
             fontSize: screenHeight * 0.022,
           ),
         ),

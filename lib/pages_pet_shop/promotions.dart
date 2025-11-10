@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/pages/login_page.dart';
 import '../components/CustomDrawer.dart';
+import '../components/custom_drawer_pet_shop.dart';
 import '../models/menu_item.dart';
 import 'home_page_pet_shop.dart';
 import 'profile.dart';
@@ -10,7 +11,10 @@ import 'payment_method.dart';
 import 'settings.dart';
 
 class Promotions extends StatefulWidget {
-  const Promotions({super.key});
+  final int petShopId;
+  final int userId;
+
+  const Promotions({super.key, required this.petShopId, required this.userId});
 
   @override
   State<Promotions> createState() => _PromotionsState();
@@ -224,17 +228,9 @@ class _PromotionsState extends State<Promotions> {
 
     return Scaffold(
       backgroundColor: corFundo,
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem(title: "Início", icon: Icons.home, destinationPage: const HomePagePetShop()),
-          MenuItem(title: "Perfil", icon: Icons.person, destinationPage: const Profile()),
-          MenuItem(title: "Serviços", icon: Icons.build, destinationPage: const Services()),
-          MenuItem(title: "Avaliações", icon: Icons.star, destinationPage: const Reviews()),
-          MenuItem(title: "Promoções", icon: Icons.local_offer, destinationPage: const Promotions()),
-          MenuItem(title: "Forma de pagamento", icon: Icons.credit_card, destinationPage: const PaymentMethod()),
-          MenuItem(title: "Configurações", icon: Icons.settings, destinationPage: const Settings()),
-          MenuItem(title: "Sair", icon: Icons.logout, destinationPage: const LoginPage()),
-        ],
+      drawer: CustomDrawerPetShop(
+        petShopId: widget.petShopId,
+        userId: widget.userId,
       ),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),

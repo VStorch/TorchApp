@@ -5,7 +5,7 @@ import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({super.key, required userId});
 
   @override
   Widget build(BuildContext context) {
