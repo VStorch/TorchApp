@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import '../components/CustomDrawer.dart';
+import '../components/custom_drawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
@@ -81,7 +81,7 @@ class HomePage extends StatelessWidget {
 
           return Stack(
             children: [
-              // --- Botão "Repetir o último serviço" ---
+              // Botão "Repetir o último serviço"
               Align(
                 alignment: Alignment(0.0, -0.80),
                 child: FractionallySizedBox(
@@ -102,10 +102,10 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // --- Patinhas ---
-              ..._patinhas(width, height),
+              // Patinhas
+              ..._paws(width, height),
 
-              // --- Gato central ---
+              // Gato central
               Align(
                 alignment: const Alignment(0, 0.0),
                 child: FractionallySizedBox(
@@ -119,7 +119,7 @@ class HomePage extends StatelessWidget {
                 ),
               ),
 
-              // --- Logo TorchApp ---
+              // Logo TorchApp
               Align(
                 alignment: const Alignment(0.05, 0.4),
                 child: FractionallySizedBox(
@@ -149,8 +149,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  static List<Widget> _patinhas(double width, double height) {
-    final patinhasData = [
+  static List<Widget> _paws(double width, double height) {
+    final pawsData = [
       [0.12, 0.90, 55.0],
       [0.17, 0.74, 45.0],
       [0.25, 0.60, 50.0],
@@ -165,7 +165,7 @@ class HomePage extends StatelessWidget {
       [0.88, 0.62, -54.0],
     ];
 
-    return patinhasData.map((e) {
+    return pawsData.map((e) {
       double top = e[0] * height;
       double left = e[1] * width;
       double rotation = e[2];

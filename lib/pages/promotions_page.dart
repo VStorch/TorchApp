@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../components/CustomDrawer.dart';
+import '../components/custom_drawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
@@ -31,7 +31,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    // === Valores responsivos baseados no tamanho da tela ===
+    // Valores responsivos baseados no tamanho da tela
     final titleFontSize = (screenWidth * 0.06).clamp(18.0, 28.0);
     final descFontSize = (screenWidth * 0.045).clamp(14.0, 20.0);
     final dateFontSize = (screenWidth * 0.04).clamp(13.0, 18.0);
@@ -56,7 +56,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
         ],
       ),
 
-      // === AppBar amarela com borda preta (igual à MyProfilePage) ===
+      // AppBar amarela com borda preta (igual à MyProfilePage)
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(screenHeight * 0.08),
         child: Container(
@@ -96,7 +96,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
         ),
       ),
 
-      // === Corpo responsivo ===
+      // Corpo responsivo
       body: ListView.builder(
         padding: EdgeInsets.all(screenWidth * 0.04),
         itemCount: promotions.length,

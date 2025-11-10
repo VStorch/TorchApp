@@ -1,8 +1,7 @@
-// lib/components/page_scaffold.dart
 import 'package:flutter/material.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
-import 'CustomDrawer.dart';
+import 'custom_drawer.dart';
 
 class PageScaffold extends StatelessWidget {
   final PageType pageType;

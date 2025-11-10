@@ -106,12 +106,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       // Dá um resize para que a caixa de texto não fique ocultada pelo usuário
       resizeToAvoidBottomInset: true,
-      backgroundColor: Color(0xFFF5F3E2),
+      backgroundColor: const Color(0xFFF5F3E2),
 
       appBar: AppBar(
-        backgroundColor: Color(0xFFEBDD6C),
+        backgroundColor: const Color(0xFFEBDD6C),
         toolbarHeight: 90,
-        title: Text(
+        title: const Text(
           'Cadastro',
           style: TextStyle(
             fontFamily: 'InknutAntiqua',
@@ -129,7 +129,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         child: SingleChildScrollView(
 
           // Define o espaçamento do objeto com as margens
-          padding: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
           child: Column(
             children: [
               ClipOval(
@@ -140,33 +140,33 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
                     fit: BoxFit.cover),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // Nome
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Nome...',
-                  prefixIcon: Icon(Icons.pets),
+                  prefixIcon: const Icon(Icons.pets),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50)
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // Sobrenome
               TextField(
                 controller: _surnameController,
                 decoration: InputDecoration(
                   labelText: 'Sobrenome...',
-                  prefixIcon: Icon(account_circle),
+                  prefixIcon: const Icon(account_circle),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(50)
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // Email
               TextField(
@@ -179,7 +179,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 25),
+              const SizedBox(height: 25),
 
               // Senha
               TextField(
@@ -193,7 +193,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   ),
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               // Botão de registro
               ElevatedButton(
@@ -202,7 +202,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   backgroundColor: Color(0xFFEBDD6C),
                   foregroundColor: Colors.black,
                 ),
-                child: Text('Cadastrar'),
+                child: const Text('Cadastrar'),
               ),
             ],
           ),

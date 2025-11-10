@@ -28,7 +28,6 @@ class _PasswordPageState extends State<PasswordPage> {
     });
 
     try {
-      // Substitua pelo IP correto ou localhost conforme o seu ambiente
       final response = await Dio().post(
         'http://10.0.2.2:8080/users/reset-password/request',
         data: {'email': email},

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/PageTypePetShop.dart';
+import '../models/page_type_pet_shop.dart';
 import '../models/menu_item_pet_shop.dart';
 
 class CustomDrawerPetShop extends StatelessWidget {

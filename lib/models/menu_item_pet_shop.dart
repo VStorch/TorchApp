@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/pages/login_page.dart';
-import 'PageTypePetShop.dart';
+import 'page_type_pet_shop.dart';
 import '../pages_pet_shop/home_page_pet_shop.dart';
 import '../pages_pet_shop/profile.dart';
 import '../pages_pet_shop/services.dart';

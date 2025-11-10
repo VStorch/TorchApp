@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
 
-import '../components/CustomDrawer.dart';
+import '../components/custom_drawer.dart';
 import '../models/menu_item.dart';
 import '../models/page_type.dart';
 import 'login_page.dart';
@@ -20,7 +20,7 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   File? _profileImage;
   String? _selectedAssetImage;
-  String _userName = "Carregando..."; // ✅ Valor inicial
+  String _userName = "Carregando..."; // Valor inicial
 
   final List<String> _defaultImages = [
     "lib/assets/images_profile/dog1.jpg",
@@ -41,7 +41,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
     _loadUserData();
   }
 
-  // ✅ Carrega os dados salvos localmente
+  // Carrega os dados salvos localmente
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
@@ -157,7 +157,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         );
 
         if (confirm == true) {
-          // ✅ Limpa os dados salvos ao sair
+          // Limpa os dados salvos ao sair
           final prefs = await SharedPreferences.getInstance();
           await prefs.clear();
 
@@ -341,7 +341,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               SizedBox(height: spacing),
               Text(
-                _userName, // ✅ Nome carregado do SharedPreferences
+                _userName,
                 style: TextStyle(
                     fontSize: titleFontSize, fontWeight: FontWeight.bold),
               ),

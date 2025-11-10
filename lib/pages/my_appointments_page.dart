@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../components/CustomDrawer.dart';
+import '../components/custom_drawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
@@ -54,7 +54,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         ],
       ),
 
-      // --- AppBar responsivo ---
+      // AppBar responsivo
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.08),
         child: Container(
@@ -95,7 +95,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         ),
       ),
 
-      // --- Corpo da tela com ListView ---
+      // Corpo da tela com ListView
       body: ListView.builder(
         padding: EdgeInsets.all(screenWidth * 0.04),
         itemCount: appointments.length,

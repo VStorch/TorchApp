@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ ADICIONE ESTE IMPORT
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/diagonal_clipper.dart';
 import '../pages_pet_shop/registration_page_pet_shop.dart';
@@ -34,7 +34,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // ✅ NOVO MÉTODO: Salvar dados do usuário localmente
+  // Salvar dados do usuário localmente
   Future<void> _saveUserData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
 
@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      // Passo 1: Fazer login
+      // Fazer login
       final loginUrl = Uri.parse('http://10.0.2.2:8080/users/login');
 
       final loginResponse = await http.post(
@@ -82,10 +82,9 @@ class _LoginPageState extends State<LoginPage> {
       final userData = jsonDecode(loginResponse.body);
       final userId = userData['id'];
 
-      //  SALVAR OS DADOS DO USUÁRIO
       await _saveUserData(userData);
 
-      // Passo 2: Verificar se o usuário tem Pet Shop
+      // Verificar se o usuário tem Pet Shop
       final petShopUrl = Uri.parse('http://10.0.2.2:8080/users/owner/$userId');
 
       print("===== VERIFICANDO PET SHOP =====");
@@ -100,14 +99,14 @@ class _LoginPageState extends State<LoginPage> {
 
       (isPetShopOwner ? " Usuário é DONO de Pet Shop" : " Usuário é CLIENTE");
 
-      // Passo 3: Navegar para a tela correta
+      // Navegar para a tela correta
       if (mounted) {
         if (isPetShopOwner) {
           final petShopData = jsonDecode(petShopResponse.body);
           final petShopId = petShopData['id']; // ID do PetShop
 
-          print("✅ PetShop ID: $petShopId");
-          print("✅ User ID: $userId");
+          print("PetShop ID: $petShopId");
+          print("User ID: $userId");
 
           Navigator.pushReplacement(
             context,
@@ -123,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(userId: userId), // Passa userId para cliente também
+              builder: (context) => HomePage(userId: userId),
             ),
           );
         }

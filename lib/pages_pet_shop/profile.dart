@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
-import '../components/CustomDrawer.dart';
+import '../components/custom_drawer.dart';
 import '../models/menu_item.dart';
 import '../pages/login_page.dart';
 import 'package:torch_app/components/custom_drawer_pet_shop.dart';

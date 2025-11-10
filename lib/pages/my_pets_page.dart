@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ ADICIONE
-import '../components/CustomDrawer.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../components/custom_drawer.dart';
 import '../data/pet/pet.dart';
 import '../data/pet/pet_service.dart';
 import '../models/menu_item.dart';
 import '../models/page_type.dart';
 
 class MyPetsPage extends StatefulWidget {
-  const MyPetsPage({super.key}); // ✅ REMOVIDO currentUserId
+  const MyPetsPage({super.key});
 
   @override
   State<MyPetsPage> createState() => _MyPetsPageState();
@@ -17,15 +17,15 @@ class MyPetsPage extends StatefulWidget {
 class _MyPetsPageState extends State<MyPetsPage> {
   List<Pet> _pets = [];
   bool _loading = true;
-  int? _currentUserId; // ✅ ADICIONADO
+  int? _currentUserId;
 
   @override
   void initState() {
     super.initState();
-    _loadUserAndPets(); // ✅ MODIFICADO
+    _loadUserAndPets();
   }
 
-  // ✅ NOVO MÉTODO: Busca o userId do SharedPreferences
+  // Busca o userId do SharedPreferences
   Future<void> _loadUserAndPets() async {
     setState(() => _loading = true);
 
@@ -240,11 +240,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
 
   ThemeData _datePickerTheme(BuildContext context) {
     return ThemeData(
-      colorScheme: ColorScheme.light(
-        primary: const Color(0xFFFFF200),
+      colorScheme: const ColorScheme.light(
+        primary: Color(0xFFFFF200),
         onPrimary: Colors.black,
         onSurface: Colors.black,
-        surface: const Color(0xFFFFFDD2),
+        surface: Color(0xFFFFFDD2),
       ),
       dialogBackgroundColor: const Color(0xFFFFFDD2),
       textButtonTheme: TextButtonThemeData(
@@ -365,7 +365,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                               speciesController.text,
                               double.parse(weightController.text),
                               birthDate,
-                              _currentUserId!, // ✅ USA O userId DO SharedPreferences
+                              _currentUserId!,
                             );
                             debugPrint("=== CRIANDO PET ===");
                             debugPrint("UserId sendo enviado: $_currentUserId");
@@ -504,7 +504,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                               speciesController.text,
                               double.parse(weightController.text),
                               birthDate,
-                              _currentUserId!, // ✅ USA O userId DO SharedPreferences
+                              _currentUserId!,
                               id: pet.id,
                             );
                             final success = await PetService.updatePet(petAtualizado);

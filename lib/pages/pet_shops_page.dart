@@ -23,8 +23,6 @@ class _PetShopPageState extends State<PetShopPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
 
-      // AppBar personalizada
-
       appBar: AppBar(
         toolbarHeight: 90,
         backgroundColor: const Color(0xFFEBDD6C),
@@ -62,9 +60,7 @@ class _PetShopPageState extends State<PetShopPage> {
         ),
       ),
 
-      // ================
       // Drawer/Menu lateral
-      // ================
       drawer: Drawer(
         backgroundColor: const Color(0xFFEBDD6C),
         child: ListView(
