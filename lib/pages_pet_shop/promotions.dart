@@ -83,7 +83,7 @@ class _PromotionsState extends State<Promotions> {
         return '$anoAtual-$mes-$dia'; // Formato ISO: YYYY-MM-DD
       }
     } catch (e) {
-      print('Erro ao converter data: $e');
+      ('Erro ao converter data: $e');
     }
     return dataDDMM;
   }
@@ -98,7 +98,7 @@ class _PromotionsState extends State<Promotions> {
         }
       }
     } catch (e) {
-      print('Erro ao converter de ISO: $e');
+      ('Erro ao converter de ISO: $e');
     }
     return dataISO;
   }
@@ -276,14 +276,67 @@ class _PromotionsState extends State<Promotions> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Excluir Promoção'),
-        content: const Text('Tem certeza que deseja remover esta promoção?'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        backgroundColor: Colors.white,
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.delete_outline,
+                color: Colors.red.shade700,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Excluir Promoção',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(
+            'Tem certeza que deseja remover esta promoção? Esta ação não pode ser desfeita.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Text(
+              'Cancelar',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
               try {
@@ -294,7 +347,22 @@ class _PromotionsState extends State<Promotions> {
                 _mostrarErro('Erro ao excluir promoção: $e');
               }
             },
-            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Excluir',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
