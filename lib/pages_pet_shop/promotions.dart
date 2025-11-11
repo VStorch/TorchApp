@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:torch_app/pages/login_page.dart';
-import '../components/custom_drawer.dart';
 import '../components/custom_drawer_pet_shop.dart';
-import '../models/menu_item.dart';
-import 'home_page_pet_shop.dart';
-import 'profile.dart';
-import 'services.dart';
-import 'reviews.dart';
-import 'payment_method.dart';
-import 'settings.dart';
+import '../models/promotion.dart';
+import '../services/promotion_service.dart';
 
 class Promotions extends StatefulWidget {
   final int petShopId;
@@ -21,18 +14,54 @@ class Promotions extends StatefulWidget {
 }
 
 class _PromotionsState extends State<Promotions> {
-  final List<Map<String, String>> _promocoes = [];
+  final PromotionService _promotionService = PromotionService();
+  List<Promotion> _promocoes = [];
+  bool _isLoading = true;
+
   final _formKey = GlobalKey<FormState>();
   String _titulo = '';
   String _descricao = '';
   String _validade = '';
-  int? _editIndex;
+  Promotion? _editPromotion;
 
   final Color corFundo = const Color(0xFFFBF8E1);
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
-  String formatarData(String input) {
+  @override
+  void initState() {
+    super.initState();
+    _carregarPromocoes();
+  }
+
+  Future<void> _carregarPromocoes() async {
+    setState(() => _isLoading = true);
+    try {
+      final promocoes = await _promotionService.getAllPromotions();
+      setState(() {
+        _promocoes = promocoes;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _mostrarErro('Erro ao carregar promoções: $e');
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
+    );
+  }
+
+  void _mostrarSucesso(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(mensagem), backgroundColor: Colors.green),
+    );
+  }
+
+  // Formata a entrada do usuário para exibição (DD/MM)
+  String formatarDataExibicao(String input) {
     String numeros = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (numeros.length >= 4) {
       String dia = numeros.substring(0, 2);
@@ -42,14 +71,47 @@ class _PromotionsState extends State<Promotions> {
     return input;
   }
 
-  void _abrirModalPromocao({Map<String, String>? promocao, int? index}) {
+  // Converte DD/MM para formato ISO (YYYY-MM-DD) para enviar ao backend
+  String converterParaISO(String dataDDMM) {
+    try {
+      final regex = RegExp(r'^(\d{2})/(\d{2})$');
+      final match = regex.firstMatch(dataDDMM);
+      if (match != null) {
+        final dia = match.group(1)!;
+        final mes = match.group(2)!;
+        final anoAtual = DateTime.now().year;
+        return '$anoAtual-$mes-$dia'; // Formato ISO: YYYY-MM-DD
+      }
+    } catch (e) {
+      print('Erro ao converter data: $e');
+    }
+    return dataDDMM;
+  }
+
+  // Converte formato ISO (YYYY-MM-DD) para DD/MM para exibição
+  String converterDeISO(String dataISO) {
+    try {
+      if (dataISO.contains('-')) {
+        final partes = dataISO.split('-');
+        if (partes.length >= 3) {
+          return '${partes[2]}/${partes[1]}'; // DD/MM
+        }
+      }
+    } catch (e) {
+      print('Erro ao converter de ISO: $e');
+    }
+    return dataISO;
+  }
+
+  void _abrirModalPromocao({Promotion? promocao}) {
     if (promocao != null) {
-      _editIndex = index;
-      _titulo = promocao['titulo']!;
-      _descricao = promocao['descricao']!;
-      _validade = promocao['validade']!;
+      _editPromotion = promocao;
+      _titulo = promocao.name;
+      _descricao = promocao.description;
+      // Converte de ISO para DD/MM ao editar
+      _validade = converterDeISO(promocao.validity);
     } else {
-      _editIndex = null;
+      _editPromotion = null;
       _titulo = '';
       _descricao = '';
       _validade = '';
@@ -80,7 +142,7 @@ class _PromotionsState extends State<Promotions> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _editIndex == null ? 'Adicionar Promoção 🏷️' : 'Editar Promoção ✏️',
+                    _editPromotion == null ? 'Adicionar Promoção 🏷️' : 'Editar Promoção ✏️',
                     style: TextStyle(
                       fontSize: screenHeight * 0.025,
                       fontWeight: FontWeight.bold,
@@ -128,7 +190,7 @@ class _PromotionsState extends State<Promotions> {
                       if (dia < 1 || dia > 31 || mes < 1 || mes > 12) return 'Data inválida';
                       return null;
                     },
-                    onSaved: (value) => _validade = formatarData(value!),
+                    onSaved: (value) => _validade = formatarDataExibicao(value!),
                   ),
                   SizedBox(height: screenHeight * 0.02),
                   SizedBox(
@@ -144,7 +206,7 @@ class _PromotionsState extends State<Promotions> {
                       ),
                       icon: const Icon(Icons.save),
                       label: Text(
-                        _editIndex == null ? 'Salvar Promoção' : 'Salvar Alterações',
+                        _editPromotion == null ? 'Salvar Promoção' : 'Salvar Alterações',
                         style: TextStyle(fontSize: screenHeight * 0.022),
                       ),
                       onPressed: _salvarPromocao,
@@ -179,39 +241,58 @@ class _PromotionsState extends State<Promotions> {
     );
   }
 
-  void _salvarPromocao() {
+  Future<void> _salvarPromocao() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
-      final novaPromocao = {
-        'titulo': _titulo,
-        'descricao': _descricao,
-        'validade': _validade,
-      };
 
-      setState(() {
-        if (_editIndex == null) {
-          _promocoes.add(novaPromocao);
+      // Converte a data de DD/MM para formato ISO antes de enviar
+      final validadeISO = converterParaISO(_validade);
+
+      final promotion = Promotion(
+        id: _editPromotion?.id,
+        name: _titulo,
+        description: _descricao,
+        validity: validadeISO, // Envia no formato ISO
+      );
+
+      try {
+        if (_editPromotion == null) {
+          await _promotionService.createPromotion(promotion);
+          _mostrarSucesso('Promoção criada com sucesso!');
         } else {
-          _promocoes[_editIndex!] = novaPromocao;
+          await _promotionService.updatePromotion(_editPromotion!.id!, promotion);
+          _mostrarSucesso('Promoção atualizada com sucesso!');
         }
-      });
 
-      Navigator.pop(context);
+        Navigator.pop(context);
+        _carregarPromocoes();
+      } catch (e) {
+        _mostrarErro('Erro ao salvar promoção: $e');
+      }
     }
   }
 
-  void _excluirPromocao(int index) {
+  void _excluirPromocao(Promotion promotion) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Promoção'),
         content: const Text('Tem certeza que deseja remover esta promoção?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
           TextButton(
-            onPressed: () {
-              setState(() => _promocoes.removeAt(index));
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
               Navigator.pop(context);
+              try {
+                await _promotionService.deletePromotion(promotion.id!);
+                _mostrarSucesso('Promoção excluída com sucesso!');
+                _carregarPromocoes();
+              } catch (e) {
+                _mostrarErro('Erro ao excluir promoção: $e');
+              }
             },
             child: const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),
@@ -269,61 +350,83 @@ class _PromotionsState extends State<Promotions> {
           ),
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        child: _promocoes.isEmpty
-            ? Center(
-          child: Text(
-            'Nenhuma promoção cadastrada ainda 🏷️',
-            style: TextStyle(color: corTexto.withOpacity(0.6), fontSize: screenHeight * 0.02),
-            textAlign: TextAlign.center,
-          ),
-        )
-            : ListView.builder(
-          itemCount: _promocoes.length,
-          itemBuilder: (context, index) {
-            final promo = _promocoes[index];
-            return Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              elevation: 4,
-              margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-              color: Colors.white,
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.012),
-                title: Text(
-                  promo['titulo']!,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: corTexto,
-                    fontSize: screenHeight * 0.022,
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+        onRefresh: _carregarPromocoes,
+        child: Padding(
+          padding: EdgeInsets.all(screenWidth * 0.04),
+          child: _promocoes.isEmpty
+              ? Center(
+            child: Text(
+              'Nenhuma promoção cadastrada ainda 🏷️',
+              style: TextStyle(
+                color: corTexto.withOpacity(0.6),
+                fontSize: screenHeight * 0.02,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          )
+              : ListView.builder(
+            itemCount: _promocoes.length,
+            itemBuilder: (context, index) {
+              final promo = _promocoes[index];
+              // Converte de ISO para DD/MM na exibição
+              final validadeExibicao = converterDeISO(promo.validity);
+
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 4,
+                margin: EdgeInsets.only(bottom: screenHeight * 0.015),
+                color: Colors.white,
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.04,
+                    vertical: screenHeight * 0.012,
+                  ),
+                  title: Text(
+                    promo.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                      fontSize: screenHeight * 0.022,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${promo.description}\nVálido até $validadeExibicao',
+                    style: TextStyle(
+                      color: corTexto.withOpacity(0.7),
+                      fontSize: screenHeight * 0.018,
+                    ),
+                  ),
+                  isThreeLine: true,
+                  trailing: Wrap(
+                    spacing: 4,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit, color: corTexto),
+                        onPressed: () => _abrirModalPromocao(promocao: promo),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.redAccent),
+                        onPressed: () => _excluirPromocao(promo),
+                      ),
+                    ],
                   ),
                 ),
-                subtitle: Text(
-                  '${promo['descricao']!}\nVálido até ${promo['validade']!}',
-                  style: TextStyle(color: corTexto.withOpacity(0.7), fontSize: screenHeight * 0.018),
-                ),
-                isThreeLine: true,
-                trailing: Wrap(
-                  spacing: 4,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: corTexto),
-                      onPressed: () => _abrirModalPromocao(promocao: promo, index: index),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.redAccent),
-                      onPressed: () => _excluirPromocao(index),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: corPrimaria,
-        label: Text('Nova Promoção', style: TextStyle(fontWeight: FontWeight.bold, color: corTexto)),
+        label: Text(
+          'Nova Promoção',
+          style: TextStyle(fontWeight: FontWeight.bold, color: corTexto),
+        ),
         icon: Icon(Icons.add, color: corTexto),
         onPressed: () => _abrirModalPromocao(),
       ),

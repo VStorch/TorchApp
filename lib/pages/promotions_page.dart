@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../components/custom_drawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
+import '../models/promotion.dart';
+import '../services/promotion_service.dart';
 
 class PromotionsPage extends StatefulWidget {
   const PromotionsPage({super.key});
@@ -11,20 +13,54 @@ class PromotionsPage extends StatefulWidget {
 }
 
 class _PromotionsPageState extends State<PromotionsPage> {
-  final List<Map<String, String>> promotions = [
-    {
-      "title": "PetShop Realeza",
-      "description": "Banho + Tosa com 20% de desconto até 15/07!",
-      "date": "15/07"
-    },
-    {
-      "title": "Meu Melhor Amigo",
-      "description": "Primeiro Tosa com 30% off! Promoção válida até 25/06",
-      "date": "25/06"
-    },
-  ];
+  final PromotionService _promotionService = PromotionService();
+  List<Promotion> _promotions = [];
+  bool _isLoading = true;
+  String? _errorMessage;
 
   final Color yellow = const Color(0xFFF4E04D);
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarPromocoes();
+  }
+
+  Future<void> _carregarPromocoes() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final promocoes = await _promotionService.getAllPromotions();
+      setState(() {
+        _promotions = promocoes;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Erro ao carregar promoções';
+      });
+      print('Erro ao carregar promoções: $e');
+    }
+  }
+
+  // Converte formato ISO (YYYY-MM-DD) para DD/MM para exibição
+  String converterDeISO(String dataISO) {
+    try {
+      if (dataISO.contains('-')) {
+        final partes = dataISO.split('-');
+        if (partes.length >= 3) {
+          return '${partes[2]}/${partes[1]}'; // DD/MM
+        }
+      }
+    } catch (e) {
+      print('Erro ao converter de ISO: $e');
+    }
+    return dataISO;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +92,7 @@ class _PromotionsPageState extends State<PromotionsPage> {
         ],
       ),
 
-      // AppBar amarela com borda preta (igual à MyProfilePage)
+      // AppBar amarela com borda preta
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(screenHeight * 0.08),
         child: Container(
@@ -96,98 +132,184 @@ class _PromotionsPageState extends State<PromotionsPage> {
         ),
       ),
 
-      // Corpo responsivo
-      body: ListView.builder(
-        padding: EdgeInsets.all(screenWidth * 0.04),
-        itemCount: promotions.length,
-        itemBuilder: (context, index) {
-          final promo = promotions[index];
-          return Container(
-            margin: EdgeInsets.symmetric(vertical: cardMargin),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(25),
-              gradient: const LinearGradient(
-                colors: [Color(0xFFEBDD6C), Color(0xFFF9E29A)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+      // Corpo responsivo com loading, erro e dados
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline,
+                size: screenHeight * 0.08,
+                color: Colors.red),
+            SizedBox(height: spacing),
+            Text(
+              _errorMessage!,
+              style: TextStyle(
+                fontSize: descFontSize,
+                color: Colors.red,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  blurRadius: 10,
-                  offset: const Offset(0, 6),
-                ),
-              ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(25),
-              child: Padding(
-                padding: EdgeInsets.all(cardPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      promo["title"]!,
-                      style: TextStyle(
-                        fontSize: titleFontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: spacing),
-                    Text(
-                      promo["description"]!,
-                      style: TextStyle(
-                        fontSize: descFontSize,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: spacing * 1.2),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          promo["date"]!,
-                          style: TextStyle(
-                            fontSize: dateFontSize,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                          ),
+            SizedBox(height: spacing * 2),
+            ElevatedButton.icon(
+              onPressed: _carregarPromocoes,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Tentar Novamente'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: yellow,
+                foregroundColor: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      )
+          : _promotions.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.local_offer_outlined,
+                size: screenHeight * 0.1,
+                color: Colors.grey),
+            SizedBox(height: spacing * 2),
+            Text(
+              'Nenhuma promoção disponível no momento 🏷️',
+              style: TextStyle(
+                fontSize: descFontSize,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: spacing * 2),
+            ElevatedButton.icon(
+              onPressed: _carregarPromocoes,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Atualizar'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: yellow,
+                foregroundColor: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      )
+          : RefreshIndicator(
+        onRefresh: _carregarPromocoes,
+        child: ListView.builder(
+          padding: EdgeInsets.all(screenWidth * 0.04),
+          itemCount: _promotions.length,
+          itemBuilder: (context, index) {
+            final promo = _promotions[index];
+            final validadeExibicao = converterDeISO(promo.validity);
+
+            return Container(
+              margin: EdgeInsets.symmetric(vertical: cardMargin),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFEBDD6C), Color(0xFFF9E29A)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(25),
+                child: Padding(
+                  padding: EdgeInsets.all(cardPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        promo.name,
+                        style: TextStyle(
+                          fontSize: titleFontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black87,
-                            elevation: 5,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: screenWidth * 0.06,
-                              vertical: screenHeight * 0.015,
+                      ),
+                      SizedBox(height: spacing),
+                      Text(
+                        promo.description,
+                        style: TextStyle(
+                          fontSize: descFontSize,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      SizedBox(height: spacing * 1.2),
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.calendar_today,
+                                  size: dateFontSize,
+                                  color: Colors.black87),
+                              SizedBox(width: spacing * 0.5),
+                              Text(
+                                'Válido até $validadeExibicao',
+                                style: TextStyle(
+                                  fontSize: dateFontSize,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ],
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              // TODO: Implementar navegação para agendamento
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Funcionalidade de agendamento em breve!'),
+                                  backgroundColor: Colors.blue,
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black87,
+                              elevation: 5,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.06,
+                                vertical: screenHeight * 0.015,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(20),
+                                side: const BorderSide(
+                                  color: Color(0xFFEBDD6C),
+                                  width: 2,
+                                ),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: const BorderSide(
-                                color: Color(0xFFEBDD6C),
-                                width: 2,
+                            child: Text(
+                              'Agendar',
+                              style: TextStyle(
+                                fontSize: buttonFontSize,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          child: Text(
-                            'Agendar',
-                            style: TextStyle(
-                              fontSize: buttonFontSize,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
