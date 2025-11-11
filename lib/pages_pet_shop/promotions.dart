@@ -376,44 +376,186 @@ class _PromotionsState extends State<Promotions> {
 
               return Card(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(color: Colors.grey.shade300, width: 1),
                 ),
-                elevation: 4,
+                elevation: 8,
                 margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-                color: Colors.white,
-                child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
-                    vertical: screenHeight * 0.012,
-                  ),
-                  title: Text(
-                    promo.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: corTexto,
-                      fontSize: screenHeight * 0.022,
+                shadowColor: Colors.black26,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.white,
+                        Colors.grey.shade50,
+                      ],
                     ),
                   ),
-                  subtitle: Text(
-                    '${promo.description}\nVálido até $validadeExibicao',
-                    style: TextStyle(
-                      color: corTexto.withOpacity(0.7),
-                      fontSize: screenHeight * 0.018,
+                  child: Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(screenWidth * 0.025),
+                              decoration: BoxDecoration(
+                                color: corPrimaria,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.local_offer,
+                                color: corTexto,
+                                size: screenHeight * 0.03,
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.03),
+                            Expanded(
+                              child: Text(
+                                promo.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: corTexto,
+                                  fontSize: screenHeight * 0.023,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.025,
+                                vertical: screenHeight * 0.006,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green.shade300,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.calendar_today,
+                                    size: screenHeight * 0.016,
+                                    color: Colors.green.shade700,
+                                  ),
+                                  SizedBox(width: screenWidth * 0.01),
+                                  Text(
+                                    validadeExibicao,
+                                    style: TextStyle(
+                                      fontSize: screenHeight * 0.016,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: screenHeight * 0.015),
+                        Container(
+                          padding: EdgeInsets.all(screenWidth * 0.03),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            promo.description,
+                            style: TextStyle(
+                              color: corTexto.withOpacity(0.8),
+                              fontSize: screenHeight * 0.019,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.015),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () => _abrirModalPromocao(promocao: promo),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.04,
+                                    vertical: screenHeight * 0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: corPrimaria.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.edit,
+                                        color: corTexto,
+                                        size: screenHeight * 0.022,
+                                      ),
+                                      SizedBox(width: screenWidth * 0.015),
+                                      Text(
+                                        'Editar',
+                                        style: TextStyle(
+                                          color: corTexto,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: screenHeight * 0.018,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.02),
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(10),
+                                onTap: () => _excluirPromocao(promo),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.04,
+                                    vertical: screenHeight * 0.01,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.red.shade700,
+                                        size: screenHeight * 0.022,
+                                      ),
+                                      SizedBox(width: screenWidth * 0.015),
+                                      Text(
+                                        'Excluir',
+                                        style: TextStyle(
+                                          color: Colors.red.shade700,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: screenHeight * 0.018,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  isThreeLine: true,
-                  trailing: Wrap(
-                    spacing: 4,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: corTexto),
-                        onPressed: () => _abrirModalPromocao(promocao: promo),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.redAccent),
-                        onPressed: () => _excluirPromocao(promo),
-                      ),
-                    ],
                   ),
                 ),
               );
