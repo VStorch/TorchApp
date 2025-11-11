@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/pet_shops_page.dart';
 import 'page_type.dart';
 import '../pages/home_page.dart';
 import '../pages/my_pets_page.dart';
@@ -25,7 +26,6 @@ class MenuItem {
   factory MenuItem.fromType(PageType type, {int? currentUserId}) {
     switch (type) {
       case PageType.home:
-      case PageType.home:
         return MenuItem(
           title: 'Tela Inicial',
           icon: Icons.home,
@@ -48,6 +48,12 @@ class MenuItem {
           title: 'Meus Agendamentos',
           icon: Icons.calendar_month,
           destinationPage: const MyAppointmentsPage(),
+        );
+      case PageType.petShops:
+        return MenuItem(
+          title: 'PetShops',
+          icon: Icons.add_business_sharp,
+          destinationPage: const PetShopPage(),
         );
       case PageType.promotions:
         return MenuItem(

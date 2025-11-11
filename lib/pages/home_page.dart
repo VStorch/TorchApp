@@ -5,7 +5,9 @@ import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key, required userId});
+  final int? userId;
+
+  const HomePage({super.key, this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +17,12 @@ class HomePage extends StatelessWidget {
 
     final barHeight = screenHeight * 0.06;
 
+    final menuItems = PageType.values
+        .map((type) => MenuItem.fromType(type, currentUserId: userId))
+        .toList();
+
     return Scaffold(
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem.fromType(PageType.home),
-          MenuItem.fromType(PageType.myPets),
-          MenuItem.fromType(PageType.favorites),
-          MenuItem.fromType(PageType.appointments),
-          MenuItem.fromType(PageType.promotions),
-          MenuItem.fromType(PageType.profile),
-          MenuItem.fromType(PageType.settings),
-          MenuItem.fromType(PageType.login),
-          MenuItem.fromType(PageType.about),
-        ],
-      ),
+      drawer: CustomDrawer(menuItems: menuItems),
       backgroundColor: const Color(0xFFFBF8E1),
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
