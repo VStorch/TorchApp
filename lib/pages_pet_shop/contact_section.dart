@@ -3,7 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'custom_widgets.dart';
 
 class ContactSection extends StatefulWidget {
-  const ContactSection({super.key});
+  final TextEditingController? phoneController;
+  final TextEditingController? emailController;
+
+  const ContactSection({
+    super.key,
+    this.phoneController,
+    this.emailController,
+  });
 
   @override
   State<ContactSection> createState() => _ContactSectionState();
@@ -11,12 +18,17 @@ class ContactSection extends StatefulWidget {
 
 class _ContactSectionState extends State<ContactSection> {
   final TextEditingController cnpjController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  late TextEditingController phoneController;
+  late TextEditingController emailController;
 
   @override
   void initState() {
     super.initState();
+
+    // Usar controllers passados ou criar novos
+    phoneController = widget.phoneController ?? TextEditingController();
+    emailController = widget.emailController ?? TextEditingController();
+
     _loadContactData();
   }
 
@@ -27,17 +39,28 @@ class _ContactSectionState extends State<ContactSection> {
       // Carrega apenas o CNPJ do SharedPreferences
       cnpjController.text = prefs.getString('petshop_cnpj') ?? '';
 
-      // Telefone e email ficam vazios (serão preenchidos depois pelo usuário)
-      phoneController.text = '';
-      emailController.text = '';
+      // Telefone e email só são resetados se não foram passados controllers
+      if (widget.phoneController == null) {
+        phoneController.text = '';
+      }
+      if (widget.emailController == null) {
+        emailController.text = '';
+      }
     });
   }
 
   @override
   void dispose() {
     cnpjController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
+
+    // Só dispose dos controllers criados internamente
+    if (widget.phoneController == null) {
+      phoneController.dispose();
+    }
+    if (widget.emailController == null) {
+      emailController.dispose();
+    }
+
     super.dispose();
   }
 

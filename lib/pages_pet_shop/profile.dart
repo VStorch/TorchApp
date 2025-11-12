@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
+import 'package:shared_preferences/shared_preferences.dart';
 import '../components/custom_drawer.dart';
+import '../data/pet_shop/pet_shop_information_service.dart';
 import '../models/menu_item.dart';
 import '../pages/login_page.dart';
 import 'package:torch_app/components/custom_drawer_pet_shop.dart';
@@ -27,6 +28,10 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   bool isPetShopActive = true;
   final Color yellow = const Color(0xFFF4E04D);
+  bool isLoading = false;
+
+  // Service
+  final PetShopInformationService _service = PetShopInformationService();
 
   // --- Controladores do usuário ---
   final TextEditingController nameController = TextEditingController();
@@ -49,6 +54,8 @@ class _ProfileState extends State<Profile> {
   final TextEditingController petDescriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _petLogo;
+  String? _currentLogoUrl; // URL da logo no servidor
+  int? _actualPetShopId; // ✅ NOVO: ID real do Pet Shop quando existe
 
   Map<String, Map<String, String>>? _horarios;
   final List<String> _serviceOptions = ["Banho", "Tosa", "Hotel/creche", "Outro"];
@@ -58,11 +65,14 @@ class _ProfileState extends State<Profile> {
   final TextEditingController _facebookController = TextEditingController();
   final TextEditingController _siteController = TextEditingController();
   final TextEditingController _whatsappController = TextEditingController();
+  final TextEditingController _commercialPhoneController = TextEditingController();
+  final TextEditingController _commercialEmailController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadUserData(); // CARREGAR DADOS AO INICIAR
+    _loadUserData();
+    _loadPetShopData();
   }
 
   // ======= CARREGAR DADOS DO SHARED PREFERENCES =======
@@ -87,15 +97,130 @@ class _ProfileState extends State<Profile> {
       enderecoController.text = prefs.getString('petshop_street') ?? '';
       numeroController.text = prefs.getString('petshop_number') ?? '';
       complementoController.text = prefs.getString('petshop_complement') ?? '';
-
-      // CNPJ será carregado automaticamente pelo ContactSection
     });
   }
-  // ====================================================
+
+  // ======= CARREGAR DADOS DO PET SHOP DO BACKEND =======
+  Future<void> _loadPetShopData() async {
+    setState(() => isLoading = true);
+
+    try {
+      final response = await _service.getPetShopInformationByUserId(widget.userId);
+
+      if (response['success'] == true && response['data'] != null) {
+        final data = response['data'];
+
+        setState(() {
+          _actualPetShopId = data['id']; // ✅ ALTERADO: Salvar o ID real
+          petNameController.text = data['name'] ?? '';
+          petDescriptionController.text = data['description'] ?? '';
+          _currentLogoUrl = data['logoUrl'];
+
+          // Serviços
+          if (data['services'] != null) {
+            _selectedServices.clear();
+            _selectedServices.addAll(List<String>.from(data['services']));
+          }
+
+          // Redes sociais
+          _instagramController.text = data['instagram'] ?? '';
+          _facebookController.text = data['facebook'] ?? '';
+          _siteController.text = data['website'] ?? '';
+          _whatsappController.text = data['whatsapp'] ?? '';
+
+          // Contatos comerciais
+          _commercialPhoneController.text = data['commercialPhone'] ?? '';
+          _commercialEmailController.text = data['commercialEmail'] ?? '';
+        });
+      }
+    } catch (e) {
+      // ✅ ALTERADO: Pet Shop não encontrado - isso é normal para novos usuários
+      print('Pet Shop não encontrado. Pronto para novo cadastro.');
+      setState(() {
+        _actualPetShopId = null;
+      });
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  // ======= SALVAR ALTERAÇÕES NO BACKEND =======
+  Future<void> _savePetShopInformation() async {
+    if (petNameController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nome do Pet Shop é obrigatório!')),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      // Adicionar "Outro" aos serviços se preenchido
+      List<String> finalServices = List.from(_selectedServices);
+      if (_otherServiceController.text.isNotEmpty &&
+          !finalServices.contains(_otherServiceController.text)) {
+        finalServices.add(_otherServiceController.text);
+      }
+
+      // ✅ ALTERADO: Decidir entre UPDATE ou CREATE baseado no ID real do Pet Shop
+      final response = _actualPetShopId != null
+          ? await _service.updatePetShopInformation(
+        id: _actualPetShopId!,
+        name: petNameController.text,
+        description: petDescriptionController.text,
+        services: finalServices,
+        userId: widget.userId,
+        instagram: _instagramController.text.isEmpty ? null : _instagramController.text,
+        facebook: _facebookController.text.isEmpty ? null : _facebookController.text,
+        website: _siteController.text.isEmpty ? null : _siteController.text,
+        whatsapp: _whatsappController.text.isEmpty ? null : _whatsappController.text,
+        commercialPhone: _commercialPhoneController.text.isEmpty ? null : _commercialPhoneController.text,
+        commercialEmail: _commercialEmailController.text.isEmpty ? null : _commercialEmailController.text,
+      )
+          : await _service.createPetShopInformation(
+        name: petNameController.text,
+        description: petDescriptionController.text,
+        services: finalServices,
+        userId: widget.userId,
+        instagram: _instagramController.text.isEmpty ? null : _instagramController.text,
+        facebook: _facebookController.text.isEmpty ? null : _facebookController.text,
+        website: _siteController.text.isEmpty ? null : _siteController.text,
+        whatsapp: _whatsappController.text.isEmpty ? null : _whatsappController.text,
+        commercialPhone: _commercialPhoneController.text.isEmpty ? null : _commercialPhoneController.text,
+        commercialEmail: _commercialEmailController.text.isEmpty ? null : _commercialEmailController.text,
+      );
+
+      // Upload da logo se houver
+      if (_petLogo != null && response['success'] == true) {
+        final petShopId = response['data']['id'];
+        await _service.uploadLogo(petShopId, _petLogo!);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(response['message'] ?? 'Alterações salvas com sucesso!')),
+        );
+
+        // Recarregar dados
+        await _loadPetShopData();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao salvar: ${e.toString()}')),
+        );
+      }
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
 
   Future<void> _pickLogo() async {
     final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) setState(() => _petLogo = File(pickedImage.path));
+    if (pickedImage != null) {
+      setState(() => _petLogo = File(pickedImage.path));
+    }
   }
 
   @override
@@ -108,8 +233,8 @@ class _ProfileState extends State<Profile> {
 
     return Scaffold(
       drawer: CustomDrawerPetShop(
-          petShopId: widget.petShopId,
-          userId: widget.userId,
+        petShopId: widget.petShopId,
+        userId: widget.userId,
       ),
       backgroundColor: const Color(0xFFFBF8E1),
 
@@ -151,7 +276,9 @@ class _ProfileState extends State<Profile> {
         ),
       ),
 
-      body: Column(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
         children: [
           Row(
             children: [
@@ -243,7 +370,10 @@ class _ProfileState extends State<Profile> {
                           whatsappController: _whatsappController,
                         ),
                         SizedBox(height: screenHeight * 0.03),
-                        const ContactSection(),
+                        ContactSection(
+                          phoneController: _commercialPhoneController,
+                          emailController: _commercialEmailController,
+                        ),
                         SizedBox(height: screenHeight * 0.03),
                         LocationSection(
                           cepController: cepController,
@@ -267,12 +397,14 @@ class _ProfileState extends State<Profile> {
                                 side: const BorderSide(color: Colors.black, width: 1),
                               ),
                             ),
-                            onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Alterações salvas com sucesso!")),
-                              );
-                            },
-                            child: const Text(
+                            onPressed: isLoading ? null : _savePetShopInformation,
+                            child: isLoading
+                                ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                                : const Text(
                               "Salvar Alterações",
                               style: TextStyle(
                                 fontSize: 18,
@@ -312,5 +444,31 @@ class _ProfileState extends State<Profile> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    phoneController.dispose();
+    birthController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    cepController.dispose();
+    estadoController.dispose();
+    cidadeController.dispose();
+    bairroController.dispose();
+    enderecoController.dispose();
+    numeroController.dispose();
+    complementoController.dispose();
+    petNameController.dispose();
+    petDescriptionController.dispose();
+    _otherServiceController.dispose();
+    _instagramController.dispose();
+    _facebookController.dispose();
+    _siteController.dispose();
+    _whatsappController.dispose();
+    _commercialPhoneController.dispose();
+    _commercialEmailController.dispose();
+    super.dispose();
   }
 }
