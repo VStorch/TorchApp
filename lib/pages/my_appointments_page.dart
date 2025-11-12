@@ -37,22 +37,13 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
 
     final barHeight = screenHeight * 0.07;
     final iconSize = barHeight * 0.6; // mesma pata do PetShops Favoritos
+    final menuItems = PageType.values
+        .map((type) => MenuItem.fromType(type))
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem.fromType(PageType.home),
-          MenuItem.fromType(PageType.myPets),
-          MenuItem.fromType(PageType.favorites),
-          MenuItem.fromType(PageType.appointments),
-          MenuItem.fromType(PageType.promotions),
-          MenuItem.fromType(PageType.profile),
-          MenuItem.fromType(PageType.settings),
-          MenuItem.fromType(PageType.login),
-          MenuItem.fromType(PageType.about),
-        ],
-      ),
+      drawer: CustomDrawer(menuItems: menuItems),
 
       // AppBar responsivo
       appBar: PreferredSize(

@@ -21,6 +21,7 @@ class PageScaffold extends StatelessWidget {
       MenuItem.fromType(PageType.myPets),
       MenuItem.fromType(PageType.favorites),
       MenuItem.fromType(PageType.appointments),
+      MenuItem.fromType(PageType.petShops),
       MenuItem.fromType(PageType.promotions),
       MenuItem.fromType(PageType.profile),
       MenuItem.fromType(PageType.settings),

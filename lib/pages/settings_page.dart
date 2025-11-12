@@ -8,6 +8,9 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final menuItems = PageType.values
+        .map((type) => MenuItem.fromType(type))
+        .toList();
 
     return Scaffold(
       appBar: PreferredSize(
@@ -49,19 +52,7 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
       ),
-      drawer: CustomDrawer(
-        menuItems: [
-          MenuItem.fromType(PageType.home),
-          MenuItem.fromType(PageType.myPets),
-          MenuItem.fromType(PageType.favorites),
-          MenuItem.fromType(PageType.appointments),
-          MenuItem.fromType(PageType.promotions),
-          MenuItem.fromType(PageType.profile),
-          MenuItem.fromType(PageType.settings),
-          MenuItem.fromType(PageType.login),
-          MenuItem.fromType(PageType.about),
-        ],
-      ),
+      drawer: CustomDrawer(menuItems: menuItems),
       backgroundColor: const Color(0xFFFBF8E1),
     );
   }

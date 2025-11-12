@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:torch_app/components/custom_drawer.dart';
+import 'package:torch_app/models/menu_item.dart';
+import 'package:torch_app/models/page_type.dart';
 import '../data/pet_shop/pet_shop_service.dart';
 
 class PetShopPage extends StatefulWidget {
@@ -18,6 +21,10 @@ class _PetShopPageState extends State<PetShopPage> {
         .getPetShops()
         .where((shop) =>
         shop.name.toLowerCase().contains(searchQuery.toLowerCase()))
+        .toList();
+
+    final menuItems = PageType.values
+        .map((type) => MenuItem.fromType(type))
         .toList();
 
     return Scaffold(
@@ -59,44 +66,7 @@ class _PetShopPageState extends State<PetShopPage> {
           ),
         ),
       ),
-
-      // Drawer/Menu lateral
-      drawer: Drawer(
-        backgroundColor: const Color(0xFFEBDD6C),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const [
-            SizedBox(
-              height: 100,
-              child: DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFFE8CA42)),
-                child: Center(
-                  child: Text(
-                    "Menu",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-            ListTile(leading: Icon(Icons.home), title: Text("Tela Inicial")),
-            ListTile(leading: Icon(Icons.pets), title: Text("Meus Pets")),
-            ListTile(
-                leading: Icon(Icons.business),
-                title: Text("PetShops favoritos")),
-            ListTile(
-                leading: Icon(Icons.calendar_month),
-                title: Text("Meus Agendamentos")),
-            ListTile(leading: Icon(Icons.local_offer), title: Text("Promoções")),
-            ListTile(leading: Icon(Icons.person), title: Text("Meu Perfil")),
-            ListTile(leading: Icon(Icons.settings), title: Text("Configurações")),
-            ListTile(leading: Icon(Icons.logout), title: Text("Sair")),
-            ListTile(leading: Icon(Icons.info), title: Text("Sobre")),
-          ],
-        ),
-      ),
+      drawer: CustomDrawer(menuItems: menuItems),
 
       // Lista de PetShops
       body: ListView.builder(
