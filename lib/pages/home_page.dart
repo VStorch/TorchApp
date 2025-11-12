@@ -40,27 +40,32 @@ class HomePage extends StatelessWidget {
           ),
           child: SafeArea(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Builder(
                   builder: (context) {
                     return IconButton(
                       icon: Icon(Icons.pets, size: screenWidth * 0.08),
                       onPressed: () => Scaffold.of(context).openDrawer(),
+                      padding: EdgeInsets.zero,
                     );
                   },
                 ),
-                SizedBox(width: screenWidth * 0.045),
+                SizedBox(width: screenWidth * 0.03),
                 Expanded(
-                  child: SizedBox(
-                    height: barHeight * 0.6,
+                  child: Container(
+                    height: barHeight * 0.65,
+                    alignment: Alignment.center,
                     child: TextField(
+                      textAlignVertical: TextAlignVertical.center,
                       style: TextStyle(fontSize: isTablet ? 22 : 16),
                       decoration: InputDecoration(
                         hintText: 'Busque um PetShop',
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
                         fillColor: const Color(0xFFFBF8E1),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: BorderSide.none,
@@ -69,6 +74,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
+                SizedBox(width: screenWidth * 0.02),
               ],
             ),
           ),
