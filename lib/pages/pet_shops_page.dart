@@ -93,7 +93,7 @@ class _PetShopPageState extends State<PetShopPage> {
                       Text(shop.name,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text(shop.address),
+                      Text(shop.fullAddress),
                       Text("📞 ${shop.phone}",
                           style: const TextStyle(fontStyle: FontStyle.italic)),
                     ],
