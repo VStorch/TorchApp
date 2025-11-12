@@ -199,7 +199,10 @@ class _ProfileState extends State<Profile> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(response['message'] ?? 'Alterações salvas com sucesso!')),
+          SnackBar(
+            content: Text(response['message'] ?? 'Alterações salvas com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
         );
 
         // Recarregar dados
