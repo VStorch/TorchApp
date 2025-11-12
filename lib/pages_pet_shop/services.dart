@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:torch_app/components/custom_drawer_pet_shop.dart';
 import 'package:torch_app/data/pet_shop_services/petshop_service.dart';
 import '../data/pet_shop_services/pet_shop_service_service.dart';
+import 'slots_service.dart'; // Importe a tela de slots
 
 class Services extends StatefulWidget {
   final int petShopId;
@@ -121,7 +122,7 @@ class _ServicesState extends State<Services> {
                       if (value == null || value.trim().isEmpty) return 'Informe o nome';
                       if (value.trim().length < 3) return 'O nome deve ter pelo menos 3 caracteres';
                       if (value.trim().length > 50) return 'O nome deve ter no máximo 50 caracteres';
-                      if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) return 'O nome deve conter apenas letras e espaços'; // Manter?
+                      if (!RegExp(r'^[a-zA-ZÀ-ú ]+$').hasMatch(value.trim())) return 'O nome deve conter apenas letras e espaços';
                       return null;
                     },
                     onSaved: (value) => _nome = value!.trim(),
@@ -206,7 +207,7 @@ class _ServicesState extends State<Services> {
           price: preco,
           petShopId: widget.petShopId
       );
-      
+
       Navigator.pop(context);
 
       showDialog(
@@ -255,9 +256,9 @@ class _ServicesState extends State<Services> {
               Navigator.pop(context);
 
               showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (context) => const Center(child: CircularProgressIndicator()),
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
               );
 
               final sucesso = await PetShopServiceService.deleteService(servico.id!);
@@ -273,6 +274,18 @@ class _ServicesState extends State<Services> {
             child: const Text('Excluir'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _abrirGerenciadorHorarios(int serviceId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScheduleManagerPage(
+          serviceId: serviceId,
+          petShopId: widget.petShopId, // Passa o petShopId
+        ),
       ),
     );
   }
@@ -297,7 +310,6 @@ class _ServicesState extends State<Services> {
           child: SafeArea(
             child: Stack(
               children: [
-                // Ícone da pata responsivo
                 Positioned(
                   left: -10,
                   top: -6,
@@ -309,7 +321,6 @@ class _ServicesState extends State<Services> {
                     ),
                   ),
                 ),
-                // Título centralizado
                 Center(
                   child: Text(
                     "Serviços",
@@ -366,40 +377,77 @@ class _ServicesState extends State<Services> {
                 elevation: 4,
                 margin: EdgeInsets.only(bottom: screenHeight * 0.015),
                 color: Colors.white,
-                child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.04,
-                    vertical: screenHeight * 0.012,
-                  ),
-                  leading: Icon(Icons.pets, size: screenHeight * 0.04, color: corPrimaria),
-                  title: Text(
-                    servico.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: corTexto,
-                      fontSize: screenHeight * 0.022,
-                    ),
-                  ),
-                  subtitle: Text(
-                    servico.formattedPrice,
-                    style: TextStyle(
-                      color: corTexto.withOpacity(0.7),
-                      fontSize: screenHeight * 0.018,
-                    ),
-                  ),
-                  trailing: Wrap(
-                    spacing: 4,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit, color: corTexto),
-                        onPressed: () => _abrirModalServico(servico: servico),
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.04,
+                        vertical: screenHeight * 0.012,
                       ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => _excluirServico(servico),
+                      leading: Icon(Icons.pets, size: screenHeight * 0.04, color: corPrimaria),
+                      title: Text(
+                        servico.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: corTexto,
+                          fontSize: screenHeight * 0.022,
+                        ),
                       ),
-                    ],
-                  ),
+                      subtitle: Text(
+                        servico.formattedPrice,
+                        style: TextStyle(
+                          color: corTexto.withOpacity(0.7),
+                          fontSize: screenHeight * 0.018,
+                        ),
+                      ),
+                      trailing: Wrap(
+                        spacing: 4,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit, color: corTexto),
+                            onPressed: () => _abrirModalServico(servico: servico),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _excluirServico(servico),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Botão para gerenciar horários
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        screenWidth * 0.04,
+                        0,
+                        screenWidth * 0.04,
+                        screenHeight * 0.012,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: corPrimaria,
+                            foregroundColor: corTexto,
+                            padding: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.012,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: Icon(Icons.schedule, size: screenHeight * 0.022),
+                          label: Text(
+                            'Gerenciar Horários',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          onPressed: () => _abrirGerenciadorHorarios(servico.id!),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
