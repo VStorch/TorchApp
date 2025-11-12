@@ -1,24 +1,26 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 import 'package:torch_app/data/pet_shop/pet_shop.dart';
 
 class PetShopService {
-  final List<PetShop> _petShops = [
-    PetShop(
-        id: 1,
-        name: "Pet shop Realeza",
-        cep: "89110-976",
-        state: 'SC',
-        city: 'Gaspar',
-        neighborhood: 'Bela Vista',
-        street: 'Anfilóquio Nunes',
-        number: '5274',
-        addressComplement: 'Fundos',
-        phone: "(48) 99999-9999",
-        email: 'realeza@email.com',
-        cnpj: '39.659.321/0001-38'
-    ),
-  ];
+  static const String baseUrl = 'http://10.0.2.2:8080/petshops';
 
-  List<PetShop> getPetShops() => _petShops;
+  Future<List<PetShop>> getPetShops() async {
+    try {
+      final response = await http.get(Uri.parse(baseUrl));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((e) => PetShop.fromJson(e)).toList();
+      } else {
+        throw Exception('Erro ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Erro ao buscar PetShops: $e');
+      return [];
+    }
+  }
 
   void toggleFavorite(PetShop shop) {
     shop.toggleFavorite();
