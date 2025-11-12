@@ -6,7 +6,6 @@ import '../pages_pet_shop/profile.dart';
 import '../pages_pet_shop/services.dart';
 import '../pages_pet_shop/reviews.dart';
 import '../pages_pet_shop/promotions.dart';
-import '../pages_pet_shop/payment_method.dart';
 import '../pages_pet_shop/settings.dart';
 
 class MenuItemPetShop {
@@ -51,12 +50,6 @@ class MenuItemPetShop {
           title: 'Promoções',
           icon: Icons.local_offer,
           destinationPage: Promotions(petShopId: petShopId, userId: userId,),
-        );
-      case PageTypePetShop.paymentMethod:
-        return MenuItemPetShop(
-          title: 'Forma de pagamento',
-          icon: Icons.credit_card,
-          destinationPage: PaymentMethod(petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.settings:
         return MenuItemPetShop(

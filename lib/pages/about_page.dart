@@ -24,7 +24,7 @@ class AboutPage extends StatelessWidget {
               children: [
                 Positioned(
                   left: -10,
-                  top: -6,
+                  top: 5,
                   bottom: 0,
                   child: Builder(
                     builder: (context) => IconButton(

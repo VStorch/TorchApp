@@ -348,13 +348,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
               SizedBox(height: spacing),
               const Divider(thickness: 1),
               _buildProfileOption(
-                  Icons.pets, "Meus PetShops Favoritos", optionFontSize),
+                  Icons.pets, "Meus Pets", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
                   Icons.receipt_long, "Meus Pedidos", optionFontSize),
-              const Divider(thickness: 1),
-              _buildProfileOption(
-                  Icons.credit_card, "Formas De Pagamento", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
                   Icons.notifications, "Notificações", optionFontSize),
