@@ -37,12 +37,6 @@ class MenuItem {
           icon: Icons.pets,
           destinationPage: const MyPetsPage(),
         );
-      case PageType.favorites:
-        return MenuItem(
-          title: 'Petshops Favoritos',
-          icon: Icons.business,
-          destinationPage: const FavoritePetshopsPage(),
-        );
       case PageType.appointments:
         return MenuItem(
           title: 'Meus Agendamentos',
@@ -52,7 +46,7 @@ class MenuItem {
       case PageType.petShops:
         return MenuItem(
           title: 'PetShops',
-          icon: Icons.add_business_sharp,
+          icon: Icons.business,
           destinationPage: const PetShopPage(),
         );
       case PageType.promotions:

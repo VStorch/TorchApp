@@ -19,7 +19,6 @@ class PageScaffold extends StatelessWidget {
     final List<MenuItem> allMenuItems = [
       MenuItem.fromType(PageType.home),
       MenuItem.fromType(PageType.myPets),
-      MenuItem.fromType(PageType.favorites),
       MenuItem.fromType(PageType.appointments),
       MenuItem.fromType(PageType.petShops),
       MenuItem.fromType(PageType.promotions),

@@ -1,7 +1,6 @@
 enum PageType {
   home,
   myPets,
-  favorites,
   appointments,
   petShops,
   promotions,
