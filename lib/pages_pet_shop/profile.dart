@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../components/custom_drawer.dart';
 import '../data/pet_shop/pet_shop_information_service.dart';
+import '../data/pet_shop/schedule_service.dart';
 import '../models/menu_item.dart';
 import '../pages/login_page.dart';
 import 'package:torch_app/components/custom_drawer_pet_shop.dart';
@@ -30,15 +31,17 @@ class _ProfileState extends State<Profile> {
   final Color yellow = const Color(0xFFF4E04D);
   bool isLoading = false;
 
-  // Service
+  // Services
   final PetShopInformationService _service = PetShopInformationService();
+  final ScheduleService _scheduleService = ScheduleService();
 
   // --- Controladores do usuário ---
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController birthController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController(text: "*********");
+  final TextEditingController passwordController =
+  TextEditingController(text: "*********");
 
   // --- Controladores de localização ---
   final TextEditingController cepController = TextEditingController();
@@ -54,97 +57,224 @@ class _ProfileState extends State<Profile> {
   final TextEditingController petDescriptionController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
   File? _petLogo;
-  String? _currentLogoUrl; // URL da logo no servidor
-  int? _actualPetShopId; // ✅ NOVO: ID real do Pet Shop quando existe
+  String? _currentLogoUrl;
+  int? _actualPetShopId;
 
   Map<String, Map<String, String>>? _horarios;
-  final List<String> _serviceOptions = ["Banho", "Tosa", "Hotel/creche", "Outro"];
+  final List<String> _serviceOptions = [
+    "Banho",
+    "Tosa",
+    "Hotel/creche",
+    "Outro"
+  ];
   final List<String> _selectedServices = [];
   final TextEditingController _otherServiceController = TextEditingController();
   final TextEditingController _instagramController = TextEditingController();
   final TextEditingController _facebookController = TextEditingController();
   final TextEditingController _siteController = TextEditingController();
   final TextEditingController _whatsappController = TextEditingController();
-  final TextEditingController _commercialPhoneController = TextEditingController();
-  final TextEditingController _commercialEmailController = TextEditingController();
+  final TextEditingController _commercialPhoneController =
+  TextEditingController();
+  final TextEditingController _commercialEmailController =
+  TextEditingController();
+
+  bool _hasLoadedOnce = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-    _loadPetShopData();
+    print('🟢 initState chamado');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Só carrega uma vez quando a tela é construída
+    if (!_hasLoadedOnce) {
+      _hasLoadedOnce = true;
+      print('🟢 Carregando dados pela primeira vez');
+      _loadAllData();
+    }
+  }
+
+  // ✅ Método que carrega tudo
+  Future<void> _loadAllData() async {
+    print('🔵 _loadAllData iniciado');
+    await _loadUserData();
+    await _loadPetShopData();
+    print('🔵 _loadAllData finalizado');
   }
 
   // ======= CARREGAR DADOS DO SHARED PREFERENCES =======
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
 
-    setState(() {
-      // Dados do usuário
-      final name = prefs.getString('user_name') ?? '';
-      final surname = prefs.getString('user_surname') ?? '';
-      nameController.text = '$name $surname'.trim();
+    if (mounted) {
+      setState(() {
+        final name = prefs.getString('user_name') ?? '';
+        final surname = prefs.getString('user_surname') ?? '';
+        nameController.text = '$name $surname'.trim();
 
-      phoneController.text = prefs.getString('user_phone') ?? '';
-      emailController.text = prefs.getString('user_email') ?? '';
-      birthController.text = prefs.getString('user_birth') ?? '';
+        phoneController.text = prefs.getString('user_phone') ?? '';
+        emailController.text = prefs.getString('user_email') ?? '';
+        birthController.text = prefs.getString('user_birth') ?? '';
 
-      // Dados do endereço do Pet Shop
-      cepController.text = prefs.getString('petshop_cep') ?? '';
-      estadoController.text = prefs.getString('petshop_state') ?? '';
-      cidadeController.text = prefs.getString('petshop_city') ?? '';
-      bairroController.text = prefs.getString('petshop_neighborhood') ?? '';
-      enderecoController.text = prefs.getString('petshop_street') ?? '';
-      numeroController.text = prefs.getString('petshop_number') ?? '';
-      complementoController.text = prefs.getString('petshop_complement') ?? '';
-    });
+        cepController.text = prefs.getString('petshop_cep') ?? '';
+        estadoController.text = prefs.getString('petshop_state') ?? '';
+        cidadeController.text = prefs.getString('petshop_city') ?? '';
+        bairroController.text = prefs.getString('petshop_neighborhood') ?? '';
+        enderecoController.text = prefs.getString('petshop_street') ?? '';
+        numeroController.text = prefs.getString('petshop_number') ?? '';
+        complementoController.text = prefs.getString('petshop_complement') ?? '';
+      });
+    }
   }
 
   // ======= CARREGAR DADOS DO PET SHOP DO BACKEND =======
   Future<void> _loadPetShopData() async {
+    if (!mounted) return;
+
     setState(() => isLoading = true);
 
     try {
-      final response = await _service.getPetShopInformationByUserId(widget.userId);
+      final response =
+      await _service.getPetShopInformationByUserId(widget.userId);
 
       if (response['success'] == true && response['data'] != null) {
         final data = response['data'];
 
-        setState(() {
-          _actualPetShopId = data['id']; // ✅ ALTERADO: Salvar o ID real
-          petNameController.text = data['name'] ?? '';
-          petDescriptionController.text = data['description'] ?? '';
-          _currentLogoUrl = data['logoUrl'];
+        if (mounted) {
+          setState(() {
+            _actualPetShopId = data['id'];
+            petNameController.text = data['name'] ?? '';
+            petDescriptionController.text = data['description'] ?? '';
+            _currentLogoUrl = data['logoUrl'];
 
-          // Serviços
-          if (data['services'] != null) {
-            _selectedServices.clear();
-            _selectedServices.addAll(List<String>.from(data['services']));
-          }
+            if (data['services'] != null) {
+              _selectedServices.clear();
+              _selectedServices.addAll(List<String>.from(data['services']));
+            }
 
-          // Redes sociais
-          _instagramController.text = data['instagram'] ?? '';
-          _facebookController.text = data['facebook'] ?? '';
-          _siteController.text = data['website'] ?? '';
-          _whatsappController.text = data['whatsapp'] ?? '';
+            _instagramController.text = data['instagram'] ?? '';
+            _facebookController.text = data['facebook'] ?? '';
+            _siteController.text = data['website'] ?? '';
+            _whatsappController.text = data['whatsapp'] ?? '';
 
-          // Contatos comerciais
-          _commercialPhoneController.text = data['commercialPhone'] ?? '';
-          _commercialEmailController.text = data['commercialEmail'] ?? '';
-        });
+            _commercialPhoneController.text = data['commercialPhone'] ?? '';
+            _commercialEmailController.text = data['commercialEmail'] ?? '';
+          });
+        }
+
+        await _loadSchedules();
       }
     } catch (e) {
-      // ✅ ALTERADO: Pet Shop não encontrado - isso é normal para novos usuários
       print('Pet Shop não encontrado. Pronto para novo cadastro.');
-      setState(() {
-        _actualPetShopId = null;
-      });
+      if (mounted) {
+        setState(() {
+          _actualPetShopId = null;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  // ======= CARREGAR HORÁRIOS DO BANCO =======
+  Future<void> _loadSchedules() async {
+    print('🟡 _loadSchedules chamado. PetShopId: $_actualPetShopId');
+
+    if (_actualPetShopId == null || !mounted) {
+      print('🔴 _loadSchedules cancelado (petShopId null ou widget desmontado)');
+      return;
+    }
+
+    try {
+      print('🟡 Buscando horários do backend...');
+      final response =
+      await _scheduleService.getSchedulesByPetShop(_actualPetShopId!);
+
+      print('🟡 Resposta recebida: ${response['success']}');
+      print('🟡 Dados: ${response['data']}');
+
+      if (response['success'] == true && response['data'] != null) {
+        if (mounted) {
+          final horariosCarregados = Map<String, Map<String, String>>.from(response['data']);
+          print('✅ Horários carregados com sucesso: $horariosCarregados');
+
+          setState(() {
+            _horarios = horariosCarregados;
+          });
+
+          print('✅ setState executado. _horarios agora é: $_horarios');
+        }
+      } else {
+        print('⚠️ Resposta sem sucesso ou sem dados');
+      }
+    } catch (e) {
+      print('🔴 ERRO ao carregar horários: $e');
+    }
+  }
+
+  // ======= SALVAR HORÁRIOS NO BANCO =======
+  Future<void> _saveSchedules(
+      Map<String, Map<String, String>> schedules) async {
+    if (_actualPetShopId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Salve as informações do Pet Shop primeiro!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final response = await _scheduleService.saveBulkSchedules(
+        petShopId: _actualPetShopId!,
+        schedules: schedules,
+      );
+
+      if (mounted) {
+        if (response['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Horários salvos com sucesso!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          setState(() {
+            _horarios = schedules;
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+              Text(response['message'] ?? 'Erro ao salvar horários'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       setState(() => isLoading = false);
     }
   }
 
-  // ======= SALVAR ALTERAÇÕES NO BACKEND =======
+  // ======= SALVAR PETSHOP =======
   Future<void> _savePetShopInformation() async {
     if (petNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -156,14 +286,12 @@ class _ProfileState extends State<Profile> {
     setState(() => isLoading = true);
 
     try {
-      // Adicionar "Outro" aos serviços se preenchido
       List<String> finalServices = List.from(_selectedServices);
       if (_otherServiceController.text.isNotEmpty &&
           !finalServices.contains(_otherServiceController.text)) {
         finalServices.add(_otherServiceController.text);
       }
 
-      // ✅ ALTERADO: Decidir entre UPDATE ou CREATE baseado no ID real do Pet Shop
       final response = _actualPetShopId != null
           ? await _service.updatePetShopInformation(
         id: _actualPetShopId!,
@@ -171,27 +299,50 @@ class _ProfileState extends State<Profile> {
         description: petDescriptionController.text,
         services: finalServices,
         userId: widget.userId,
-        instagram: _instagramController.text.isEmpty ? null : _instagramController.text,
-        facebook: _facebookController.text.isEmpty ? null : _facebookController.text,
-        website: _siteController.text.isEmpty ? null : _siteController.text,
-        whatsapp: _whatsappController.text.isEmpty ? null : _whatsappController.text,
-        commercialPhone: _commercialPhoneController.text.isEmpty ? null : _commercialPhoneController.text,
-        commercialEmail: _commercialEmailController.text.isEmpty ? null : _commercialEmailController.text,
+        instagram: _instagramController.text.isEmpty
+            ? null
+            : _instagramController.text,
+        facebook: _facebookController.text.isEmpty
+            ? null
+            : _facebookController.text,
+        website: _siteController.text.isEmpty
+            ? null
+            : _siteController.text,
+        whatsapp: _whatsappController.text.isEmpty
+            ? null
+            : _whatsappController.text,
+        commercialPhone: _commercialPhoneController.text.isEmpty
+            ? null
+            : _commercialPhoneController.text,
+        commercialEmail: _commercialEmailController.text.isEmpty
+            ? null
+            : _commercialEmailController.text,
       )
           : await _service.createPetShopInformation(
         name: petNameController.text,
         description: petDescriptionController.text,
         services: finalServices,
         userId: widget.userId,
-        instagram: _instagramController.text.isEmpty ? null : _instagramController.text,
-        facebook: _facebookController.text.isEmpty ? null : _facebookController.text,
-        website: _siteController.text.isEmpty ? null : _siteController.text,
-        whatsapp: _whatsappController.text.isEmpty ? null : _whatsappController.text,
-        commercialPhone: _commercialPhoneController.text.isEmpty ? null : _commercialPhoneController.text,
-        commercialEmail: _commercialEmailController.text.isEmpty ? null : _commercialEmailController.text,
+        instagram: _instagramController.text.isEmpty
+            ? null
+            : _instagramController.text,
+        facebook: _facebookController.text.isEmpty
+            ? null
+            : _facebookController.text,
+        website: _siteController.text.isEmpty
+            ? null
+            : _siteController.text,
+        whatsapp: _whatsappController.text.isEmpty
+            ? null
+            : _whatsappController.text,
+        commercialPhone: _commercialPhoneController.text.isEmpty
+            ? null
+            : _commercialPhoneController.text,
+        commercialEmail: _commercialEmailController.text.isEmpty
+            ? null
+            : _commercialEmailController.text,
       );
 
-      // Upload da logo se houver
       if (_petLogo != null && response['success'] == true) {
         final petShopId = response['data']['id'];
         await _service.uploadLogo(petShopId, _petLogo!);
@@ -200,12 +351,12 @@ class _ProfileState extends State<Profile> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(response['message'] ?? 'Alterações salvas com sucesso!'),
+            content:
+            Text(response['message'] ?? 'Alterações salvas com sucesso!'),
             backgroundColor: Colors.green,
           ),
         );
 
-        // Recarregar dados
         await _loadPetShopData();
       }
     } catch (e) {
@@ -240,7 +391,6 @@ class _ProfileState extends State<Profile> {
         userId: widget.userId,
       ),
       backgroundColor: const Color(0xFFFBF8E1),
-
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(barHeight),
         child: Container(
@@ -258,7 +408,8 @@ class _ProfileState extends State<Profile> {
                   bottom: 0,
                   child: Builder(
                     builder: (context) => IconButton(
-                      icon: Icon(Icons.pets, size: barHeight * 0.8, color: Colors.black),
+                      icon: Icon(Icons.pets,
+                          size: barHeight * 0.8, color: Colors.black),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                     ),
                   ),
@@ -278,7 +429,6 @@ class _ProfileState extends State<Profile> {
           ),
         ),
       ),
-
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -292,7 +442,9 @@ class _ProfileState extends State<Profile> {
                     alignment: Alignment.center,
                     height: barHeight,
                     decoration: BoxDecoration(
-                      color: isPetShopActive ? const Color(0xFFFFF59D) : const Color(0xFFFBF8E1),
+                      color: isPetShopActive
+                          ? const Color(0xFFFFF59D)
+                          : const Color(0xFFFBF8E1),
                       border: const Border(
                         right: BorderSide(color: Colors.black, width: 1),
                         bottom: BorderSide(color: Colors.black, width: 1),
@@ -316,8 +468,12 @@ class _ProfileState extends State<Profile> {
                     alignment: Alignment.center,
                     height: barHeight,
                     decoration: BoxDecoration(
-                      color: isPetShopActive ? const Color(0xFFFBF8E1) : const Color(0xFFFFF59D),
-                      border: const Border(bottom: BorderSide(color: Colors.black, width: 1)),
+                      color: isPetShopActive
+                          ? const Color(0xFFFBF8E1)
+                          : const Color(0xFFFFF59D),
+                      border: const Border(
+                          bottom:
+                          BorderSide(color: Colors.black, width: 1)),
                     ),
                     child: Text(
                       "Usuário",
@@ -332,7 +488,6 @@ class _ProfileState extends State<Profile> {
               ),
             ],
           ),
-
           Expanded(
             child: Stack(
               children: [
@@ -344,18 +499,30 @@ class _ProfileState extends State<Profile> {
                       children: [
                         PetShopInfoSection(
                           nameController: petNameController,
-                          descriptionController: petDescriptionController,
+                          descriptionController:
+                          petDescriptionController,
                           petLogo: _petLogo,
                           pickLogo: _pickLogo,
                         ),
                         SizedBox(height: screenHeight * 0.03),
                         ScheduleBox(
                           schedules: _horarios,
-                          onEdit: (result) {
+                          onEdit: (result) async {
                             if (result != null && mounted) {
+                              final newSchedules =
+                              Map<String, Map<String, String>>.from(
+                                  result as Map);
+
+                              final merged = {
+                                ...?_horarios,
+                                ...newSchedules
+                              };
+
                               setState(() {
-                                _horarios = Map<String, Map<String, String>>.from(result as Map);
+                                _horarios = merged;
                               });
+
+                              await _saveSchedules(merged);
                             }
                           },
                         ),
@@ -363,7 +530,8 @@ class _ProfileState extends State<Profile> {
                         ServicesSection(
                           serviceOptions: _serviceOptions,
                           selectedServices: _selectedServices,
-                          otherServiceController: _otherServiceController,
+                          otherServiceController:
+                          _otherServiceController,
                         ),
                         SizedBox(height: screenHeight * 0.03),
                         SocialMediaSection(
@@ -385,10 +553,10 @@ class _ProfileState extends State<Profile> {
                           neighborhoodController: bairroController,
                           streetController: enderecoController,
                           numberController: numeroController,
-                          addressComplementController: complementoController,
+                          addressComplementController:
+                          complementoController,
                         ),
                         SizedBox(height: screenHeight * 0.03),
-
                         SizedBox(
                           width: screenWidth * 0.9,
                           height: 50,
@@ -397,15 +565,19 @@ class _ProfileState extends State<Profile> {
                               backgroundColor: yellow,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(color: Colors.black, width: 1),
+                                side: const BorderSide(
+                                    color: Colors.black, width: 1),
                               ),
                             ),
-                            onPressed: isLoading ? null : _savePetShopInformation,
+                            onPressed:
+                            isLoading ? null : _savePetShopInformation,
                             child: isLoading
                                 ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child:
+                              CircularProgressIndicator(
+                                  strokeWidth: 2),
                             )
                                 : const Text(
                               "Salvar Alterações",
@@ -421,7 +593,6 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                   ),
-
                 if (!isPetShopActive)
                   UserTab(
                     nameController: nameController,
@@ -430,14 +601,14 @@ class _ProfileState extends State<Profile> {
                     emailController: emailController,
                     passwordController: passwordController,
                   ),
-
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
                     height: bottomBarHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFFEBDD6C),
-                      border: Border.all(color: Colors.black, width: 1),
+                      border:
+                      Border.all(color: Colors.black, width: 1),
                     ),
                   ),
                 ),

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class SchedulePage extends StatefulWidget {
-  const SchedulePage({super.key});
+  final Map<String, Map<String, String>> initialSchedules;
+
+  const SchedulePage({super.key, required this.initialSchedules});
 
   @override
   State<SchedulePage> createState() => _SchedulePageState();
@@ -11,26 +13,44 @@ class SchedulePage extends StatefulWidget {
 class _SchedulePageState extends State<SchedulePage> {
   final Color yellow = const Color(0xFFF4E04D);
 
-  // Controladores de abertura e fechamento
-  final Map<String, TextEditingController> _openControllers = {
-    'Seg': TextEditingController(),
-    'Ter': TextEditingController(),
-    'Qua': TextEditingController(),
-    'Qui': TextEditingController(),
-    'Sex': TextEditingController(),
-    'Sáb': TextEditingController(),
-    'Dom': TextEditingController(),
-  };
+  // ✅ Ordem fixa dos dias da semana
+  static const List<String> _diasOrdenados = [
+    'Seg',
+    'Ter',
+    'Qua',
+    'Qui',
+    'Sex',
+    'Sáb',
+    'Dom',
+  ];
 
-  final Map<String, TextEditingController> _closeControllers = {
-    'Seg': TextEditingController(),
-    'Ter': TextEditingController(),
-    'Qua': TextEditingController(),
-    'Qui': TextEditingController(),
-    'Sex': TextEditingController(),
-    'Sáb': TextEditingController(),
-    'Dom': TextEditingController(),
-  };
+  // ✅ Usa LinkedHashMap mantendo ordem de inserção
+  late final Map<String, TextEditingController> _openControllers;
+  late final Map<String, TextEditingController> _closeControllers;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ Inicializa os controllers na ordem correta
+    _openControllers = {
+      for (var dia in _diasOrdenados) dia: TextEditingController()
+    };
+
+    _closeControllers = {
+      for (var dia in _diasOrdenados) dia: TextEditingController()
+    };
+
+    // Preenche os controllers com os horários inicialmente passados
+    if (widget.initialSchedules.isNotEmpty) {
+      widget.initialSchedules.forEach((dia, valores) {
+        if (valores != null && _openControllers.containsKey(dia)) {
+          _openControllers[dia]?.text = valores['abre'] ?? '';
+          _closeControllers[dia]?.text = valores['fecha'] ?? '';
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -73,16 +93,23 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 
   void _saveAndReturn() {
-    // Cria um mapa com todos os horários
+    // ✅ Cria LinkedHashMap mantendo a ordem dos dias
     final Map<String, Map<String, String>> horarios = {};
-    for (var dia in _openControllers.keys) {
+
+    // ✅ Percorre na ordem correta
+    for (var dia in _diasOrdenados) {
+      final abre = _openControllers[dia]!.text.trim();
+      final fecha = _closeControllers[dia]!.text.trim();
+
+      // Se ambos vazios -> ignorar
+      if (abre.isEmpty && fecha.isEmpty) continue;
+
       horarios[dia] = {
-        'abre': _openControllers[dia]!.text,
-        'fecha': _closeControllers[dia]!.text,
+        'abre': abre,
+        'fecha': fecha,
       };
     }
 
-    // Retorna o mapa de horários para o Profile
     Navigator.pop(context, horarios);
   }
 
@@ -112,8 +139,8 @@ class _SchedulePageState extends State<SchedulePage> {
               ),
               const SizedBox(height: 20),
 
-              // Campos de horários
-              for (var day in _openControllers.keys)
+              // ✅ Percorre os dias na ordem correta
+              for (var day in _diasOrdenados)
                 Padding(
                   padding:
                   const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
@@ -174,8 +201,7 @@ class _SchedulePageState extends State<SchedulePage> {
                   ),
                   child: const Text(
                     "Salvar Horários",
-                    style: TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
