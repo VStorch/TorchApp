@@ -32,6 +32,9 @@ class _SchedulePageState extends State<SchedulePage> {
   void initState() {
     super.initState();
 
+    print('🟢 SchedulePage initState');
+    print('🟢 initialSchedules recebido: ${widget.initialSchedules}');
+
     // ✅ Inicializa os controllers na ordem correta
     _openControllers = {
       for (var dia in _diasOrdenados) dia: TextEditingController()
@@ -44,11 +47,22 @@ class _SchedulePageState extends State<SchedulePage> {
     // Preenche os controllers com os horários inicialmente passados
     if (widget.initialSchedules.isNotEmpty) {
       widget.initialSchedules.forEach((dia, valores) {
+        print('🟢 Preenchendo dia: $dia com valores: $valores');
+
         if (valores != null && _openControllers.containsKey(dia)) {
           _openControllers[dia]?.text = valores['abre'] ?? '';
           _closeControllers[dia]?.text = valores['fecha'] ?? '';
+          print('   ✅ Preenchido: abre=${valores['abre']}, fecha=${valores['fecha']}');
+        } else {
+          print('   ⚠️ Dia $dia não tem controller ou valores inválidos');
         }
       });
+    }
+
+    // Debug: mostra todos os controllers depois de preencher
+    print('🟢 Controllers após preenchimento:');
+    for (var dia in _diasOrdenados) {
+      print('   $dia: abre="${_openControllers[dia]?.text}" fecha="${_closeControllers[dia]?.text}"');
     }
   }
 
@@ -96,20 +110,29 @@ class _SchedulePageState extends State<SchedulePage> {
     // ✅ Cria LinkedHashMap mantendo a ordem dos dias
     final Map<String, Map<String, String>> horarios = {};
 
+    print('💾 Salvando horários...');
+
     // ✅ Percorre na ordem correta
     for (var dia in _diasOrdenados) {
       final abre = _openControllers[dia]!.text.trim();
       final fecha = _closeControllers[dia]!.text.trim();
 
+      print('💾 Dia: $dia | Abre: "$abre" | Fecha: "$fecha"');
+
       // Se ambos vazios -> ignorar
-      if (abre.isEmpty && fecha.isEmpty) continue;
+      if (abre.isEmpty && fecha.isEmpty) {
+        print('   ⏭️ Ignorado (vazio)');
+        continue;
+      }
 
       horarios[dia] = {
         'abre': abre,
         'fecha': fecha,
       };
+      print('   ✅ Adicionado aos horários');
     }
 
+    print('💾 Horários finais para retornar: $horarios');
     Navigator.pop(context, horarios);
   }
 

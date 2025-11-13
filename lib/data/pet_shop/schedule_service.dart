@@ -23,17 +23,27 @@ class ScheduleService {
     try {
       final List<Map<String, String>> schedulesList = [];
 
+      print('🔵 Salvando horários recebidos: $schedules');
+
       //  Percorre na ordem correta dos dias
       for (var day in _diasOrdenados) {
+        print('🔍 Verificando dia: $day');
         if (schedules.containsKey(day)) {
           final times = schedules[day]!;
+          print('   → abre: ${times['abre']}, fecha: ${times['fecha']}');
+
           if (times['abre']!.isNotEmpty && times['fecha']!.isNotEmpty) {
             schedulesList.add({
               'day': day,
               'openTime': times['abre']!,
               'closeTime': times['fecha']!,
             });
+            print('    Adicionado à lista');
+          } else {
+            print('   ⚠ Ignorado (horários vazios)');
           }
+        } else {
+          print('   ⚠ Dia não encontrado no mapa schedules');
         }
       }
 
@@ -42,7 +52,7 @@ class ScheduleService {
         'schedules': schedulesList,
       };
 
-      print('Enviando horários: ${jsonEncode(body)}');
+      print('📤 Enviando horários: ${jsonEncode(body)}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/bulk'),
@@ -50,8 +60,8 @@ class ScheduleService {
         body: jsonEncode(body),
       );
 
-      print('Status: ${response.statusCode}');
-      print('Response: ${response.body}');
+      print('📥 Status: ${response.statusCode}');
+      print('📥 Response: ${response.body}');
 
       if (response.statusCode == 200) {
         return {
@@ -65,7 +75,7 @@ class ScheduleService {
         };
       }
     } catch (e) {
-      print('Erro ao salvar horários: $e');
+      print(' Erro ao salvar horários: $e');
       return {
         'success': false,
         'message': 'Erro de conexão: ${e.toString()}',
@@ -84,31 +94,28 @@ class ScheduleService {
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
 
-        print(' Dados recebidos do backend: $data');
+        print('🔍 Dados recebidos do backend: $data');
 
         //  Usa LinkedHashMap para manter a ordem de inserção
         final Map<String, Map<String, String>> schedules = {};
 
-        //  Cria um mapa de conversão de MAIÚSCULO para o formato do app
-        final Map<String, String> dayMapping = {
-          'SEG': 'Seg',
-          'TER': 'Ter',
-          'QUA': 'Qua',
-          'QUI': 'Qui',
-          'SEX': 'Sex',
-          'SÁB': 'Sáb',
-          'SAB': 'Sáb', // caso venha sem acento
-          'DOM': 'Dom',
-        };
-
         //  Insere na ordem correta dos dias
         for (var day in _diasOrdenados) {
-          // Procura o horário desse dia no retorno do backend
-          // Converte o dia do app (Seg) para maiúsculo (SEG) para comparar
-          final dayUpper = day.toUpperCase();
+          print('🔍 Procurando dia: $day');
+
+          //  Para Sábado, tenta com e sem acento
+          final possibleValues = day == 'Sáb'
+              ? ['SÁB', 'SAB', 'SABADO', 'SÁBADO']
+              : [day.toUpperCase()];
+
+          print('   Valores possíveis: $possibleValues');
 
           final schedule = data.firstWhere(
-                (s) => s['dayOfWeek']?.toString().toUpperCase() == dayUpper,
+                (s) {
+              final dayFromBackend = s['dayOfWeek']?.toString().toUpperCase() ?? '';
+              print('   Comparando com backend: $dayFromBackend');
+              return possibleValues.contains(dayFromBackend);
+            },
             orElse: () => null,
           );
 
@@ -117,13 +124,13 @@ class ScheduleService {
               'abre': schedule['openTime'] ?? '',
               'fecha': schedule['closeTime'] ?? '',
             };
-            print('✅ Dia $day encontrado: ${schedules[day]}');
+            print('    Dia $day encontrado: ${schedules[day]}');
           } else {
-            print('⚠️ Dia $day não encontrado no backend');
+            print('   ⚠ Dia $day NÃO encontrado no backend');
           }
         }
 
-        print('✅ Schedules final montado: $schedules');
+        print(' Schedules final montado: $schedules');
 
         return {
           'success': true,
