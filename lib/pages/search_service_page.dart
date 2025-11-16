@@ -4,6 +4,8 @@ import '../models/page_type.dart';
 import '../models/menu_item.dart';
 import '../data/pet_shop_services/pet_shop_service_service.dart';
 import '../data/pet_shop_services/petshop_service.dart';
+import '../data/pet_shop/pet_shop_information_service.dart';
+import 'service_detail_page.dart';
 
 class SearchServicePage extends StatefulWidget {
   const SearchServicePage({super.key});
@@ -14,11 +16,30 @@ class SearchServicePage extends StatefulWidget {
 
 class _SearchServicePageState extends State<SearchServicePage> {
   final Color yellow = const Color(0xFFF4E04D);
+  final Color bgColor = const Color(0xFFFBF8E1);
   final TextEditingController _searchController = TextEditingController();
 
   List<PetShopService> _allServices = [];
   List<PetShopService> _filteredServices = [];
   bool _isLoading = true;
+
+  // Filtros e ordenação
+  String _selectedCategory = 'Todos';
+  String _sortBy = 'name'; // 'name', 'price_asc', 'price_desc'
+
+  // Categorias disponíveis
+  final List<String> _categories = [
+    'Todos',
+    'Banho',
+    'Tosa',
+    'Creche',
+    'Outro',
+  ];
+
+  // Cache de nomes dos Pet Shops
+  Map<String, String> _petShopNames = {};
+
+  final PetShopInformationService _petShopService = PetShopInformationService();
 
   @override
   void initState() {
@@ -30,33 +51,111 @@ class _SearchServicePageState extends State<SearchServicePage> {
     setState(() => _isLoading = true);
     try {
       final services = await PetShopServiceService.getAllServices();
+
+      // Carregar nomes dos Pet Shops
+      await _loadPetShopNames(services);
+
       setState(() {
         _allServices = services;
-        _filteredServices = services;
+        _applyFilters();
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro ao carregar serviços: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao carregar serviços: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-  void _filterServices(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filteredServices = _allServices;
-      } else {
-        _filteredServices = _allServices
-            .where((service) =>
-            service.name.toLowerCase().contains(query.toLowerCase()))
-            .toList();
+  Future<void> _loadPetShopNames(List<PetShopService> services) async {
+    // Pegar IDs únicos dos Pet Shops
+    final uniquePetShopIds = services.map((s) => s.petShopId).toSet();
+
+    for (var petShopId in uniquePetShopIds) {
+      try {
+        // Passar o int direto, sem converter para String
+        final response = await _petShopService.getPetShopInformationById(petShopId);
+
+        Map<String, dynamic>? data;
+        if (response is Map<String, dynamic>) {
+          if (response.containsKey('data') && response['data'] != null) {
+            data = response['data'] as Map<String, dynamic>;
+          } else {
+            data = response;
+          }
+        }
+
+        if (data != null && data['name'] != null) {
+          _petShopNames[petShopId.toString()] = data['name'].toString();
+        } else {
+          _petShopNames[petShopId.toString()] = 'Pet Shop $petShopId';
+        }
+      } catch (e) {
+        print('Erro ao carregar nome do Pet Shop $petShopId: $e');
+        _petShopNames[petShopId.toString()] = 'Pet Shop $petShopId';
       }
+    }
+  }
+
+  void _applyFilters() {
+    List<PetShopService> filtered = _allServices;
+
+    // Filtro de busca por texto
+    if (_searchController.text.isNotEmpty) {
+      filtered = filtered
+          .where((service) =>
+          service.name.toLowerCase().contains(_searchController.text.toLowerCase()))
+          .toList();
+    }
+
+    // Filtro por categoria
+    if (_selectedCategory != 'Todos') {
+      filtered = filtered
+          .where((service) =>
+          service.name.toLowerCase().contains(_selectedCategory.toLowerCase()))
+          .toList();
+    }
+
+    // Ordenação
+    switch (_sortBy) {
+      case 'price_asc':
+        filtered.sort((a, b) => a.price.compareTo(b.price));
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) => b.price.compareTo(a.price));
+        break;
+      case 'name':
+      default:
+        filtered.sort((a, b) => a.name.compareTo(b.name));
+        break;
+    }
+
+    setState(() {
+      _filteredServices = filtered;
     });
+  }
+
+  // Agrupar serviços por Pet Shop
+  Map<String, List<PetShopService>> _groupByPetShop() {
+    Map<String, List<PetShopService>> grouped = {};
+
+    for (var service in _filteredServices) {
+      // Buscar o nome real do Pet Shop do cache (converter ID para String)
+      String petShopName = _petShopNames[service.petShopId.toString()] ?? 'Pet Shop ${service.petShopId}';
+
+      if (!grouped.containsKey(petShopName)) {
+        grouped[petShopName] = [];
+      }
+      grouped[petShopName]!.add(service);
+    }
+
+    return grouped;
   }
 
   @override
@@ -64,12 +163,10 @@ class _SearchServicePageState extends State<SearchServicePage> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final menuItems = PageType.values
-        .map((type) => MenuItem.fromType(type))
-        .toList();
+    final menuItems = PageType.values.map((type) => MenuItem.fromType(type)).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBF8E1),
+      backgroundColor: bgColor,
       drawer: CustomDrawer(menuItems: menuItems),
 
       appBar: PreferredSize(
@@ -77,7 +174,7 @@ class _SearchServicePageState extends State<SearchServicePage> {
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
           decoration: BoxDecoration(
-            color: const Color(0xFFF4E04D),
+            color: yellow,
             border: Border.all(color: Colors.black, width: 1),
           ),
           child: SafeArea(
@@ -106,6 +203,55 @@ class _SearchServicePageState extends State<SearchServicePage> {
                     ),
                   ),
                 ),
+                Positioned(
+                  right: -10,
+                  top: -6,
+                  bottom: 0,
+                  child: PopupMenuButton<String>(
+                    icon: Icon(Icons.sort, size: screenHeight * 0.03, color: Colors.black),
+                    onSelected: (value) {
+                      setState(() {
+                        _sortBy = value;
+                        _applyFilters();
+                      });
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'name',
+                        child: Row(
+                          children: [
+                            Icon(Icons.sort_by_alpha,
+                                color: _sortBy == 'name' ? yellow : Colors.black54),
+                            const SizedBox(width: 8),
+                            Text('Nome A-Z'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'price_asc',
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_upward,
+                                color: _sortBy == 'price_asc' ? yellow : Colors.black54),
+                            const SizedBox(width: 8),
+                            Text('Menor Preço'),
+                          ],
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 'price_desc',
+                        child: Row(
+                          children: [
+                            Icon(Icons.arrow_downward,
+                                color: _sortBy == 'price_desc' ? yellow : Colors.black54),
+                            const SizedBox(width: 8),
+                            Text('Maior Preço'),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -116,13 +262,14 @@ class _SearchServicePageState extends State<SearchServicePage> {
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
         onRefresh: _loadServices,
-        child: Padding(
-          padding: EdgeInsets.all(screenWidth * 0.04),
-          child: Column(
-            children: [
-              TextField(
+        child: Column(
+          children: [
+            // Campo de busca
+            Padding(
+              padding: EdgeInsets.all(screenWidth * 0.04),
+              child: TextField(
                 controller: _searchController,
-                onChanged: _filterServices,
+                onChanged: (value) => _applyFilters(),
                 decoration: InputDecoration(
                   hintText: 'Buscar serviço...',
                   prefixIcon: const Icon(Icons.search, color: Colors.black54),
@@ -131,7 +278,7 @@ class _SearchServicePageState extends State<SearchServicePage> {
                     icon: const Icon(Icons.clear, color: Colors.black54),
                     onPressed: () {
                       _searchController.clear();
-                      _filterServices('');
+                      _applyFilters();
                     },
                   )
                       : null,
@@ -151,106 +298,250 @@ class _SearchServicePageState extends State<SearchServicePage> {
                   ),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.02),
-              Expanded(
-                child: _filteredServices.isEmpty
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _searchController.text.isEmpty
-                            ? Icons.search
-                            : Icons.search_off,
-                        size: screenHeight * 0.1,
-                        color: Colors.black38,
+            ),
+
+            // Chips de Categorias
+            SizedBox(
+              height: screenHeight * 0.06,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  final category = _categories[index];
+                  final isSelected = _selectedCategory == category;
+
+                  return Padding(
+                    padding: EdgeInsets.only(right: screenWidth * 0.02),
+                    child: FilterChip(
+                      label: Text(category),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedCategory = category;
+                          _applyFilters();
+                        });
+                      },
+                      backgroundColor: Colors.white,
+                      selectedColor: yellow,
+                      checkmarkColor: Colors.black,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.black : Colors.black54,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                       ),
-                      SizedBox(height: screenHeight * 0.02),
-                      Text(
-                        _searchController.text.isEmpty
-                            ? "Nenhum serviço disponível"
-                            : "Nenhum serviço encontrado",
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.025,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
-                        ),
+                      side: BorderSide(
+                        color: isSelected ? Colors.black : Colors.black38,
+                        width: isSelected ? 2 : 1,
                       ),
-                      SizedBox(height: screenHeight * 0.01),
-                      Text(
-                        _searchController.text.isEmpty
-                            ? "Arraste para baixo para atualizar"
-                            : "Tente buscar por outro termo",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.018,
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                    : ListView.builder(
-                  itemCount: _filteredServices.length,
-                  itemBuilder: (context, index) {
-                    final service = _filteredServices[index];
-                    return _buildServiceCard(service, screenWidth, screenHeight);
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+
+            SizedBox(height: screenHeight * 0.01),
+
+            // Lista de Serviços Agrupados
+            Expanded(
+              child: _filteredServices.isEmpty
+                  ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      _searchController.text.isEmpty
+                          ? Icons.search
+                          : Icons.search_off,
+                      size: screenHeight * 0.1,
+                      color: Colors.black38,
+                    ),
+                    SizedBox(height: screenHeight * 0.02),
+                    Text(
+                      _searchController.text.isEmpty
+                          ? "Nenhum serviço disponível"
+                          : "Nenhum serviço encontrado",
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.025,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54,
+                      ),
+                    ),
+                    SizedBox(height: screenHeight * 0.01),
+                    Text(
+                      _searchController.text.isEmpty
+                          ? "Arraste para baixo para atualizar"
+                          : "Tente buscar por outro termo",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.018,
+                        color: Colors.black45,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+                  : _buildGroupedServicesList(screenWidth, screenHeight),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildServiceCard(PetShopService service, double screenWidth, double screenHeight) {
-    return Container(
-      margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.black, width: 1),
-      ),
-      child: ListTile(
-        contentPadding: EdgeInsets.all(screenWidth * 0.04),
-        leading: Container(
-          padding: EdgeInsets.all(screenWidth * 0.03),
+  Widget _buildGroupedServicesList(double screenWidth, double screenHeight) {
+    final grouped = _groupByPetShop();
+    final petShops = grouped.keys.toList();
+
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+      itemCount: petShops.length,
+      itemBuilder: (context, index) {
+        final petShopName = petShops[index];
+        final services = grouped[petShopName]!;
+
+        return Container(
+          margin: EdgeInsets.only(bottom: screenHeight * 0.02),
           decoration: BoxDecoration(
-            color: yellow,
-            shape: BoxShape.circle,
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.black, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: Icon(
-            Icons.pets,
-            size: screenHeight * 0.03,
-            color: Colors.black87,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cabeçalho do Pet Shop
+              Container(
+                padding: EdgeInsets.all(screenWidth * 0.04),
+                decoration: BoxDecoration(
+                  color: yellow.withOpacity(0.3),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(15),
+                    topRight: Radius.circular(15),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.black.withOpacity(0.2), width: 1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(screenWidth * 0.02),
+                      decoration: BoxDecoration(
+                        color: yellow,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.black, width: 1),
+                      ),
+                      child: Icon(
+                        Icons.store,
+                        size: screenHeight * 0.025,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(width: screenWidth * 0.03),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            petShopName,
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.02,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            '${services.length} serviço${services.length > 1 ? 's' : ''}',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.016,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Lista de Serviços do Pet Shop
+              ...services.map((service) => _buildServiceItem(service, screenWidth, screenHeight)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildServiceItem(PetShopService service, double screenWidth, double screenHeight) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ServiceDetailPage(service: service),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(screenWidth * 0.04),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: Colors.black.withOpacity(0.1), width: 1),
           ),
         ),
-        title: Text(
-          service.name,
-          style: TextStyle(
-            fontSize: screenHeight * 0.022,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Text(
-          service.formattedPrice,
-          style: TextStyle(
-            fontSize: screenHeight * 0.018,
-            color: Colors.black54,
-          ),
-        ),
-        trailing: Icon(Icons.arrow_forward_ios, size: screenHeight * 0.02),
-        onTap: () {
-          // Ação ao selecionar o serviço - você pode navegar para detalhes ou agendar
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Serviço: ${service.name}'),
-              duration: const Duration(seconds: 1),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(screenWidth * 0.025),
+              decoration: BoxDecoration(
+                color: yellow.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.pets,
+                size: screenHeight * 0.025,
+                color: Colors.black87,
+              ),
             ),
-          );
-        },
+            SizedBox(width: screenWidth * 0.03),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service.name,
+                    style: TextStyle(
+                      fontSize: screenHeight * 0.02,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    service.formattedPrice,
+                    style: TextStyle(
+                      fontSize: screenHeight * 0.018,
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: screenHeight * 0.02,
+              color: Colors.black54,
+            ),
+          ],
+        ),
       ),
     );
   }
