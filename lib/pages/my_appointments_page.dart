@@ -13,22 +13,7 @@ class MyAppointmentsPage extends StatefulWidget {
 class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   final Color yellow = const Color(0xFFF4E04D);
 
-  final List<Map<String, String>> appointments = [
-    {
-      'shopName': 'Pet shop Realeza',
-      'address': 'Rua Adriano Kormann',
-      'date': '28/06/2025',
-      'time': '14:00',
-      'service': 'Banho + Tosa',
-    },
-    {
-      'shopName': 'Pet shop Realeza',
-      'address': 'Rua Adriano Kormann',
-      'date': '28/06/2025',
-      'time': '15:00',
-      'service': 'Banho + Tosa',
-    },
-  ];
+  final List<Map<String, String>> appointments = [];
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +21,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     final barHeight = screenHeight * 0.07;
-    final iconSize = barHeight * 0.6; // mesma pata do PetShops Favoritos
+    final iconSize = barHeight * 0.6;
     final menuItems = PageType.values
         .map((type) => MenuItem.fromType(type))
         .toList();
@@ -45,7 +30,6 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
       backgroundColor: const Color(0xFFFBF8E1),
       drawer: CustomDrawer(menuItems: menuItems),
 
-      // AppBar responsivo
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(MediaQuery.of(context).size.height * 0.08),
         child: Container(
@@ -86,8 +70,41 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         ),
       ),
 
-      // Corpo da tela com ListView
-      body: ListView.builder(
+      body: appointments.isEmpty
+          ? Center(
+        child: Padding(
+          padding: EdgeInsets.all(screenWidth * 0.08),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.calendar_today_outlined,
+                size: screenHeight * 0.1,
+                color: Colors.black38,
+              ),
+              SizedBox(height: screenHeight * 0.02),
+              Text(
+                "Nenhum agendamento",
+                style: TextStyle(
+                  fontSize: screenHeight * 0.025,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+              SizedBox(height: screenHeight * 0.01),
+              Text(
+                "Seus agendamentos aparecerão aqui",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: screenHeight * 0.018,
+                  color: Colors.black45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
+          : ListView.builder(
         padding: EdgeInsets.all(screenWidth * 0.04),
         itemCount: appointments.length,
         itemBuilder: (context, index) {
@@ -109,7 +126,6 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
       ),
       child: Column(
         children: [
-          // Cabeçalho do cartão
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.008),
@@ -134,7 +150,6 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
               ],
             ),
           ),
-          // Corpo do cartão
           Padding(
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04, vertical: screenHeight * 0.015),
             child: Column(

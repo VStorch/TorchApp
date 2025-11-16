@@ -9,6 +9,7 @@ import '../pages/promotions_page.dart';
 import '../pages/my_profile_page.dart';
 import '../pages/login_page.dart';
 import '../pages/about_page.dart';
+import '../pages/search_service_page.dart';
 
 class MenuItem {
   final String title;
@@ -41,6 +42,12 @@ class MenuItem {
           title: 'Meus Agendamentos',
           icon: Icons.calendar_month,
           destinationPage: const MyAppointmentsPage(),
+        );
+      case PageType.searchService:
+        return MenuItem(
+          title: 'Buscar Serviço',
+          icon: Icons.search,
+          destinationPage: const SearchServicePage(),
         );
       case PageType.petShops:
         return MenuItem(

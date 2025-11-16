@@ -21,6 +21,17 @@ class PetShopServiceService {
     }
   }
 
+  // ADICIONE ESTE MÉTODO AQUI
+  static Future<List<PetShopService>> getAllServices() async {
+    final response = await http.get(Uri.parse(baseUrl));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = jsonDecode(response.body);
+      return data.map((e) => PetShopService.fromJson(e)).toList();
+    } else {
+      throw Exception('Erro ao carregar serviços: ${response.body}');
+    }
+  }
 
   static Future<List<PetShopService>> getByPetShopId(int petShopId) async {
     final response = await http.get(Uri.parse('$baseUrl/petshops/$petShopId'));
@@ -33,12 +44,10 @@ class PetShopServiceService {
     }
   }
 
-
   static Future<bool> deleteService(int id) async {
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
     return response.statusCode == 204;
   }
-
 
   static Future<bool> updateService(int id, PetShopService service) async {
     final response = await http.put(
