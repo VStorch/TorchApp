@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   final String email;
-  final String? prefilledCode; // Código opcional vindo do deep link
+  final String? prefilledCode;
 
   const ResetPasswordPage({
     super.key,
@@ -20,6 +20,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefilledCode != null) {
+      codeController.text = widget.prefilledCode!;
+    }
+  }
+
   bool isLoading = false;
   String? message;
   bool obscurePassword = true;
@@ -27,11 +35,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
 
   // Função para confirmar a redefinição de senha
   Future<void> confirmResetPassword() async {
-    final code = codeController.text.trim();
+    final token = codeController.text.trim();
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (code.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+    if (token.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
       setState(() => message = "Por favor, preencha todos os campos.");
       return;
     }
@@ -56,7 +64,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         'http://10.0.2.2:8080/users/reset-password/confirm',
         data: {
           'email': widget.email,
-          'code': code,
+          'token': token,
           'newPassword': newPassword,
         },
       );
