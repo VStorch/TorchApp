@@ -144,4 +144,54 @@ class AppointmentService {
       throw Exception('Erro de conexão: $e');
     }
   }
+
+  // Avaliar Pet Shop
+  static Future<void> evaluatePetShop({
+    required int userId,
+    required int petShopId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/evaluate'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'userId': userId,
+          'petShopId': petShopId,
+          'rating': rating,
+          'comment': comment ?? '',
+        }),
+      );
+
+      if (response.statusCode != 201) {
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['message'] ?? 'Erro ao enviar avaliação');
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão: $e');
+    }
+  }
+
+  // Verificar se usuário já avaliou um Pet Shop
+  static Future<bool> hasUserEvaluated({
+    required int userId,
+    required int petShopId,
+  }) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/evaluate/$petShopId'),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> evaluations = jsonDecode(response.body);
+
+        // Verificar se existe alguma avaliação deste usuário
+        return evaluations.any((evaluation) => evaluation['userId'] == userId);
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }

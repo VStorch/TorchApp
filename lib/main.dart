@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       ],
 
       // Página inicial
-      home: HomePage()
+      home: LoadingPage()
     );
   }
 }

@@ -20,6 +20,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   List<Map<String, dynamic>> appointments = [];
   bool isLoading = true;
   int? userId;
+  String filterStatus = 'Todos'; // Filtro de status
 
   final PetShopInformationService _petShopService = PetShopInformationService();
 
@@ -44,25 +45,52 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     try {
       final data = await AppointmentService.getUserAppointments(userId!);
 
-      // Filtra apenas agendamentos pendentes e concluídos (remove cancelados)
-      final filteredData = data.where((apt) {
-        final status = apt['status']?.toString().toUpperCase() ?? '';
-        return status != 'CANCELLED';
-      }).toList();
-
-      filteredData.sort((a, b) {
+      // Não filtra cancelados aqui, deixa para o filtro de abas
+      data.sort((a, b) {
         final dateA = DateTime.parse(a['date']);
         final dateB = DateTime.parse(b['date']);
         return dateB.compareTo(dateA);
       });
       setState(() {
-        appointments = filteredData;
+        appointments = data;
         isLoading = false;
       });
     } catch (e) {
       setState(() => isLoading = false);
       _showSnackBar('Erro ao carregar agendamentos', isError: true);
     }
+  }
+
+  List<Map<String, dynamic>> get filteredAppointments {
+    if (filterStatus == 'Todos') {
+      // Remove apenas os cancelados quando estiver em "Todos"
+      return appointments.where((apt) {
+        final status = apt['status']?.toString().toUpperCase() ?? '';
+        return status != 'CANCELLED';
+      }).toList();
+    }
+
+    // Mapear português para inglês
+    String statusBackend = '';
+    switch (filterStatus) {
+      case 'Pendente':
+        statusBackend = 'PENDING';
+        break;
+      case 'Confirmado':
+        statusBackend = 'CONFIRMED';
+        break;
+      case 'Concluído':
+        statusBackend = 'COMPLETED';
+        break;
+      case 'Cancelado':
+        statusBackend = 'CANCELLED';
+        break;
+    }
+
+    return appointments.where((apt) {
+      final status = apt['status']?.toString().toUpperCase() ?? '';
+      return status == statusBackend;
+    }).toList();
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
@@ -84,6 +112,22 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         petShopService: _petShopService,
         bgColor: bgColor,
         yellow: yellow,
+      ),
+    );
+  }
+
+  void _showEvaluationDialog(Map<String, dynamic> apt) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _EvaluationDialog(
+        appointment: apt,
+        userId: userId!,
+        yellow: yellow,
+        bgColor: bgColor,
+        onEvaluated: () {
+          _showSnackBar('Avaliação enviada com sucesso!');
+          _loadAppointments();
+        },
       ),
     );
   }
@@ -159,7 +203,9 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   String _getStatusText(String status) {
     switch (status.toUpperCase()) {
       case 'PENDING':
-        return 'Agendado';
+        return 'Pendente';
+      case 'CONFIRMED':
+        return 'Confirmado';
       case 'COMPLETED':
         return 'Concluído';
       case 'CANCELLED':
@@ -173,6 +219,8 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
     switch (status.toUpperCase()) {
       case 'PENDING':
         return yellow;
+      case 'CONFIRMED':
+        return Colors.blue[500]!;
       case 'COMPLETED':
         return Colors.green[500]!;
       case 'CANCELLED':
@@ -239,22 +287,145 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-        onRefresh: _loadAppointments,
-        child: appointments.isEmpty
-            ? _buildEmptyState(screenHeight)
-            : ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: appointments.length,
-          itemBuilder: (context, index) {
-            return _buildAppointmentCard(appointments[index], screenHeight);
-          },
-        ),
+          : Column(
+        children: [
+          // Filtro de Status
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('Todos'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Pendente'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Confirmado'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Concluído'),
+                  const SizedBox(width: 8),
+                  _buildFilterChip('Cancelado'),
+                ],
+              ),
+            ),
+          ),
+
+          // Lista de Agendamentos
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: _loadAppointments,
+              child: filteredAppointments.isEmpty
+                  ? _buildEmptyState(screenHeight)
+                  : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: filteredAppointments.length,
+                itemBuilder: (context, index) {
+                  return _buildAppointmentCard(filteredAppointments[index], screenHeight);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
+  Widget _buildFilterChip(String label) {
+    final isSelected = filterStatus == label;
+
+    Color chipColor;
+    IconData chipIcon;
+
+    switch (label) {
+      case 'Pendente':
+        chipColor = yellow;
+        chipIcon = Icons.schedule;
+        break;
+      case 'Confirmado':
+        chipColor = Colors.blue[500]!;
+        chipIcon = Icons.check_circle;
+        break;
+      case 'Concluído':
+        chipColor = Colors.green[500]!;
+        chipIcon = Icons.done_all;
+        break;
+      case 'Cancelado':
+        chipColor = Colors.red[400]!;
+        chipIcon = Icons.cancel;
+        break;
+      default:
+        chipColor = Colors.grey[600]!;
+        chipIcon = Icons.all_inclusive;
+    }
+
+    return FilterChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            chipIcon,
+            size: 16,
+            color: isSelected ? Colors.black87 : chipColor,
+          ),
+          const SizedBox(width: 6),
+          Text(label),
+        ],
+      ),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() => filterStatus = label);
+      },
+      selectedColor: chipColor,
+      backgroundColor: Colors.grey[200],
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.black87 : Colors.grey[700],
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        fontSize: 14,
+      ),
+      side: BorderSide(
+        color: isSelected ? Colors.black : Colors.transparent,
+        width: 2,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    );
+  }
+
   Widget _buildEmptyState(double screenHeight) {
+    String emptyMessage;
+    IconData emptyIcon;
+
+    switch (filterStatus) {
+      case 'Pendente':
+        emptyMessage = 'Nenhum agendamento pendente';
+        emptyIcon = Icons.schedule;
+        break;
+      case 'Confirmado':
+        emptyMessage = 'Nenhum agendamento confirmado';
+        emptyIcon = Icons.check_circle_outline;
+        break;
+      case 'Concluído':
+        emptyMessage = 'Nenhum agendamento concluído';
+        emptyIcon = Icons.done_all;
+        break;
+      case 'Cancelado':
+        emptyMessage = 'Nenhum agendamento cancelado';
+        emptyIcon = Icons.cancel_outlined;
+        break;
+      default:
+        emptyMessage = 'Nenhum agendamento';
+        emptyIcon = Icons.event_busy;
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -265,16 +436,18 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
               color: yellow.withOpacity(0.2),
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.event_busy, size: 80, color: Colors.black38),
+            child: Icon(emptyIcon, size: 80, color: Colors.black38),
           ),
           SizedBox(height: screenHeight * 0.03),
-          const Text(
-            "Nenhum agendamento",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black54),
+          Text(
+            emptyMessage,
+            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black54),
           ),
           const SizedBox(height: 8),
           Text(
-            "Seus agendamentos aparecerão aqui",
+            filterStatus == 'Todos'
+                ? 'Seus agendamentos aparecerão aqui'
+                : 'Nenhum agendamento com este status',
             style: TextStyle(fontSize: 15, color: Colors.grey[600]),
           ),
         ],
@@ -285,6 +458,9 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
   Widget _buildAppointmentCard(Map<String, dynamic> apt, double screenHeight) {
     final status = apt['status'] ?? 'PENDING';
     final isPending = status.toUpperCase() == 'PENDING';
+    final isConfirmed = status.toUpperCase() == 'CONFIRMED';
+    final isCompleted = status.toUpperCase() == 'COMPLETED';
+    final isCancelled = status.toUpperCase() == 'CANCELLED';
     final statusColor = _getStatusColor(status);
 
     return Container(
@@ -427,7 +603,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                         onPressed: () => _showDetailsDialog(apt),
                         icon: const Icon(Icons.info_outline, size: 18),
                         label: const Text(
-                          'Ver Detalhes',
+                          'Detalhes',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -441,8 +617,8 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                       ),
                     ),
 
-                    // Botão Cancelar (se pending)
-                    if (isPending) ...[
+                    // Botão Cancelar (se pending ou confirmed)
+                    if (isPending || isConfirmed) ...[
                       const SizedBox(width: 10),
                       Expanded(
                         child: ElevatedButton.icon(
@@ -458,6 +634,31 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(color: Colors.red[300]!, width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    // Botão Avaliar (se completed)
+                    if (isCompleted) ...[
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showEvaluationDialog(apt),
+                          icon: const Icon(Icons.star_rounded, size: 18),
+                          label: const Text(
+                            'Avaliar',
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber[50],
+                            foregroundColor: Colors.amber[900],
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            side: BorderSide(color: Colors.amber[700]!, width: 2),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -529,6 +730,262 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
         ],
       ),
     );
+  }
+}
+
+// Dialog de Avaliação
+class _EvaluationDialog extends StatefulWidget {
+  final Map<String, dynamic> appointment;
+  final int userId;
+  final Color yellow;
+  final Color bgColor;
+  final VoidCallback onEvaluated;
+
+  const _EvaluationDialog({
+    required this.appointment,
+    required this.userId,
+    required this.yellow,
+    required this.bgColor,
+    required this.onEvaluated,
+  });
+
+  @override
+  State<_EvaluationDialog> createState() => _EvaluationDialogState();
+}
+
+class _EvaluationDialogState extends State<_EvaluationDialog> {
+  int rating = 0;
+  final TextEditingController commentController = TextEditingController();
+  bool isSubmitting = false;
+
+  Future<void> _submitEvaluation() async {
+    if (rating == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Por favor, selecione uma classificação'),
+          backgroundColor: Colors.red[600],
+        ),
+      );
+      return;
+    }
+
+    setState(() => isSubmitting = true);
+
+    try {
+      await AppointmentService.evaluatePetShop(
+        userId: widget.userId,
+        petShopId: widget.appointment['petShopId'],
+        rating: rating,
+        comment: commentController.text.trim(),
+      );
+
+      if (mounted) {
+        Navigator.pop(context);
+        widget.onEvaluated();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => isSubmitting = false);
+
+        String errorMessage = 'Erro ao enviar avaliação';
+
+        // Detectar mensagens específicas do backend
+        if (e.toString().contains('já avaliou')) {
+          errorMessage = 'Você já avaliou este Pet Shop';
+        } else if (e.toString().contains('sem ter completado')) {
+          errorMessage = 'Você precisa concluir um agendamento antes de avaliar';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text(errorMessage)),
+              ],
+            ),
+            backgroundColor: Colors.orange[700],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 500),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.black, width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: widget.yellow,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(23),
+                  topRight: Radius.circular(23),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.star_rounded, size: 28, color: Colors.black87),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Avaliar Pet Shop',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.black87),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
+            // Conteúdo
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Nome do Pet Shop
+                  Center(
+                    child: Text(
+                      widget.appointment['petShopName'] ?? 'Pet Shop',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Estrelas
+                  const Text(
+                    'Classificação',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(5, (index) {
+                        return IconButton(
+                          icon: Icon(
+                            index < rating ? Icons.star : Icons.star_border,
+                            size: 40,
+                            color: Colors.amber[700],
+                          ),
+                          onPressed: () => setState(() => rating = index + 1),
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Comentário
+                  const Text(
+                    'Comentário (opcional)',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: commentController,
+                    maxLines: 4,
+                    maxLength: 1000,
+                    decoration: InputDecoration(
+                      hintText: 'Compartilhe sua experiência...',
+                      filled: true,
+                      fillColor: widget.bgColor,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.black, width: 2),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.black, width: 2),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: widget.yellow, width: 2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Botão Enviar
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: isSubmitting ? null : _submitEvaluation,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: widget.yellow,
+                        foregroundColor: Colors.black87,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(color: Colors.black, width: 2),
+                        ),
+                      ),
+                      child: isSubmitting
+                          ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black87,
+                        ),
+                      )
+                          : const Text(
+                        'Enviar Avaliação',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    commentController.dispose();
+    super.dispose();
   }
 }
 
