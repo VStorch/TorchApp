@@ -49,12 +49,6 @@ class MenuItem {
           icon: Icons.search,
           destinationPage: const SearchServicePage(),
         );
-      case PageType.petShops:
-        return MenuItem(
-          title: 'PetShops',
-          icon: Icons.business,
-          destinationPage: const PetShopPage(),
-        );
       case PageType.promotions:
         return MenuItem(
           title: 'Promoções',
