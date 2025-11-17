@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:torch_app/pages/login_page.dart';
+import '../pages_pet_shop/pet_shop_appointments_page.dart';
 import 'page_type_pet_shop.dart';
 import '../pages_pet_shop/home_page_pet_shop.dart';
 import '../pages_pet_shop/profile.dart';
@@ -19,13 +20,15 @@ class MenuItemPetShop {
     required this.destinationPage,
   });
 
-  factory MenuItemPetShop.fromType(PageTypePetShop type, {required int petShopId, required int userId}) {
+  factory MenuItemPetShop.fromType(PageTypePetShop type,
+      {required int petShopId, required int userId}) {
     switch (type) {
       case PageTypePetShop.home:
         return MenuItemPetShop(
           title: 'Início',
           icon: Icons.home,
-          destinationPage: HomePagePetShop(petShopId: petShopId, userId: userId,),
+          destinationPage: HomePagePetShop(
+            petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.profile:
         return MenuItemPetShop(
@@ -50,6 +53,13 @@ class MenuItemPetShop {
           title: 'Promoções',
           icon: Icons.local_offer,
           destinationPage: Promotions(petShopId: petShopId, userId: userId,),
+        );
+      case PageTypePetShop.appointments: // ADICIONE ESTE CASE
+        return MenuItemPetShop(
+          title: 'Agendamentos',
+          icon: Icons.event_note,
+          destinationPage: PetShopAppointmentsPage(
+            petShopId: petShopId, userId: userId,),
         );
       case PageTypePetShop.settings:
         return MenuItemPetShop(

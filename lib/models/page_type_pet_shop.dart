@@ -4,6 +4,7 @@ enum PageTypePetShop {
   services,
   reviews,
   promotions,
+  appointments,
   settings,
   logout,
 }

@@ -62,7 +62,6 @@ class AppointmentService {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
-        print('📦 Dados recebidos do backend: $data'); // DEBUG
         return data.map((appointment) => appointment as Map<String, dynamic>).toList();
       } else {
         throw Exception('Erro ao carregar agendamentos: ${response.body}');
@@ -76,16 +75,6 @@ class AppointmentService {
   static Future<List<Map<String, dynamic>>> getUserAppointments(int userId) async {
     try {
       final allAppointments = await getAllAppointments();
-
-      // DEBUG: Ver o que está vindo
-      print('🔍 TODOS OS AGENDAMENTOS:');
-      for (var appointment in allAppointments) {
-        print('Pet Shop Name: ${appointment['petShopName']}');
-        print('Service Name: ${appointment['serviceName']}');
-        print('Pet Name: ${appointment['petName']}');
-        print('Pet Shop ID: ${appointment['petShopId']}');
-        print('---');
-      }
 
       // Filtrar agendamentos do usuário
       return allAppointments.where((appointment) {
@@ -120,6 +109,36 @@ class AppointmentService {
 
       if (response.statusCode != 204) {
         throw Exception('Erro ao deletar agendamento: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão: $e');
+    }
+  }
+
+  // Confirmar agendamento (muda status de PENDING para CONFIRMED)
+  static Future<void> confirmAppointment(int appointmentId) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/appointments/$appointmentId/confirm'),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Erro ao confirmar agendamento: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Erro de conexão: $e');
+    }
+  }
+
+  // Concluir agendamento (muda status para COMPLETED)
+  static Future<void> completeAppointment(int appointmentId) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/appointments/$appointmentId/complete'),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Erro ao concluir agendamento: ${response.body}');
       }
     } catch (e) {
       throw Exception('Erro de conexão: $e');
