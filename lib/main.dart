@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:torch_app/pages/loading_page.dart';
-import 'package:torch_app/pages/search_service_page.dart';
 
 void main() {
   runApp(const MyApp());
