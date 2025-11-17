@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/pet_shop_services/petshop_service.dart';
 import '../data/pet_shop/pet_shop_information_service.dart';
+import 'booking_page.dart';
 
 class ServiceDetailPage extends StatefulWidget {
   final PetShopService service;
@@ -451,8 +452,38 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                           ),
                         ),
                         onPressed: () {
-                          // TODO: Navegar para tela de agendamento
-                          // Navigator.push(context, MaterialPageRoute(builder: (context) => AgendamentoPage()));
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookingPage(
+                                service: widget.service,
+                                petShopId: widget.service.petShopId,
+                              ),
+                            ),
+                          ).then((success) {
+                            // Se o agendamento foi bem sucedido
+                            if (success == true && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: Colors.white),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text('Agendamento realizado!'),
+                                      ),
+                                    ],
+                                  ),
+                                  backgroundColor: Colors.green[700],
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  duration: const Duration(seconds: 3),
+                                ),
+                              );
+                            }
+                          });
                         },
                       ),
                     ),
@@ -468,7 +499,7 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       child: Column(
                         children: [
                           Icon(Icons.error_outline, color: Colors.red[800], size: 40),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text(
                             'Erro ao carregar',
                             style: TextStyle(
@@ -477,9 +508,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                               color: Colors.red[900],
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Text(errorMessage!, textAlign: TextAlign.center),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: _loadPetShopData,
                             child: const Text('Tentar Novamente'),
@@ -500,11 +531,11 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                         children: [
                           Icon(Icons.warning_amber_rounded,
                               color: Colors.orange[800], size: 30),
-                          SizedBox(width: 15),
-                          Expanded(
+                          const SizedBox(width: 15),
+                          const Expanded(
                             child: Text(
                               'Informações não disponíveis',
-                              style: TextStyle(color: Colors.orange[900]),
+                              style: TextStyle(color: Colors.black87),
                             ),
                           ),
                         ],
