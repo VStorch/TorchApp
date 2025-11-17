@@ -3,7 +3,6 @@ enum PageType {
   myPets,
   appointments,
   searchService,
-  petShops,
   promotions,
   profile,
   settings,

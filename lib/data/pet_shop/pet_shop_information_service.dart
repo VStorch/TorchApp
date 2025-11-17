@@ -3,12 +3,8 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 
 class PetShopInformationService {
-  // Altere para o IP da sua máquina se estiver testando em dispositivo físico
   static const String baseUrl = 'http://10.0.2.2:8080/api/petshop-information';
-  // Para emulador Android: 'http://10.0.2.2:8080/api/petshop-information'
-  // Para dispositivo físico: 'http://SEU_IP:8080/api/petshop-information'
 
-  // Criar informações do Pet Shop
   Future<Map<String, dynamic>> createPetShopInformation({
     required String name,
     required String description,

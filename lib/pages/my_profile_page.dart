@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
+import 'package:torch_app/pages/my_pets_page.dart';
+import 'package:torch_app/pages/my_appointments_page.dart';
 
 import '../components/custom_drawer.dart';
 import '../models/menu_item.dart';
@@ -20,7 +22,7 @@ class MyProfilePage extends StatefulWidget {
 class _MyProfilePageState extends State<MyProfilePage> {
   File? _profileImage;
   String? _selectedAssetImage;
-  String _userName = "Carregando..."; // Valor inicial
+  String _userName = "Carregando...";
 
   final List<String> _defaultImages = [
     "lib/assets/images_profile/dog1.jpg",
@@ -41,7 +43,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
     _loadUserData();
   }
 
-  // Carrega os dados salvos localmente
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
@@ -122,6 +123,20 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   void _handleOptionTap(String title) async {
     switch (title) {
+      case "Meus Pets":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyPetsPage()),
+        );
+        break;
+
+      case "Meus Agendamentos":
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const MyAppointmentsPage()),
+        );
+        break;
+
       case "Alterar Senha":
         Navigator.push(
           context,
@@ -157,7 +172,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
         );
 
         if (confirm == true) {
-          // Limpa os dados salvos ao sair
           final prefs = await SharedPreferences.getInstance();
           await prefs.clear();
 
@@ -343,7 +357,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   Icons.pets, "Meus Pets", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
-                  Icons.receipt_long, "Meus Pedidos", optionFontSize),
+                  Icons.receipt_long, "Meus Agendamentos", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
                   Icons.notifications, "Notificações", optionFontSize),
