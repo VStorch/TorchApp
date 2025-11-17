@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:app_links/app_links.dart';
 import 'login_page.dart';
 
 class LoadingPage extends StatefulWidget {
@@ -19,9 +20,13 @@ class _LoadingPageState extends State<LoadingPage>
 
   int dotCount = 0;
 
+  late final AppLinks _appLinks;
+
   @override
   void initState() {
     super.initState();
+
+    _appLinks = AppLinks();
 
     _fallController = AnimationController(
       vsync: this,
