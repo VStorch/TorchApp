@@ -23,6 +23,18 @@ class _LoadingPageState extends State<LoadingPage>
   void initState() {
     super.initState();
 
+    // Timeout para redirecionar ao login
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        print('⏱️ Timeout - redirecionando para login');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+    });
+
+    // Animações
     _fallController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -54,6 +66,7 @@ class _LoadingPageState extends State<LoadingPage>
       _fadeController.repeat(reverse: true);
     });
 
+    // Animação dos pontinhos
     Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return false;
@@ -61,16 +74,6 @@ class _LoadingPageState extends State<LoadingPage>
         dotCount = (dotCount + 1) % 4;
       });
       return true;
-    });
-
-    // Vai pra tela de login
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      }
     });
   }
 
