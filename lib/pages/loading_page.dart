@@ -1,7 +1,5 @@
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:torch_app/pages/reset_password_page.dart';
 import 'login_page.dart';
 
 class LoadingPage extends StatefulWidget {
@@ -21,25 +19,14 @@ class _LoadingPageState extends State<LoadingPage>
 
   int dotCount = 0;
 
-  late final AppLinks _appLinks;
-  bool _deepLinkHandled = false;
-
   @override
   void initState() {
     super.initState();
 
-    _appLinks = AppLinks();
-
-    // Caso o app esteja aberto
-    _appLinks.uriLinkStream.listen((uri) {
-      _handleIncomingLink(uri);
-    });
-
-    // Ao abrir a primeira vez via deep link
-    _initDeepLink();
-
-    Future.delayed(const Duration(seconds: 4), () {
-      if (!_deepLinkHandled && mounted) {
+    // Timeout para redirecionar ao login
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        print('⏱️ Timeout - redirecionando para login');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -47,6 +34,7 @@ class _LoadingPageState extends State<LoadingPage>
       }
     });
 
+    // Animações
     _fallController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -78,6 +66,7 @@ class _LoadingPageState extends State<LoadingPage>
       _fadeController.repeat(reverse: true);
     });
 
+    // Animação dos pontinhos
     Future.doWhile(() async {
       await Future.delayed(const Duration(milliseconds: 500));
       if (!mounted) return false;
@@ -86,36 +75,6 @@ class _LoadingPageState extends State<LoadingPage>
       });
       return true;
     });
-  }
-
-  Future<void> _initDeepLink() async {
-    try {
-      final uri = await _appLinks.getInitialLink();
-      if (uri != null) {
-        _handleIncomingLink(uri);
-      }
-    } catch (e) {
-      print('Erro ao inicializar o deep link: $e');
-    }
-  }
-
-  void _handleIncomingLink(Uri uri) {
-    _deepLinkHandled = true;
-
-    final token = uri.queryParameters['token'];
-    final email = uri.queryParameters['email'];
-
-    if (token != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (_) => ResetPasswordPage(
-                email: email ?? '',
-                prefilledCode: token,
-            ),
-        ),
-      );
-    }
   }
 
   @override
