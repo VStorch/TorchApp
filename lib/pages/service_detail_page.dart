@@ -6,8 +6,13 @@ import 'booking_page.dart';
 
 class ServiceDetailPage extends StatefulWidget {
   final PetShopService service;
+  final String? preFilledCouponCode; // ← NOVO: Cupom pré-preenchido
 
-  const ServiceDetailPage({super.key, required this.service});
+  const ServiceDetailPage({
+    super.key,
+    required this.service,
+    this.preFilledCouponCode, // ← NOVO
+  });
 
   @override
   State<ServiceDetailPage> createState() => _ServiceDetailPageState();
@@ -38,6 +43,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
     super.initState();
     print('🟢 ServiceDetailPage - Serviço ID: ${widget.service.id}');
     print('🟢 ServiceDetailPage - Pet Shop ID: ${widget.service.petShopId}');
+    if (widget.preFilledCouponCode != null) {
+      print('🎟️ ServiceDetailPage - Cupom pré-preenchido: ${widget.preFilledCouponCode}');
+    }
     _loadPetShopData();
     _loadAddressFromPrefs();
   }
@@ -67,21 +75,17 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
     try {
       print('🔵 Buscando dados do Pet Shop ID: ${widget.service.petShopId}');
 
-      // Busca informações do petshop pelo ID
       final response = await _service.getPetShopInformationById(widget.service.petShopId);
 
       print('✅ Dados recebidos: $response');
 
-      // CORREÇÃO: Pegar os dados de dentro do objeto 'data'
       Map<String, dynamic>? data;
 
       if (response is Map<String, dynamic>) {
-        // Se tem 'data' dentro, pega de lá
         if (response.containsKey('data') && response['data'] != null) {
           data = response['data'] as Map<String, dynamic>;
           print('📦 Dados extraídos de response[data]: $data');
         } else {
-          // Se não, usa o response direto
           data = response;
           print('📦 Usando response direto: $data');
         }
@@ -226,6 +230,37 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       ),
                     ),
                   ),
+
+                  // ← NOVO: Mostrar badge se tem cupom
+                  if (widget.preFilledCouponCode != null) ...[
+                    SizedBox(height: screenHeight * 0.015),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green[700]!, width: 2),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.confirmation_number,
+                              color: Colors.green[900],
+                              size: 20
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Cupom: ${widget.preFilledCouponCode}',
+                            style: TextStyle(
+                              fontSize: screenHeight * 0.018,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green[900],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -271,7 +306,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                           // Logo e Nome
                           Row(
                             children: [
-                              // Logo
                               Container(
                                 width: screenWidth * 0.18,
                                 height: screenWidth * 0.18,
@@ -429,7 +463,7 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
 
                     SizedBox(height: screenHeight * 0.03),
 
-                    // Botão Agendar
+                    // Botão Agendar (← ATUALIZADO: passa o cupom)
                     SizedBox(
                       width: double.infinity,
                       height: screenHeight * 0.07,
@@ -445,7 +479,9 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                         ),
                         icon: Icon(Icons.calendar_today, size: screenHeight * 0.03),
                         label: Text(
-                          'Agendar Serviço',
+                          widget.preFilledCouponCode != null
+                              ? 'Agendar com Cupom'
+                              : 'Agendar Serviço',
                           style: TextStyle(
                             fontSize: screenHeight * 0.022,
                             fontWeight: FontWeight.bold,
@@ -458,10 +494,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                               builder: (context) => BookingPage(
                                 service: widget.service,
                                 petShopId: widget.service.petShopId,
+                                preFilledCouponCode: widget.preFilledCouponCode, // ← PASSA O CUPOM
                               ),
                             ),
                           ).then((success) {
-                            // Se o agendamento foi bem sucedido
                             if (success == true && mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -488,7 +524,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       ),
                     ),
                   ] else if (errorMessage != null)
-                  // Erro
                     Container(
                       padding: EdgeInsets.all(screenWidth * 0.05),
                       decoration: BoxDecoration(
@@ -519,7 +554,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
                       ),
                     )
                   else
-                  // Sem dados
                     Container(
                       padding: EdgeInsets.all(screenWidth * 0.05),
                       decoration: BoxDecoration(
@@ -575,7 +609,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   }
 
   bool _temLocalizacao() {
-    // Verifica se tem dados de localização no SharedPreferences
     return (endereco != null && endereco!.trim().isNotEmpty) ||
         (cidade != null && cidade!.trim().isNotEmpty) ||
         (cep != null && cep!.trim().isNotEmpty);
@@ -584,7 +617,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
   String _getEnderecoCompleto() {
     List<String> partes = [];
 
-    // Rua e número
     if (endereco != null && endereco!.trim().isNotEmpty) {
       String enderecoLinha = endereco!;
 
@@ -599,12 +631,10 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       partes.add(enderecoLinha);
     }
 
-    // Bairro
     if (bairro != null && bairro!.trim().isNotEmpty) {
       partes.add(bairro!);
     }
 
-    // Cidade e Estado
     if (cidade != null && cidade!.trim().isNotEmpty) {
       String cidadeEstado = cidade!;
       if (estado != null && estado!.trim().isNotEmpty) {
@@ -613,7 +643,6 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
       partes.add(cidadeEstado);
     }
 
-    // CEP
     if (cep != null && cep!.trim().isNotEmpty) {
       partes.add('CEP: $cep');
     }

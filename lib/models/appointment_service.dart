@@ -1,3 +1,4 @@
+// lib/models/appointment_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -22,33 +23,46 @@ class AppointmentService {
     }
   }
 
-  // Criar agendamento
+  // Criar agendamento COM suporte a cupom de desconto ← ATUALIZADO
   static Future<Map<String, dynamic>> createAppointment({
     required int userId,
     required int petId,
     required int petShopId,
     required int serviceId,
     required int slotId,
+    String? couponCode,           // ← NOVO
+    double? discountPercent,      // ← NOVO
+    double? finalPrice,           // ← NOVO
   }) async {
     try {
+      final body = {
+        'userId': userId,
+        'petId': petId,
+        'petShopId': petShopId,
+        'serviceId': serviceId,
+        'slotId': slotId,
+        if (couponCode != null && couponCode.isNotEmpty) 'couponCode': couponCode,
+        if (discountPercent != null) 'discountPercent': discountPercent,
+        if (finalPrice != null) 'finalPrice': finalPrice,
+      };
+
+      print('📤 Criando agendamento com dados: $body');
+
       final response = await http.post(
         Uri.parse('$baseUrl/appointments'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'userId': userId,
-          'petId': petId,
-          'petShopId': petShopId,
-          'serviceId': serviceId,
-          'slotId': slotId,
-        }),
+        body: jsonEncode(body),
       );
 
       if (response.statusCode == 201) {
+        print('✅ Agendamento criado com sucesso!');
         return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
+        print('❌ Erro ${response.statusCode}: ${response.body}');
         throw Exception('Erro ao criar agendamento: ${response.body}');
       }
     } catch (e) {
+      print('❌ Erro ao criar agendamento: $e');
       throw Exception('Erro de conexão: $e');
     }
   }

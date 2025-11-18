@@ -64,7 +64,6 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
   List<Map<String, dynamic>> get filteredAppointments {
     if (filterStatus == 'Todos') return appointments;
 
-    // Mapear português para inglês
     String statusBackend = '';
     switch (filterStatus) {
       case 'Pendente':
@@ -198,6 +197,14 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
   }
 
   Future<void> _showAppointmentDetails(Map<String, dynamic> appointment) async {
+    // Calcular valores com desconto
+    final originalPrice = appointment['servicePrice'];
+    final discountPercent = appointment['discountPercent'];
+    final finalPrice = appointment['finalPrice'];
+    final couponCode = appointment['couponCode'];
+
+    final bool hasDiscount = discountPercent != null && discountPercent > 0;
+
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -283,18 +290,115 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
+
                     _buildSectionTitle('Cliente'),
                     _buildInfoCard([
                       _buildInfoRow(Icons.person, 'Nome', appointment['userName'] ?? 'N/A'),
                       _buildInfoRow(Icons.pets, 'Pet', appointment['petName'] ?? 'N/A'),
                     ]),
                     const SizedBox(height: 16),
+
                     _buildSectionTitle('Serviço'),
                     _buildInfoCard([
                       _buildInfoRow(Icons.medical_services, 'Serviço', appointment['serviceName'] ?? 'N/A'),
-                      _buildInfoRow(Icons.attach_money, 'Valor', _formatPrice(appointment['servicePrice'])),
+
+                      // Mostrar informações de preço e desconto
+                      if (hasDiscount && couponCode != null) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green[50],
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.green[300]!, width: 2),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.confirmation_number, color: Colors.green[700], size: 20),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        'Cupom aplicado: $couponCode',
+                                        style: TextStyle(
+                                          color: Colors.green[900],
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Valor original:',
+                                      style: TextStyle(color: Colors.grey[700], fontSize: 13),
+                                    ),
+                                    Text(
+                                      _formatPrice(originalPrice),
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                        fontSize: 13,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Desconto (${discountPercent.toStringAsFixed(0)}%):',
+                                      style: TextStyle(color: Colors.green[700], fontSize: 13),
+                                    ),
+                                    Text(
+                                      '- ${_formatPrice((originalPrice ?? 0) - (finalPrice ?? originalPrice ?? 0))}',
+                                      style: TextStyle(
+                                        color: Colors.green[700],
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Valor final:',
+                                      style: TextStyle(
+                                        color: Colors.green[900],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    Text(
+                                      _formatPrice(finalPrice ?? originalPrice),
+                                      style: TextStyle(
+                                        color: Colors.green[900],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ] else
+                        _buildInfoRow(Icons.attach_money, 'Valor', _formatPrice(originalPrice)),
                     ]),
                     const SizedBox(height: 16),
+
                     _buildSectionTitle('Data e Horário'),
                     _buildInfoCard([
                       _buildInfoRow(Icons.calendar_today, 'Data', _formatDate(appointment['date'])),
@@ -302,6 +406,7 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
                           '${appointment['slotStartTime'] ?? '-'} - ${appointment['slotEndTime'] ?? '-'}'),
                     ]),
                     const SizedBox(height: 24),
+
                     if (appointment['status']?.toString().toUpperCase() == 'PENDING')
                       Column(
                         children: [
@@ -849,7 +954,7 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
                           Icon(Icons.access_time, size: 16, color: corTexto),
                           const SizedBox(width: 4),
                           Text(
-                            appointment['time'] ?? '-',
+                            appointment['slotStartTime'] ?? '-',
                             style: TextStyle(
                               color: corTexto,
                               fontWeight: FontWeight.bold,

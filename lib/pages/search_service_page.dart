@@ -8,7 +8,14 @@ import '../data/pet_shop/pet_shop_information_service.dart';
 import 'service_detail_page.dart';
 
 class SearchServicePage extends StatefulWidget {
-  const SearchServicePage({super.key});
+  final int? petShopId; // ← NOVO: Filtrar por pet shop específico
+  final String? preFilledCouponCode; // ← NOVO: Cupom para passar adiante
+
+  const SearchServicePage({
+    super.key,
+    this.petShopId,
+    this.preFilledCouponCode,
+  });
 
   @override
   State<SearchServicePage> createState() => _SearchServicePageState();
@@ -23,11 +30,9 @@ class _SearchServicePageState extends State<SearchServicePage> {
   List<PetShopService> _filteredServices = [];
   bool _isLoading = true;
 
-  // Filtros e ordenação
   String _selectedCategory = 'Todos';
-  String _sortBy = 'name'; // 'name', 'price_asc', 'price_desc'
+  String _sortBy = 'name';
 
-  // Categorias disponíveis
   final List<String> _categories = [
     'Todos',
     'Banho',
@@ -36,9 +41,7 @@ class _SearchServicePageState extends State<SearchServicePage> {
     'Outro',
   ];
 
-  // Cache de nomes dos Pet Shops
   Map<String, String> _petShopNames = {};
-
   final PetShopInformationService _petShopService = PetShopInformationService();
 
   @override
@@ -52,11 +55,15 @@ class _SearchServicePageState extends State<SearchServicePage> {
     try {
       final services = await PetShopServiceService.getAllServices();
 
-      // Carregar nomes dos Pet Shops
-      await _loadPetShopNames(services);
+      // ← NOVO: Filtrar por pet shop se especificado
+      final filteredByPetShop = widget.petShopId != null
+          ? services.where((s) => s.petShopId == widget.petShopId).toList()
+          : services;
+
+      await _loadPetShopNames(filteredByPetShop);
 
       setState(() {
-        _allServices = services;
+        _allServices = filteredByPetShop;
         _applyFilters();
         _isLoading = false;
       });
@@ -74,12 +81,10 @@ class _SearchServicePageState extends State<SearchServicePage> {
   }
 
   Future<void> _loadPetShopNames(List<PetShopService> services) async {
-    // Pegar IDs únicos dos Pet Shops
     final uniquePetShopIds = services.map((s) => s.petShopId).toSet();
 
     for (var petShopId in uniquePetShopIds) {
       try {
-        // Passar o int direto, sem converter para String
         final response = await _petShopService.getPetShopInformationById(petShopId);
 
         Map<String, dynamic>? data;
@@ -106,7 +111,6 @@ class _SearchServicePageState extends State<SearchServicePage> {
   void _applyFilters() {
     List<PetShopService> filtered = _allServices;
 
-    // Filtro de busca por texto
     if (_searchController.text.isNotEmpty) {
       filtered = filtered
           .where((service) =>
@@ -114,7 +118,6 @@ class _SearchServicePageState extends State<SearchServicePage> {
           .toList();
     }
 
-    // Filtro por categoria
     if (_selectedCategory != 'Todos') {
       filtered = filtered
           .where((service) =>
@@ -122,7 +125,6 @@ class _SearchServicePageState extends State<SearchServicePage> {
           .toList();
     }
 
-    // Ordenação
     switch (_sortBy) {
       case 'price_asc':
         filtered.sort((a, b) => a.price.compareTo(b.price));
@@ -141,12 +143,10 @@ class _SearchServicePageState extends State<SearchServicePage> {
     });
   }
 
-  // Agrupar serviços por Pet Shop
   Map<String, List<PetShopService>> _groupByPetShop() {
     Map<String, List<PetShopService>> grouped = {};
 
     for (var service in _filteredServices) {
-      // Buscar o nome real do Pet Shop do cache (converter ID para String)
       String petShopName = _petShopNames[service.petShopId.toString()] ?? 'Pet Shop ${service.petShopId}';
 
       if (!grouped.containsKey(petShopName)) {
@@ -195,7 +195,7 @@ class _SearchServicePageState extends State<SearchServicePage> {
                 ),
                 Center(
                   child: Text(
-                    "Buscar Serviço",
+                    widget.petShopId != null ? "Serviços do Pet Shop" : "Buscar Serviço",
                     style: TextStyle(
                       fontSize: (MediaQuery.of(context).size.width * 0.06).clamp(18.0, 28.0),
                       fontWeight: FontWeight.bold,
@@ -264,6 +264,67 @@ class _SearchServicePageState extends State<SearchServicePage> {
         onRefresh: _loadServices,
         child: Column(
           children: [
+            // ← NOVO: Mostrar badge de cupom se presente
+            if (widget.preFilledCouponCode != null)
+              Container(
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green[100]!, Colors.green[50]!],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.green[700]!, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.confirmation_number,
+                        color: Colors.green[700],
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Cupom Ativo',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.green[900],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.preFilledCouponCode!,
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.green[900],
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.check_circle,
+                      color: Colors.green[700],
+                      size: 32,
+                    ),
+                  ],
+                ),
+              ),
+
             // Campo de busca
             Padding(
               padding: EdgeInsets.all(screenWidth * 0.04),
@@ -416,7 +477,6 @@ class _SearchServicePageState extends State<SearchServicePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Cabeçalho do Pet Shop
               Container(
                 padding: EdgeInsets.all(screenWidth * 0.04),
                 decoration: BoxDecoration(
@@ -471,7 +531,6 @@ class _SearchServicePageState extends State<SearchServicePage> {
                 ),
               ),
 
-              // Lista de Serviços do Pet Shop
               ...services.map((service) => _buildServiceItem(service, screenWidth, screenHeight)),
             ],
           ),
@@ -483,10 +542,14 @@ class _SearchServicePageState extends State<SearchServicePage> {
   Widget _buildServiceItem(PetShopService service, double screenWidth, double screenHeight) {
     return InkWell(
       onTap: () {
+        // ← ATUALIZADO: Passa o cupom para a próxima página
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ServiceDetailPage(service: service),
+            builder: (context) => ServiceDetailPage(
+              service: service,
+              preFilledCouponCode: widget.preFilledCouponCode,
+            ),
           ),
         );
       },

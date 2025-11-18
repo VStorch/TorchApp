@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/pet_shop_services/petshop_service.dart';
 import '../models/appointment_service.dart';
+import '../models/promotion.dart';
+import '../services/promotion_service.dart';
 import '../models/time_slot.dart';
 
 class BookingPage extends StatefulWidget {
   final PetShopService service;
   final int petShopId;
+  final String? preFilledCouponCode;
 
   const BookingPage({
     super.key,
     required this.service,
     required this.petShopId,
+    this.preFilledCouponCode,
   });
 
   @override
@@ -23,6 +28,9 @@ class _BookingPageState extends State<BookingPage> {
   final Color corPrimaria = const Color(0xFFF4E04D);
   final Color corTexto = Colors.black87;
 
+  final TextEditingController _couponController = TextEditingController();
+  final PromotionService _promotionService = PromotionService();
+
   DateTime selectedDate = DateTime.now();
   TimeSlot? selectedSlot;
   int? selectedPetId;
@@ -31,7 +39,11 @@ class _BookingPageState extends State<BookingPage> {
   bool isLoadingSlots = false;
   bool isLoadingPets = false;
   bool isBooking = false;
+  bool isValidatingCoupon = false;
   int? userId;
+
+  Promotion? appliedCoupon;
+  bool couponApplied = false;
 
   @override
   void initState() {
@@ -39,6 +51,13 @@ class _BookingPageState extends State<BookingPage> {
     _loadUserId();
     _loadUserPets();
     _loadSlotsForDate();
+
+    if (widget.preFilledCouponCode != null) {
+      _couponController.text = widget.preFilledCouponCode!;
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _validateCoupon();
+      });
+    }
   }
 
   Future<void> _loadUserId() async {
@@ -81,14 +100,78 @@ class _BookingPageState extends State<BookingPage> {
       );
 
       setState(() {
-        availableSlots = slots; // Mostrar todos os slots (disponíveis e reservados)
+        availableSlots = slots;
         isLoadingSlots = false;
-        selectedSlot = null; // Resetar seleção ao mudar data
+        selectedSlot = null;
       });
     } catch (e) {
       setState(() => isLoadingSlots = false);
       _showErrorSnackBar('Erro ao carregar horários: $e');
     }
+  }
+
+  Future<void> _validateCoupon() async {
+    final code = _couponController.text.trim().toUpperCase();
+
+    if (code.isEmpty) {
+      setState(() {
+        appliedCoupon = null;
+        couponApplied = false;
+      });
+      return;
+    }
+
+    setState(() => isValidatingCoupon = true);
+
+    try {
+      final promotions = await _promotionService.getAllPromotions();
+      final promotion = promotions.firstWhere(
+            (p) => p.couponCode?.toUpperCase() == code,
+        orElse: () => throw Exception('Cupom não encontrado'),
+      );
+
+      if (!promotion.isValida()) {
+        throw Exception('Este cupom expirou');
+      }
+
+      setState(() {
+        appliedCoupon = promotion;
+        couponApplied = true;
+        isValidatingCoupon = false;
+      });
+
+      _showSuccessSnackBar('Cupom "${promotion.couponCode}" aplicado! ${promotion.getDescontoFormatado()}');
+    } catch (e) {
+      setState(() {
+        appliedCoupon = null;
+        couponApplied = false;
+        isValidatingCoupon = false;
+      });
+      _showErrorSnackBar(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  void _removeCoupon() {
+    setState(() {
+      _couponController.clear();
+      appliedCoupon = null;
+      couponApplied = false;
+    });
+    _showSuccessSnackBar('Cupom removido');
+  }
+
+  double get finalPrice {
+    if (appliedCoupon != null && couponApplied) {
+      return appliedCoupon!.calcularValorComDesconto(widget.service.price);
+    }
+    return widget.service.price;
+  }
+
+  double get discountAmount {
+    if (appliedCoupon != null && couponApplied) {
+      return appliedCoupon!.calcularValorDesconto(widget.service.price);
+    }
+    return 0;
   }
 
   String _formatDate(DateTime date) {
@@ -194,7 +277,7 @@ class _BookingPageState extends State<BookingPage> {
       return;
     }
 
-    // Confirmação
+    // Confirmação com preço final
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -219,12 +302,62 @@ class _BookingPageState extends State<BookingPage> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Serviço: ${widget.service.name}', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Serviço: ${widget.service.name}',
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text('Data: ${selectedDate.day}/${selectedDate.month}/${selectedDate.year}'),
             Text('Horário: ${selectedSlot!.startTime}'),
-            Text('Valor: ${widget.service.formattedPrice}',
-                style: TextStyle(color: Colors.green[700], fontWeight: FontWeight.bold)),
+            const Divider(height: 20),
+
+            // Mostrar desconto se aplicado
+            if (couponApplied && appliedCoupon != null) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Valor original:'),
+                  Text(
+                    'R\$ ${widget.service.price.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: const TextStyle(
+                      decoration: TextDecoration.lineThrough,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Desconto (${appliedCoupon!.getDescontoFormatado()}):',
+                    style: TextStyle(color: Colors.green[700]),
+                  ),
+                  Text(
+                    '- R\$ ${discountAmount.toStringAsFixed(2).replaceAll('.', ',')}',
+                    style: TextStyle(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 16),
+            ],
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Valor final:', style: TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'R\$ ${finalPrice.toStringAsFixed(2).replaceAll('.', ',')}',
+                  style: TextStyle(
+                    color: Colors.green[700],
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
         actions: [
@@ -249,7 +382,6 @@ class _BookingPageState extends State<BookingPage> {
       setState(() => isBooking = true);
 
       try {
-        // Verificar novamente se o slot ainda está disponível antes de agendar
         final updatedSlots = await ApiService.getAvailableSlots(
           serviceId: widget.service.id!,
           date: _formatDate(selectedDate),
@@ -262,21 +394,22 @@ class _BookingPageState extends State<BookingPage> {
         if (!slotStillAvailable) {
           setState(() => isBooking = false);
           _showErrorSnackBar('Este horário já foi reservado. Por favor, escolha outro horário.');
-          // Recarregar os horários disponíveis
           await _loadSlotsForDate();
           return;
         }
 
-        // Tentar criar o agendamento
+        // ATUALIZADO: Enviar dados do cupom para o backend
         await AppointmentService.createAppointment(
           userId: userId!,
           petId: selectedPetId!,
           petShopId: widget.petShopId,
           serviceId: widget.service.id!,
           slotId: selectedSlot!.id!,
+          couponCode: couponApplied ? appliedCoupon?.couponCode : null,
+          discountPercent: couponApplied ? appliedCoupon?.discountPercent : null,
+          finalPrice: finalPrice,
         );
 
-        // Marcar o horário como reservado ao invés de removê-lo
         setState(() {
           final index = availableSlots.indexWhere((slot) => slot.id == selectedSlot!.id);
           if (index != -1) {
@@ -284,29 +417,26 @@ class _BookingPageState extends State<BookingPage> {
               id: availableSlots[index].id,
               startTime: availableSlots[index].startTime,
               endTime: availableSlots[index].endTime,
-              isBooked: true, // Marcar como reservado
+              isBooked: true,
             );
           }
-          selectedSlot = null; // Limpar seleção
+          selectedSlot = null;
           isBooking = false;
         });
 
         _showSuccessSnackBar('Agendamento realizado com sucesso!');
 
-        // Voltar para a tela anterior imediatamente
         if (mounted) {
-          Navigator.pop(context, true); // Retorna true indicando sucesso
+          Navigator.pop(context, true);
         }
       } catch (e) {
         setState(() => isBooking = false);
 
-        // Verificar se é erro de duplicação (horário já reservado)
         final errorMessage = e.toString().toLowerCase();
         if (errorMessage.contains('duplicate') ||
             errorMessage.contains('uk8y6yin1cflvk14414e91mdcwm') ||
             errorMessage.contains('já') && errorMessage.contains('reservado')) {
           _showErrorSnackBar('Este horário já foi reservado. Recarregando horários disponíveis...');
-          // Recarregar os horários disponíveis
           await _loadSlotsForDate();
         } else {
           _showErrorSnackBar('Erro ao agendar: $e');
@@ -383,13 +513,147 @@ class _BookingPageState extends State<BookingPage> {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  Text(
-                    widget.service.formattedPrice,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
+
+                  // Mostrar preço com desconto
+                  if (couponApplied && appliedCoupon != null) ...[
+                    Text(
+                      widget.service.formattedPrice,
+                      style: TextStyle(
+                        fontSize: 16,
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.grey[700],
+                      ),
                     ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.green[700]!, width: 2),
+                      ),
+                      child: Text(
+                        appliedCoupon!.getDescontoFormatado(),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[900],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'R\$ ${finalPrice.toStringAsFixed(2).replaceAll('.', ',')}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[700],
+                      ),
+                    ),
+                  ] else
+                    Text(
+                      widget.service.formattedPrice,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green[700],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Campo de Cupom
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Cupom de Desconto (Opcional)',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: corTexto,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _couponController,
+                          enabled: !couponApplied,
+                          textCapitalization: TextCapitalization.characters,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[A-Z0-9]')),
+                            LengthLimitingTextInputFormatter(20),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: 'Digite o código do cupom',
+                            prefixIcon: Icon(
+                              couponApplied ? Icons.check_circle : Icons.confirmation_number,
+                              color: couponApplied ? Colors.green[700] : Colors.grey,
+                            ),
+                            suffixIcon: couponApplied
+                                ? IconButton(
+                              icon: Icon(Icons.close, color: Colors.red[700]),
+                              onPressed: _removeCoupon,
+                            )
+                                : null,
+                            filled: true,
+                            fillColor: couponApplied ? Colors.green[50] : Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: couponApplied ? Colors.green[700]! : corPrimaria,
+                                width: 2,
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: couponApplied ? Colors.green[700]! : corPrimaria,
+                                width: 2,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: corPrimaria, width: 2),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      if (!couponApplied)
+                        ElevatedButton(
+                          onPressed: isValidatingCoupon ? null : _validateCoupon,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: corPrimaria,
+                            foregroundColor: Colors.black87,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(color: Colors.black, width: 2),
+                            ),
+                          ),
+                          child: isValidatingCoupon
+                              ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black87,
+                            ),
+                          )
+                              : const Text(
+                            'Aplicar',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -710,5 +974,11 @@ class _BookingPageState extends State<BookingPage> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
   }
 }

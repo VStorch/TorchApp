@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../components/custom_drawer_pet_shop.dart';
 import '../models/promotion.dart';
 import '../services/promotion_service.dart';
@@ -22,6 +23,8 @@ class _PromotionsState extends State<Promotions> {
   String _titulo = '';
   String _descricao = '';
   String _validade = '';
+  String _codigoCupom = '';
+  double _porcentagemDesconto = 0;
   Promotion? _editPromotion;
 
   final Color corFundo = const Color(0xFFFBF8E1);
@@ -34,33 +37,72 @@ class _PromotionsState extends State<Promotions> {
     _carregarPromocoes();
   }
 
+  // Na função _carregarPromocoes(), substitua o trecho atual por:
+
   Future<void> _carregarPromocoes() async {
     setState(() => _isLoading = true);
     try {
       final promocoes = await _promotionService.getAllPromotions();
+      ('===== DEBUG CARREGAR PROMOÇÕES =====');
+      ('Total promoções retornadas do backend: ${promocoes.length}');
+      ('Pet Shop ID atual: ${widget.petShopId}');
+
+      for (var p in promocoes) {
+        ('Promoção: ${p.name}, petShopId: ${p.petShopId}');
+      }
+
+      final promocoesFiltradas = promocoes
+          .where((p) => p.petShopId == widget.petShopId)
+          .toList();
+
+      ('Promoções sendo exibidas: ${promocoesFiltradas.length}');
+      ('====================================');
+
       setState(() {
-        _promocoes = promocoes;
+        _promocoes = promocoesFiltradas;
         _isLoading = false;
       });
     } catch (e) {
       setState(() => _isLoading = false);
       _mostrarErro('Erro ao carregar promoções: $e');
+      ('ERRO ao carregar: $e');
     }
   }
 
   void _mostrarErro(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem), backgroundColor: Colors.red),
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(mensagem)),
+          ],
+        ),
+        backgroundColor: Colors.red[700],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
   void _mostrarSucesso(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(mensagem), backgroundColor: Colors.green),
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            Expanded(child: Text(mensagem)),
+          ],
+        ),
+        backgroundColor: Colors.green[700],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
-  // Formata a entrada do usuário para exibição (DD/MM)
   String formatarDataExibicao(String input) {
     String numeros = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (numeros.length >= 4) {
@@ -71,7 +113,6 @@ class _PromotionsState extends State<Promotions> {
     return input;
   }
 
-  // Converte DD/MM para formato ISO (YYYY-MM-DD) para enviar ao backend
   String converterParaISO(String dataDDMM) {
     try {
       final regex = RegExp(r'^(\d{2})/(\d{2})$');
@@ -80,7 +121,7 @@ class _PromotionsState extends State<Promotions> {
         final dia = match.group(1)!;
         final mes = match.group(2)!;
         final anoAtual = DateTime.now().year;
-        return '$anoAtual-$mes-$dia'; // Formato ISO: YYYY-MM-DD
+        return '$anoAtual-$mes-$dia';
       }
     } catch (e) {
       ('Erro ao converter data: $e');
@@ -88,13 +129,12 @@ class _PromotionsState extends State<Promotions> {
     return dataDDMM;
   }
 
-  // Converte formato ISO (YYYY-MM-DD) para DD/MM para exibição
   String converterDeISO(String dataISO) {
     try {
       if (dataISO.contains('-')) {
         final partes = dataISO.split('-');
         if (partes.length >= 3) {
-          return '${partes[2]}/${partes[1]}'; // DD/MM
+          return '${partes[2]}/${partes[1]}';
         }
       }
     } catch (e) {
@@ -108,115 +148,301 @@ class _PromotionsState extends State<Promotions> {
       _editPromotion = promocao;
       _titulo = promocao.name;
       _descricao = promocao.description;
-      // Converte de ISO para DD/MM ao editar
       _validade = converterDeISO(promocao.validity);
+      _codigoCupom = promocao.couponCode ?? '';
+      _porcentagemDesconto = promocao.discountPercent ?? 0;
     } else {
       _editPromotion = null;
       _titulo = '';
       _descricao = '';
       _validade = '';
+      _codigoCupom = '';
+      _porcentagemDesconto = 0;
     }
-
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: corFundo,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom + screenHeight * 0.02,
-            left: screenWidth * 0.05,
-            right: screenWidth * 0.05,
-            top: screenHeight * 0.02,
-          ),
-          child: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(25),
+                  topRight: Radius.circular(25),
+                ),
+                border: Border.all(color: corPrimaria, width: 3),
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    _editPromotion == null ? 'Adicionar Promoção 🏷️' : 'Editar Promoção ✏️',
-                    style: TextStyle(
-                      fontSize: screenHeight * 0.025,
-                      fontWeight: FontWeight.bold,
-                      color: corTexto,
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: corPrimaria,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(22),
+                        topRight: Radius.circular(22),
+                      ),
                     ),
-                    textAlign: TextAlign.center,
+                    child: Row(
+                      children: [
+                        Icon(Icons.local_offer, size: 30, color: corTexto),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            _editPromotion == null ? 'Nova Promoção' : 'Editar Promoção',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: corTexto,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: screenHeight * 0.02),
-                  _buildTextField(
-                    label: 'Nome da promoção',
-                    icon: Icons.label,
-                    initialValue: _titulo,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Informe o título';
-                      if (value.trim().length < 3) return 'O título deve ter pelo menos 3 caracteres';
-                      if (value.trim().length > 50) return 'O título deve ter no máximo 50 caracteres';
-                      return null;
-                    },
-                    onSaved: (value) => _titulo = value!.trim(),
-                  ),
-                  SizedBox(height: screenHeight * 0.015),
-                  _buildTextField(
-                    label: 'Descrição',
-                    icon: Icons.description,
-                    initialValue: _descricao,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Informe a descrição';
-                      if (value.trim().length > 200) return 'A descrição deve ter no máximo 200 caracteres';
-                      return null;
-                    },
-                    onSaved: (value) => _descricao = value!.trim(),
-                  ),
-                  SizedBox(height: screenHeight * 0.015),
-                  _buildTextField(
-                    label: 'Validade (ex: 15/07)',
-                    icon: Icons.calendar_today,
-                    initialValue: _validade,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Informe a validade';
-                      final regex = RegExp(r'^(\d{2})/(\d{2})$');
-                      if (!regex.hasMatch(value)) return 'Formato inválido (use DD/MM)';
-                      final match = regex.firstMatch(value)!;
-                      final dia = int.parse(match.group(1)!);
-                      final mes = int.parse(match.group(2)!);
-                      if (dia < 1 || dia > 31 || mes < 1 || mes > 12) return 'Data inválida';
-                      return null;
-                    },
-                    onSaved: (value) => _validade = formatarDataExibicao(value!),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: corPrimaria,
-                        foregroundColor: corTexto,
-                        padding: EdgeInsets.symmetric(vertical: screenHeight * 0.02),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTextField(
+                              label: 'Nome da Promoção',
+                              icon: Icons.title,
+                              initialValue: _titulo,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Informe o nome da promoção';
+                                }
+                                if (value.trim().length < 3) {
+                                  return 'Mínimo 3 caracteres';
+                                }
+                                if (value.trim().length > 50) {
+                                  return 'Máximo 50 caracteres';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) => _titulo = value!.trim(),
+                            ),
+                            const SizedBox(height: 16),
+
+                            _buildTextField(
+                              label: 'Descrição',
+                              icon: Icons.description,
+                              initialValue: _descricao,
+                              maxLines: 3,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Informe a descrição';
+                                }
+                                if (value.trim().length > 200) {
+                                  return 'Máximo 200 caracteres';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) => _descricao = value!.trim(),
+                            ),
+                            const SizedBox(height: 16),
+
+                            Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: _buildTextField(
+                                    label: 'Código do Cupom',
+                                    icon: Icons.confirmation_number,
+                                    initialValue: _codigoCupom,
+                                    textCapitalization: TextCapitalization.characters,
+                                    onChanged: (value) {
+                                      setModalState(() {
+                                        _codigoCupom = value.toUpperCase();
+                                      });
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Informe o código';
+                                      }
+                                      if (value.trim().length < 3) {
+                                        return 'Mínimo 3 caracteres';
+                                      }
+                                      if (value.trim().length > 20) {
+                                        return 'Máximo 20 caracteres';
+                                      }
+                                      if (!RegExp(r'^[A-Z0-9]+$').hasMatch(value.trim())) {
+                                        return 'Apenas letras e números';
+                                      }
+                                      return null;
+                                    },
+                                    onSaved: (value) => _codigoCupom = value!.trim().toUpperCase(),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: _buildTextField(
+                                    label: 'Desconto %',
+                                    icon: Icons.percent,
+                                    initialValue: _porcentagemDesconto > 0
+                                        ? _porcentagemDesconto.toStringAsFixed(0)
+                                        : '',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                      LengthLimitingTextInputFormatter(3),
+                                    ],
+                                    onChanged: (value) {
+                                      setModalState(() {
+                                        _porcentagemDesconto = double.tryParse(value) ?? 0;
+                                      });
+                                    },
+                                    validator: (value) {
+                                      if (value == null || value.trim().isEmpty) {
+                                        return 'Informe %';
+                                      }
+                                      final percent = double.tryParse(value);
+                                      if (percent == null) {
+                                        return 'Inválido';
+                                      }
+                                      if (percent <= 0 || percent > 100) {
+                                        return '1-100';
+                                      }
+                                      return null;
+                                    },
+                                    onSaved: (value) {
+                                      _porcentagemDesconto = double.parse(value!.trim());
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+
+                            _buildTextField(
+                              label: 'Validade (DD/MM)',
+                              icon: Icons.calendar_today,
+                              initialValue: _validade,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                                LengthLimitingTextInputFormatter(4),
+                                _DateInputFormatter(),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Informe a validade';
+                                }
+                                final regex = RegExp(r'^(\d{2})/(\d{2})$');
+                                if (!regex.hasMatch(value)) {
+                                  return 'Formato inválido (use DD/MM)';
+                                }
+                                final match = regex.firstMatch(value)!;
+                                final dia = int.parse(match.group(1)!);
+                                final mes = int.parse(match.group(2)!);
+                                if (dia < 1 || dia > 31 || mes < 1 || mes > 12) {
+                                  return 'Data inválida';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) => _validade = formatarDataExibicao(value!),
+                            ),
+                            const SizedBox(height: 24),
+
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: corFundo,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: corPrimaria, width: 2),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.visibility, size: 20, color: corTexto.withOpacity(0.7)),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'Preview do Cupom',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: corTexto.withOpacity(0.7),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    _codigoCupom.isNotEmpty ? _codigoCupom.toUpperCase() : 'CODIGO123',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: corTexto,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green[100],
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: Colors.green[700]!, width: 2),
+                                    ),
+                                    child: Text(
+                                      '${_porcentagemDesconto > 0 ? _porcentagemDesconto.toStringAsFixed(0) : '0'}% OFF',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green[900],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: corPrimaria,
+                                  foregroundColor: corTexto,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(color: Colors.black, width: 2),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.save),
+                                label: Text(
+                                  _editPromotion == null ? 'Criar Promoção' : 'Salvar Alterações',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                onPressed: _salvarPromocao,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      icon: const Icon(Icons.save),
-                      label: Text(
-                        _editPromotion == null ? 'Salvar Promoção' : 'Salvar Alterações',
-                        style: TextStyle(fontSize: screenHeight * 0.022),
-                      ),
-                      onPressed: _salvarPromocao,
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.025),
                 ],
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -226,18 +452,41 @@ class _PromotionsState extends State<Promotions> {
     required String label,
     required IconData icon,
     String? initialValue,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
     String? Function(String?)? validator,
     void Function(String?)? onSaved,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       initialValue: initialValue,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
+      textCapitalization: textCapitalization,
       decoration: InputDecoration(
         labelText: label,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         prefixIcon: Icon(icon),
+        filled: true,
+        fillColor: corFundo,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black, width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: corPrimaria, width: 2),
+        ),
       ),
       validator: validator,
       onSaved: onSaved,
+      onChanged: onChanged,
     );
   }
 
@@ -245,19 +494,30 @@ class _PromotionsState extends State<Promotions> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      // Converte a data de DD/MM para formato ISO antes de enviar
       final validadeISO = converterParaISO(_validade);
 
       final promotion = Promotion(
         id: _editPromotion?.id,
         name: _titulo,
         description: _descricao,
-        validity: validadeISO, // Envia no formato ISO
+        validity: validadeISO,
+        couponCode: _codigoCupom.toUpperCase(),
+        discountPercent: _porcentagemDesconto,
+        petShopId: widget.petShopId,
       );
+
+      ('===== DEBUG SALVAR PROMOÇÃO =====');
+      ('Promoção sendo salva:');
+      ('Nome: ${promotion.name}');
+      ('Cupom: ${promotion.couponCode}');
+      ('PetShopId: ${promotion.petShopId}');
+      ('JSON: ${promotion.toJson()}');
+      ('=================================');
 
       try {
         if (_editPromotion == null) {
-          await _promotionService.createPromotion(promotion);
+          final resultado = await _promotionService.createPromotion(promotion);
+          ('Promoção criada! Resultado: $resultado');
           _mostrarSucesso('Promoção criada com sucesso!');
         } else {
           await _promotionService.updatePromotion(_editPromotion!.id!, promotion);
@@ -267,6 +527,7 @@ class _PromotionsState extends State<Promotions> {
         Navigator.pop(context);
         _carregarPromocoes();
       } catch (e) {
+        ('ERRO ao salvar promoção: $e');
         _mostrarErro('Erro ao salvar promoção: $e');
       }
     }
@@ -276,9 +537,7 @@ class _PromotionsState extends State<Promotions> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: Colors.white,
         title: Row(
           children: [
@@ -288,53 +547,26 @@ class _PromotionsState extends State<Promotions> {
                 color: Colors.red.shade50,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.delete_outline,
-                color: Colors.red.shade700,
-                size: 28,
-              ),
+              child: Icon(Icons.delete_outline, color: Colors.red.shade700, size: 28),
             ),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text(
-                'Excluir Promoção',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
+              child: Text('Excluir Promoção', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
             ),
           ],
         ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+        content: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
           child: Text(
             'Tem certeza que deseja remover esta promoção? Esta ação não pode ser desfeita.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade700,
-              height: 1.5,
-            ),
+            style: TextStyle(fontSize: 16, height: 1.5),
           ),
         ),
         actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(
-              'Cancelar',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: const Text('Cancelar', style: TextStyle(fontSize: 16)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -350,19 +582,8 @@ class _PromotionsState extends State<Promotions> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              elevation: 0,
             ),
-            child: const Text(
-              'Excluir',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: const Text('Excluir', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -413,233 +634,261 @@ class _PromotionsState extends State<Promotions> {
                     ),
                   ),
                 ),
+                Positioned(
+                  right: -10,
+                  top: -6,
+                  bottom: 0,
+                  child: IconButton(
+                    icon: Icon(Icons.refresh, size: barHeight * 0.7, color: Colors.black87),
+                    onPressed: _carregarPromocoes,
+                    tooltip: 'Atualizar',
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: corPrimaria))
+          : _promocoes.isEmpty
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.local_offer_outlined, size: 80, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Nenhuma promoção cadastrada',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Crie cupons de desconto para seus clientes!',
+              style: TextStyle(color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      )
           : RefreshIndicator(
         onRefresh: _carregarPromocoes,
-        child: Padding(
-          padding: EdgeInsets.all(screenWidth * 0.04),
-          child: _promocoes.isEmpty
-              ? Center(
-            child: Text(
-              'Nenhuma promoção cadastrada ainda 🏷️',
-              style: TextStyle(
-                color: corTexto.withOpacity(0.6),
-                fontSize: screenHeight * 0.02,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          )
-              : ListView.builder(
-            itemCount: _promocoes.length,
-            itemBuilder: (context, index) {
-              final promo = _promocoes[index];
-              // Converte de ISO para DD/MM na exibição
-              final validadeExibicao = converterDeISO(promo.validity);
+        color: corPrimaria,
+        child: ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: _promocoes.length,
+          itemBuilder: (context, index) {
+            final promo = _promocoes[index];
+            final validadeExibicao = converterDeISO(promo.validity);
 
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: BorderSide(color: Colors.grey.shade300, width: 1),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFFF3CD), Color(0xFFFFE69C)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                elevation: 8,
-                margin: EdgeInsets.only(bottom: screenHeight * 0.015),
-                shadowColor: Colors.black26,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white,
-                        Colors.grey.shade50,
-                      ],
-                    ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.black, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(screenWidth * 0.025),
-                              decoration: BoxDecoration(
-                                color: corPrimaria,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.local_offer,
-                                color: corTexto,
-                                size: screenHeight * 0.03,
-                              ),
-                            ),
-                            SizedBox(width: screenWidth * 0.03),
-                            Expanded(
-                              child: Text(
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.local_offer, color: corPrimaria, size: 24),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                                 promo.name,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: corTexto,
-                                  fontSize: screenHeight * 0.023,
+                                  fontSize: 18,
+                                  color: Colors.black87,
                                 ),
                               ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.025,
-                                vertical: screenHeight * 0.006,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.green.shade50,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.green.shade300,
-                                  width: 1,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                              const SizedBox(height: 4),
+                              Row(
                                 children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    size: screenHeight * 0.016,
-                                    color: Colors.green.shade700,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.green[700]!, width: 1.5),
+                                    ),
+                                    child: Text(
+                                      '${promo.discountPercent?.toStringAsFixed(0) ?? '0'}% OFF',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.green[900],
+                                      ),
+                                    ),
                                   ),
-                                  SizedBox(width: screenWidth * 0.01),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                                  const SizedBox(width: 4),
                                   Text(
                                     validadeExibicao,
-                                    style: TextStyle(
-                                      fontSize: screenHeight * 0.016,
+                                    style: const TextStyle(
+                                      fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.green.shade700,
+                                      color: Colors.black54,
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: screenHeight * 0.015),
-                        Container(
-                          padding: EdgeInsets.all(screenWidth * 0.03),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
+                            ],
                           ),
-                          child: Text(
-                            promo.description,
-                            style: TextStyle(
-                              color: corTexto.withOpacity(0.8),
-                              fontSize: screenHeight * 0.019,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: screenHeight * 0.015),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () => _abrirModalPromocao(promocao: promo),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: screenWidth * 0.04,
-                                    vertical: screenHeight * 0.01,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: corPrimaria.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.edit,
-                                        color: corTexto,
-                                        size: screenHeight * 0.022,
-                                      ),
-                                      SizedBox(width: screenWidth * 0.015),
-                                      Text(
-                                        'Editar',
-                                        style: TextStyle(
-                                          color: corTexto,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: screenHeight * 0.018,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: screenWidth * 0.02),
-                            Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(10),
-                                onTap: () => _excluirPromocao(promo),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: screenWidth * 0.04,
-                                    vertical: screenHeight * 0.01,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.shade50,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red.shade700,
-                                        size: screenHeight * 0.022,
-                                      ),
-                                      SizedBox(width: screenWidth * 0.015),
-                                      Text(
-                                        'Excluir',
-                                        style: TextStyle(
-                                          color: Colors.red.shade700,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: screenHeight * 0.018,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        promo.description,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: corPrimaria, width: 2),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.confirmation_number, color: corTexto, size: 20),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Cupom:',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            promo.couponCode ?? 'N/A',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: corTexto,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => _abrirModalPromocao(promocao: promo),
+                          icon: const Icon(Icons.edit, size: 18),
+                          label: const Text('Editar'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black87,
+                            side: const BorderSide(color: Colors.black, width: 2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton.icon(
+                          onPressed: () => _excluirPromocao(promo),
+                          icon: const Icon(Icons.delete_outline, size: 18),
+                          label: const Text('Excluir'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red[50],
+                            foregroundColor: Colors.red[700],
+                            side: BorderSide(color: Colors.red[300]!, width: 2),
+                            elevation: 0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: corPrimaria,
-        label: Text(
-          'Nova Promoção',
-          style: TextStyle(fontWeight: FontWeight.bold, color: corTexto),
-        ),
-        icon: Icon(Icons.add, color: corTexto),
+        foregroundColor: corTexto,
+        label: const Text('Nova Promoção', style: TextStyle(fontWeight: FontWeight.bold)),
+        icon: const Icon(Icons.add),
         onPressed: () => _abrirModalPromocao(),
       ),
+    );
+  }
+}
+
+class _DateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue) {
+    final text = newValue.text;
+
+    if (text.isEmpty) {
+      return newValue;
+    }
+
+    // Remove tudo que não é número
+    final numbersOnly = text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Limita a 4 dígitos
+    if (numbersOnly.length > 4) {
+      return oldValue;
+    }
+
+    // Formata DD/MM
+    String formatted = numbersOnly;
+    if (numbersOnly.length >= 3) {
+      formatted = '${numbersOnly.substring(0, 2)}/${numbersOnly.substring(2)}';
+    }
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
