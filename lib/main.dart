@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_links/app_links.dart';
 import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/reset_password_page.dart';
+import 'package:torch_app/routes.dart';
 
 void main() {
   runApp(const MyApp());
@@ -51,13 +52,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handleDeepLink(Uri uri) {
-
     final token = uri.queryParameters['token'];
     final email = uri.queryParameters['email'];
+    final couponCode = uri.queryParameters['coupon'];
+    final petShopId = uri.queryParameters['petshop_id'];
 
+    // ← TRATAMENTO PARA RESET DE SENHA
     if (uri.host == 'reset-password' && token != null && email != null) {
-
-      // Navegar usando o navigatorKey
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (_) => ResetPasswordPage(
@@ -67,8 +68,31 @@ class _MyAppState extends State<MyApp> {
         ),
             (route) => false,
       );
-    } else {
-      print('Deep link inválido ou incompleto');
+    }
+    // ← TRATAMENTO PARA PROMOÇÕES
+    else if (uri.host == 'promotions' || uri.path.contains('/promotions')) {
+      navigatorKey.currentState?.pushNamed(
+        AppRoutes.promotions,
+      );
+    }
+    // ← TRATAMENTO PARA DETALHES DO PETSHOP
+    else if (uri.host == 'petshop' && petShopId != null) {
+      navigatorKey.currentState?.pushNamed(
+        AppRoutes.petshopDetails,
+        arguments: {
+          'petShopId': int.tryParse(petShopId) ?? 0,
+          'couponCode': couponCode,
+        },
+      );
+    }
+    // ← TRATAMENTO PARA BUSCA DE SERVIÇOS
+    else if (uri.host == 'search' || uri.path.contains('/search')) {
+      navigatorKey.currentState?.pushNamed(
+        AppRoutes.searchService,
+      );
+    }
+    else {
+      print('Deep link não reconhecido: $uri');
     }
   }
 
@@ -77,6 +101,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
+
+      // ← GERADOR DE ROTAS ADICIONADO
+      onGenerateRoute: AppRoutes.generateRoute,
 
       // Suporte à localização (português Brasil)
       localizationsDelegates: const [
