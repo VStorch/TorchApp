@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // ADICIONAR
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cpf_cnpj_validator/cpf_validator.dart'; // ADICIONAR
+import 'package:cpf_cnpj_validator/cnpj_validator.dart'; // ADICIONAR
 import 'dart:convert';
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 
@@ -22,6 +24,8 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
   bool accepted = false;
   bool _isLoading = false;
   final TextEditingController cnpjController = TextEditingController();
+  String? companyName; // Nome da empresa do CNPJ
+  bool _isSearchingCNPJ = false;
 
   @override
   void dispose() {
@@ -105,11 +109,79 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
                         children: [
                           const Text("CNPJ:"),
                           const SizedBox(height: 6),
-                          _buildTextField(
-                            controller: cnpjController,
-                            hint: "00.000.000/0000-00",
-                            keyboardType: TextInputType.number,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildTextField(
+                                  controller: cnpjController,
+                                  hint: "00.000.000/0000-00",
+                                  keyboardType: TextInputType.number,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              ElevatedButton(
+                                onPressed: _isSearchingCNPJ ? null : _searchCNPJ,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: yellow,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 14),
+                                ),
+                                child: _isSearchingCNPJ
+                                    ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.black,
+                                  ),
+                                )
+                                    : const Text(
+                                  "Buscar",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+
+                          // Exibir nome da empresa se encontrado
+                          if (companyName != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                border: Border.all(color: Colors.green),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Empresa encontrada:",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    companyName!,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
 
                           const SizedBox(height: 12),
                           CheckboxListTile(
@@ -199,6 +271,74 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
     );
   }
 
+  Future<void> _searchCNPJ() async {
+    final cnpj = cnpjController.text.trim();
+
+    if (cnpj.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Digite o CNPJ.')),
+      );
+      return;
+    }
+
+    // Validação real de CNPJ
+    if (!CNPJValidator.isValid(cnpj)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('CNPJ inválido!'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSearchingCNPJ = true);
+
+    try {
+      // Remove formatação
+      final cnpjNumbers = cnpj.replaceAll(RegExp(r'[^\d]'), '');
+
+      // Consulta API da Receita Federal (via proxy público)
+      final url = Uri.parse("https://publica.cnpj.ws/cnpj/$cnpjNumbers");
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        setState(() {
+          companyName = data['razao_social'] ?? 'Nome não encontrado';
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('CNPJ validado com sucesso!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Não foi possível consultar o CNPJ.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      print("Erro ao consultar CNPJ: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erro ao consultar CNPJ. Verifique sua conexão.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isSearchingCNPJ = false);
+      }
+    }
+  }
+
   Future<void> _submitForm() async {
     final cnpj = cnpjController.text.trim();
 
@@ -209,16 +349,21 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
       return;
     }
 
-    // Validação básica de CNPJ (14 dígitos)
-    final cnpjNumbers = cnpj.replaceAll(RegExp(r'[^\d]'), '');
-    if (cnpjNumbers.length != 14) {
+    // Verifica se o CNPJ foi validado (se o nome da empresa foi encontrado)
+    if (companyName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('CNPJ deve conter 14 dígitos.')),
+        const SnackBar(
+          content: Text('Clique em "Buscar" para validar o CNPJ primeiro.'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
 
     setState(() => _isLoading = true);
+
+    // Remove formatação para enviar apenas números
+    final cnpjNumbers = cnpj.replaceAll(RegExp(r'[^\d]'), '');
 
     final updatedPetShop = PetShopDto(
       cep: widget.petShop.cep,
@@ -228,7 +373,7 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
       street: widget.petShop.street,
       number: widget.petShop.number,
       complement: widget.petShop.complement,
-      cnpj: cnpj,
+      cnpj: cnpjNumbers, // Envia apenas números
       ownerId: widget.petShop.ownerId,
     );
 
@@ -254,10 +399,9 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
       print("============================");
 
       if (response.statusCode == 201) {
-        // ======= SALVAR CNPJ NO SHARED PREFERENCES =======
+        // Salvar CNPJ no SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('petshop_cnpj', petShop.cnpj);
-        // =================================================
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -266,10 +410,8 @@ class _RegistrationSupplementsState extends State<RegistrationSupplements> {
           ),
         );
 
-        // Aguarda um pouco para mostrar o snackbar
         await Future.delayed(const Duration(milliseconds: 500));
 
-        // Remove todas as telas e volta para a home
         if (mounted) {
           Navigator.of(context).pushNamedAndRemoveUntil(
             '/',
