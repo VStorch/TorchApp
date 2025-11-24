@@ -5,7 +5,15 @@ import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/reset_password_page.dart';
 import 'package:torch_app/routes.dart';
 
-void main() {
+import 'models/notification_service.dart';
+
+void main() async {
+  // Garantir que o Flutter esteja inicializado
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔔 Inicializar o serviço de notificações
+  await NotificationService.initialize();
+
   runApp(const MyApp());
 }
 

@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 import 'dart:convert';
+import 'package:flutter_map/flutter_map.dart' as fm;
+import 'package:latlong2/latlong.dart';
 
 import 'package:torch_app/pages_pet_shop/registration_supplements.dart';
 
@@ -20,7 +22,6 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
   static const Color bgColor = Color(0xFFFBF8E1);
   static const Color yellow = Color(0xFFF7E34D);
 
-  // Controllers para todos os campos
   final TextEditingController _cepController = TextEditingController();
   final TextEditingController _ufController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
@@ -32,8 +33,6 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
   @override
   void initState() {
     super.initState();
-
-    // Adiciona listener para buscar endereço automaticamente ao digitar CEP completo
     _cepController.addListener(() {
       String cep = _cepController.text.replaceAll(RegExp(r'[^0-9]'), '');
       if (cep.length == 8) {
@@ -72,10 +71,8 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
     );
   }
 
-  // Salvar dados do endereço no shared preferences
   Future<void> _saveAddressData() async {
     final prefs = await SharedPreferences.getInstance();
-
     await prefs.setString('petshop_cep', _cepController.text.trim());
     await prefs.setString('petshop_state', _ufController.text.trim());
     await prefs.setString('petshop_city', _cityController.text.trim());
@@ -83,6 +80,217 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
     await prefs.setString('petshop_street', _addressController.text.trim());
     await prefs.setString('petshop_number', _numberController.text.trim());
     await prefs.setString('petshop_complement', _complementController.text.trim());
+  }
+
+  // Função para geocodificar o endereço usando Nominatim (OpenStreetMap)
+  Future<LatLng?> _getCoordinatesFromAddress() async {
+    try {
+      final fullAddress = '${_addressController.text}, ${_numberController.text}, ${_neighborhoodController.text}, ${_cityController.text}, ${_ufController.text}, Brasil';
+
+      // Usando Nominatim API (OpenStreetMap)
+      final encodedAddress = Uri.encodeComponent(fullAddress);
+      final url = Uri.parse('https://nominatim.openstreetmap.org/search?q=$encodedAddress&format=json&limit=1');
+
+      final response = await http.get(
+        url,
+        headers: {'User-Agent': 'TorchPetShopApp/1.0'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          final lat = double.parse(data[0]['lat']);
+          final lon = double.parse(data[0]['lon']);
+          return LatLng(lat, lon);
+        }
+      }
+    } catch (e) {
+      print('Erro ao geocodificar: $e');
+      _showError('Não foi possível encontrar a localização exata.');
+    }
+    return null;
+  }
+
+  // Função para mostrar o mapa em um modal
+  Future<void> _showMapModal(LatLng coordinates) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.8,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (_, controller) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Localização do Pet Shop',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: fm.FlutterMap(
+                  options: fm.MapOptions(
+                    initialCenter: coordinates,
+                    initialZoom: 16.0,
+                    minZoom: 5.0,
+                    maxZoom: 18.0,
+                  ),
+                  children: [
+                    fm.TileLayer(
+                      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                      userAgentPackageName: 'com.torch.app',
+                      maxNativeZoom: 19,
+                    ),
+                    fm.MarkerLayer(
+                      markers: [
+                        fm.Marker(
+                          point: coordinates,
+                          width: 80,
+                          height: 80,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Text(
+                                  'Pet Shop',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              const Icon(
+                                Icons.location_on,
+                                color: Colors.red,
+                                size: 40,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: bgColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.black, width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${_addressController.text}, ${_numberController.text} - ${_neighborhoodController.text}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _navigateToNextPage();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: yellow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          "Confirmar e Continuar",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _navigateToNextPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RegistrationSupplements(
+          petShop: PetShopDto(
+            cep: _cepController.text,
+            state: _ufController.text,
+            city: _cityController.text,
+            neighborhood: _neighborhoodController.text,
+            street: _addressController.text,
+            number: _numberController.text,
+            complement: _complementController.text,
+            cnpj: "00.000.000/0000-00",
+            ownerId: widget.ownerId,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -242,26 +450,31 @@ class _PetShopInformationPageState extends State<PetShopInformationPage> {
                                   return;
                                 }
 
-                                // ======= SALVAR DADOS ANTES DE NAVEGAR =======
+                                // Salvar dados
                                 await _saveAddressData();
-                                // =============================================
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => RegistrationSupplements(
-                                    petShop: PetShopDto(
-                                      cep: _cepController.text,
-                                      state: _ufController.text,
-                                      city: _cityController.text,
-                                      neighborhood: _neighborhoodController.text,
-                                      street: _addressController.text,
-                                      number: _numberController.text,
-                                      complement: _complementController.text,
-                                      cnpj: "00.000.000/0000-00",
-                                      ownerId: widget.ownerId,
-                                    ),
-                                  )),
+                                // Mostrar loading
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) => const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
                                 );
+
+                                // Buscar coordenadas
+                                final coordinates = await _getCoordinatesFromAddress();
+
+                                // Fechar loading
+                                Navigator.pop(context);
+
+                                if (coordinates != null) {
+                                  // Mostrar mapa
+                                  await _showMapModal(coordinates);
+                                } else {
+                                  // Se não conseguir geocodificar, navega direto
+                                  _navigateToNextPage();
+                                }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: yellow,

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../components/custom_drawer.dart';
@@ -30,6 +31,10 @@ class _ProfileState extends State<Profile> {
   bool isPetShopActive = true;
   final Color yellow = const Color(0xFFF4E04D);
   bool isLoading = false;
+
+  // Form keys para validação
+  final GlobalKey<FormState> _petShopFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _userFormKey = GlobalKey<FormState>();
 
   // Services
   final PetShopInformationService _service = PetShopInformationService();
@@ -89,12 +94,131 @@ class _ProfileState extends State<Profile> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Só carrega uma vez quando a tela é construída
     if (!_hasLoadedOnce) {
       _hasLoadedOnce = true;
       print('🟢 Carregando dados pela primeira vez');
       _loadAllData();
     }
+  }
+
+  // ========== VALIDAÇÕES ==========
+
+  String? _validateRequired(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName é obrigatório';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'E-mail é obrigatório';
+    }
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegex.hasMatch(value.trim())) {
+      return 'E-mail inválido';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Opcional
+    }
+    final phoneDigits = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      return 'Telefone inválido (min 10 dígitos)';
+    }
+    return null;
+  }
+
+  String? _validateCEP(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Opcional
+    }
+    final cepDigits = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (cepDigits.length != 8) {
+      return 'CEP deve ter 8 dígitos';
+    }
+    return null;
+  }
+
+  String? _validateURL(String? value, String fieldName) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Opcional
+    }
+    try {
+      final uri = Uri.parse(value.trim());
+      if (!uri.hasScheme || (!uri.isScheme('http') && !uri.isScheme('https'))) {
+        return '$fieldName deve começar com http:// ou https://';
+      }
+    } catch (e) {
+      return '$fieldName inválida';
+    }
+    return null;
+  }
+
+  String? _validateInstagram(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Opcional
+    }
+    // Aceita @usuario ou instagram.com/usuario
+    if (!value.startsWith('@') && !value.contains('instagram.com')) {
+      return 'Use @usuario ou URL do Instagram';
+    }
+    return null;
+  }
+
+  String? _validateWhatsApp(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null; // Opcional
+    }
+    final digits = value.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.length < 10 || digits.length > 13) {
+      return 'WhatsApp inválido (com DDI + DDD)';
+    }
+    return null;
+  }
+
+  String? _validatePetShopName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Nome do Pet Shop é obrigatório';
+    }
+    if (value.trim().length < 3) {
+      return 'Nome deve ter no mínimo 3 caracteres';
+    }
+    if (value.trim().length > 100) {
+      return 'Nome deve ter no máximo 100 caracteres';
+    }
+    return null;
+  }
+
+  String? _validateDescription(String? value) {
+    if (value != null && value.trim().length > 500) {
+      return 'Descrição deve ter no máximo 500 caracteres';
+    }
+    return null;
+  }
+
+  bool _validateServices() {
+    if (_selectedServices.isEmpty && _otherServiceController.text.trim().isEmpty) {
+      _showSnackBar('Selecione pelo menos um serviço', Colors.orange);
+      return false;
+    }
+    return true;
+  }
+
+
+
+  void _showSnackBar(String message, Color backgroundColor) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: backgroundColor,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   // ✅ Método que carrega tudo
@@ -221,12 +345,7 @@ class _ProfileState extends State<Profile> {
   Future<void> _saveSchedules(
       Map<String, Map<String, String>> schedules) async {
     if (_actualPetShopId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Salve as informações do Pet Shop primeiro!'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      _showSnackBar('Salve as informações do Pet Shop primeiro!', Colors.orange);
       return;
     }
 
@@ -240,34 +359,21 @@ class _ProfileState extends State<Profile> {
 
       if (mounted) {
         if (response['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Horários salvos com sucesso!'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          _showSnackBar('Horários salvos com sucesso!', Colors.green);
 
           setState(() {
             _horarios = schedules;
           });
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-              Text(response['message'] ?? 'Erro ao salvar horários'),
-              backgroundColor: Colors.red,
-            ),
+          _showSnackBar(
+            response['message'] ?? 'Erro ao salvar horários',
+            Colors.red,
           );
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        _showSnackBar('Erro: ${e.toString()}', Colors.red);
       }
     } finally {
       setState(() => isLoading = false);
@@ -276,10 +382,14 @@ class _ProfileState extends State<Profile> {
 
   // ======= SALVAR PETSHOP =======
   Future<void> _savePetShopInformation() async {
-    if (petNameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nome do Pet Shop é obrigatório!')),
-      );
+    // Valida o formulário
+    if (!_petShopFormKey.currentState!.validate()) {
+      _showSnackBar('Por favor, corrija os erros no formulário', Colors.orange);
+      return;
+    }
+
+    // Valida serviços
+    if (!_validateServices()) {
       return;
     }
 
@@ -287,83 +397,82 @@ class _ProfileState extends State<Profile> {
 
     try {
       List<String> finalServices = List.from(_selectedServices);
-      if (_otherServiceController.text.isNotEmpty &&
-          !finalServices.contains(_otherServiceController.text)) {
-        finalServices.add(_otherServiceController.text);
+      if (_otherServiceController.text.trim().isNotEmpty &&
+          !finalServices.contains(_otherServiceController.text.trim())) {
+        finalServices.add(_otherServiceController.text.trim());
       }
 
       final response = _actualPetShopId != null
           ? await _service.updatePetShopInformation(
         id: _actualPetShopId!,
-        name: petNameController.text,
-        description: petDescriptionController.text,
+        name: petNameController.text.trim(),
+        description: petDescriptionController.text.trim(),
         services: finalServices,
         userId: widget.userId,
-        instagram: _instagramController.text.isEmpty
+        instagram: _instagramController.text.trim().isEmpty
             ? null
-            : _instagramController.text,
-        facebook: _facebookController.text.isEmpty
+            : _instagramController.text.trim(),
+        facebook: _facebookController.text.trim().isEmpty
             ? null
-            : _facebookController.text,
-        website: _siteController.text.isEmpty
+            : _facebookController.text.trim(),
+        website: _siteController.text.trim().isEmpty
             ? null
-            : _siteController.text,
-        whatsapp: _whatsappController.text.isEmpty
+            : _siteController.text.trim(),
+        whatsapp: _whatsappController.text.trim().isEmpty
             ? null
-            : _whatsappController.text,
-        commercialPhone: _commercialPhoneController.text.isEmpty
+            : _whatsappController.text.trim(),
+        commercialPhone: _commercialPhoneController.text.trim().isEmpty
             ? null
-            : _commercialPhoneController.text,
-        commercialEmail: _commercialEmailController.text.isEmpty
+            : _commercialPhoneController.text.trim(),
+        commercialEmail: _commercialEmailController.text.trim().isEmpty
             ? null
-            : _commercialEmailController.text,
+            : _commercialEmailController.text.trim(),
       )
           : await _service.createPetShopInformation(
-        name: petNameController.text,
-        description: petDescriptionController.text,
+        name: petNameController.text.trim(),
+        description: petDescriptionController.text.trim(),
         services: finalServices,
         userId: widget.userId,
-        instagram: _instagramController.text.isEmpty
+        instagram: _instagramController.text.trim().isEmpty
             ? null
-            : _instagramController.text,
-        facebook: _facebookController.text.isEmpty
+            : _instagramController.text.trim(),
+        facebook: _facebookController.text.trim().isEmpty
             ? null
-            : _facebookController.text,
-        website: _siteController.text.isEmpty
+            : _facebookController.text.trim(),
+        website: _siteController.text.trim().isEmpty
             ? null
-            : _siteController.text,
-        whatsapp: _whatsappController.text.isEmpty
+            : _siteController.text.trim(),
+        whatsapp: _whatsappController.text.trim().isEmpty
             ? null
-            : _whatsappController.text,
-        commercialPhone: _commercialPhoneController.text.isEmpty
+            : _whatsappController.text.trim(),
+        commercialPhone: _commercialPhoneController.text.trim().isEmpty
             ? null
-            : _commercialPhoneController.text,
-        commercialEmail: _commercialEmailController.text.isEmpty
+            : _commercialPhoneController.text.trim(),
+        commercialEmail: _commercialEmailController.text.trim().isEmpty
             ? null
-            : _commercialEmailController.text,
+            : _commercialEmailController.text.trim(),
       );
 
       if (_petLogo != null && response['success'] == true) {
         final petShopId = response['data']['id'];
-        await _service.uploadLogo(petShopId, _petLogo!);
+        final uploadResponse = await _service.uploadLogo(petShopId, _petLogo!);
+
+        if (uploadResponse['success'] != true) {
+          _showSnackBar('Informações salvas, mas erro ao fazer upload da logo', Colors.orange);
+        }
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-            Text(response['message'] ?? 'Alterações salvas com sucesso!'),
-            backgroundColor: Colors.green,
-          ),
+        _showSnackBar(
+          response['message'] ?? 'Alterações salvas com sucesso!',
+          Colors.green,
         );
 
         await _loadPetShopData();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao salvar: ${e.toString()}')),
-        );
+        _showSnackBar('Erro ao salvar: ${e.toString()}', Colors.red);
       }
     } finally {
       setState(() => isLoading = false);
@@ -371,9 +480,28 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _pickLogo() async {
-    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      setState(() => _petLogo = File(pickedImage.path));
+    try {
+      final pickedImage = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (pickedImage != null) {
+        final file = File(pickedImage.path);
+        final fileSize = await file.length();
+
+        // Valida tamanho do arquivo (max 5MB)
+        if (fileSize > 5 * 1024 * 1024) {
+          _showSnackBar('Imagem muito grande. Máximo 5MB', Colors.orange);
+          return;
+        }
+
+        setState(() => _petLogo = file);
+      }
+    } catch (e) {
+      _showSnackBar('Erro ao selecionar imagem: ${e.toString()}', Colors.red);
     }
   }
 
@@ -492,114 +620,119 @@ class _ProfileState extends State<Profile> {
             child: Stack(
               children: [
                 if (isPetShopActive)
-                  SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.only(bottom: bottomBarHeight),
-                    child: Column(
-                      children: [
-                        PetShopInfoSection(
-                          nameController: petNameController,
-                          descriptionController:
-                          petDescriptionController,
-                          petLogo: _petLogo,
-                          pickLogo: _pickLogo,
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        ScheduleBox(
-                          schedules: _horarios,
-                          onEdit: (result) async {
-                            if (result != null && mounted) {
-                              final newSchedules =
-                              Map<String, Map<String, String>>.from(
-                                  result as Map);
+                  Form(
+                    key: _petShopFormKey,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.only(bottom: bottomBarHeight),
+                      child: Column(
+                        children: [
+                          PetShopInfoSection(
+                            nameController: petNameController,
+                            descriptionController:
+                            petDescriptionController,
+                            petLogo: _petLogo,
+                            pickLogo: _pickLogo,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          ScheduleBox(
+                            schedules: _horarios,
+                            onEdit: (result) async {
+                              if (result != null && mounted) {
+                                final newSchedules =
+                                Map<String, Map<String, String>>.from(
+                                    result as Map);
 
-                              final merged = {
-                                ...?_horarios,
-                                ...newSchedules
-                              };
+                                final merged = {
+                                  ...?_horarios,
+                                  ...newSchedules
+                                };
 
-                              setState(() {
-                                _horarios = merged;
-                              });
+                                setState(() {
+                                  _horarios = merged;
+                                });
 
-                              await _saveSchedules(merged);
-                            }
-                          },
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        ServicesSection(
-                          serviceOptions: _serviceOptions,
-                          selectedServices: _selectedServices,
-                          otherServiceController:
-                          _otherServiceController,
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        SocialMediaSection(
-                          instagramController: _instagramController,
-                          facebookController: _facebookController,
-                          siteController: _siteController,
-                          whatsappController: _whatsappController,
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        ContactSection(
-                          phoneController: _commercialPhoneController,
-                          emailController: _commercialEmailController,
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        LocationSection(
-                          cepController: cepController,
-                          stateController: estadoController,
-                          cityController: cidadeController,
-                          neighborhoodController: bairroController,
-                          streetController: enderecoController,
-                          numberController: numeroController,
-                          addressComplementController:
-                          complementoController,
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                        SizedBox(
-                          width: screenWidth * 0.9,
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: yellow,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: const BorderSide(
-                                    color: Colors.black, width: 1),
+                                await _saveSchedules(merged);
+                              }
+                            },
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          ServicesSection(
+                            serviceOptions: _serviceOptions,
+                            selectedServices: _selectedServices,
+                            otherServiceController:
+                            _otherServiceController,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          SocialMediaSection(
+                            instagramController: _instagramController,
+                            facebookController: _facebookController,
+                            siteController: _siteController,
+                            whatsappController: _whatsappController,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          ContactSection(
+                            phoneController: _commercialPhoneController,
+                            emailController: _commercialEmailController,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          LocationSection(
+                            cepController: cepController,
+                            stateController: estadoController,
+                            cityController: cidadeController,
+                            neighborhoodController: bairroController,
+                            streetController: enderecoController,
+                            numberController: numeroController,
+                            addressComplementController:
+                            complementoController,
+                          ),
+                          SizedBox(height: screenHeight * 0.03),
+                          SizedBox(
+                            width: screenWidth * 0.9,
+                            height: 50,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: yellow,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: const BorderSide(
+                                      color: Colors.black, width: 1),
+                                ),
                               ),
-                            ),
-                            onPressed:
-                            isLoading ? null : _savePetShopInformation,
-                            child: isLoading
-                                ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child:
-                              CircularProgressIndicator(
-                                  strokeWidth: 2),
-                            )
-                                : const Text(
-                              "Salvar Alterações",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                              onPressed:
+                              isLoading ? null : _savePetShopInformation,
+                              child: isLoading
+                                  ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2),
+                              )
+                                  : const Text(
+                                "Salvar Alterações",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: screenHeight * 0.03),
-                      ],
+                          SizedBox(height: screenHeight * 0.03),
+                        ],
+                      ),
                     ),
                   ),
                 if (!isPetShopActive)
-                  UserTab(
-                    nameController: nameController,
-                    phoneController: phoneController,
-                    birthController: birthController,
-                    emailController: emailController,
-                    passwordController: passwordController,
+                  Form(
+                    key: _userFormKey,
+                    child: UserTab(
+                      nameController: nameController,
+                      phoneController: phoneController,
+                      birthController: birthController,
+                      emailController: emailController,
+                      passwordController: passwordController,
+                    ),
                   ),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -607,8 +740,7 @@ class _ProfileState extends State<Profile> {
                     height: bottomBarHeight,
                     decoration: BoxDecoration(
                       color: const Color(0xFFEBDD6C),
-                      border:
-                      Border.all(color: Colors.black, width: 1),
+                      border: Border.all(color: Colors.black, width: 1),
                     ),
                   ),
                 ),

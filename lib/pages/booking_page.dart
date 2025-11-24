@@ -6,6 +6,7 @@ import '../models/appointment_service.dart';
 import '../models/promotion.dart';
 import '../services/promotion_service.dart';
 import '../models/time_slot.dart';
+import '../models/notification_service.dart';
 
 class BookingPage extends StatefulWidget {
   final PetShopService service;
@@ -277,7 +278,6 @@ class _BookingPageState extends State<BookingPage> {
       return;
     }
 
-    // Confirmação com preço final
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -309,7 +309,6 @@ class _BookingPageState extends State<BookingPage> {
             Text('Horário: ${selectedSlot!.startTime}'),
             const Divider(height: 20),
 
-            // Mostrar desconto se aplicado
             if (couponApplied && appliedCoupon != null) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -398,7 +397,7 @@ class _BookingPageState extends State<BookingPage> {
           return;
         }
 
-        // ATUALIZADO: Enviar dados do cupom para o backend
+        // Criar o agendamento
         await AppointmentService.createAppointment(
           userId: userId!,
           petId: selectedPetId!,
@@ -408,6 +407,25 @@ class _BookingPageState extends State<BookingPage> {
           couponCode: couponApplied ? appliedCoupon?.couponCode : null,
           discountPercent: couponApplied ? appliedCoupon?.discountPercent : null,
           finalPrice: finalPrice,
+        );
+
+        // 🔔 NOTIFICAÇÃO: Buscar informações do pet e usuário
+        final prefs = await SharedPreferences.getInstance();
+        final userName = prefs.getString('user_name') ?? 'Cliente';
+
+        final selectedPet = userPets.firstWhere(
+              (pet) => pet['id'] == selectedPetId,
+          orElse: () => {'name': 'Pet'},
+        );
+        final petName = selectedPet['name'] ?? 'Pet';
+
+        // 🔔 ENVIAR NOTIFICAÇÃO PARA O DONO DO PET SHOP
+        await NotificationService.showNewAppointmentNotification(
+          clientName: userName,
+          petName: petName,
+          serviceName: widget.service.name,
+          date: '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+          time: selectedSlot!.startTime,
         );
 
         setState(() {
@@ -486,7 +504,6 @@ class _BookingPageState extends State<BookingPage> {
           : SingleChildScrollView(
         child: Column(
           children: [
-            // Informações do Serviço
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -514,7 +531,6 @@ class _BookingPageState extends State<BookingPage> {
                   ),
                   const SizedBox(height: 5),
 
-                  // Mostrar preço com desconto
                   if (couponApplied && appliedCoupon != null) ...[
                     Text(
                       widget.service.formattedPrice,
@@ -565,7 +581,6 @@ class _BookingPageState extends State<BookingPage> {
 
             const SizedBox(height: 20),
 
-            // Campo de Cupom
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -661,7 +676,6 @@ class _BookingPageState extends State<BookingPage> {
 
             const SizedBox(height: 20),
 
-            // Seleção de Pet
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -736,7 +750,6 @@ class _BookingPageState extends State<BookingPage> {
 
             const SizedBox(height: 20),
 
-            // Seleção de Data
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
               decoration: BoxDecoration(
@@ -795,7 +808,6 @@ class _BookingPageState extends State<BookingPage> {
 
             const SizedBox(height: 20),
 
-            // Horários Disponíveis
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
@@ -941,7 +953,6 @@ class _BookingPageState extends State<BookingPage> {
 
             const SizedBox(height: 30),
 
-            // Botão Confirmar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SizedBox(

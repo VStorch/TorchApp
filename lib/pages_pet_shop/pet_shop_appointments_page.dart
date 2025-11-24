@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/appointment_service.dart';
 import '../components/custom_drawer_pet_shop.dart';
+import '../models/notification_service.dart';
 
 class PetShopAppointmentsPage extends StatefulWidget {
   final int petShopId;
@@ -28,7 +29,18 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
   @override
   void initState() {
     super.initState();
+    _initializeNotifications();
     _loadAppointments();
+  }
+
+  // Inicializar o serviço de notificações
+  Future<void> _initializeNotifications() async {
+    try {
+      await NotificationService.initialize();
+      print('✅ Serviço de notificações inicializado');
+    } catch (e) {
+      print('❌ Erro ao inicializar notificações: $e');
+    }
   }
 
   Future<void> _loadAppointments() async {
@@ -197,7 +209,6 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
   }
 
   Future<void> _showAppointmentDetails(Map<String, dynamic> appointment) async {
-    // Calcular valores com desconto
     final originalPrice = appointment['servicePrice'];
     final discountPercent = appointment['discountPercent'];
     final finalPrice = appointment['finalPrice'];
@@ -302,7 +313,6 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
                     _buildInfoCard([
                       _buildInfoRow(Icons.medical_services, 'Serviço', appointment['serviceName'] ?? 'N/A'),
 
-                      // Mostrar informações de preço e desconto
                       if (hasDiscount && couponCode != null) ...[
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -566,6 +576,11 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
     if (confirm == true) {
       try {
         await AppointmentService.confirmAppointment(appointment['id']);
+
+        // 🔔 NOTIFICAÇÃO: Agendamento confirmado (cliente recebe)
+        // Esta notificação poderia ser enviada via push notification para o app do cliente
+        print('📱 Notificação: Agendamento #${appointment['id']} confirmado');
+
         _showSuccessSnackBar('Agendamento confirmado com sucesso!');
         await _loadAppointments();
       } catch (e) {
@@ -611,6 +626,10 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
     if (confirm == true) {
       try {
         await AppointmentService.completeAppointment(appointment['id']);
+
+        // 🔔 NOTIFICAÇÃO: Agendamento concluído (cliente recebe)
+        print('📱 Notificação: Agendamento #${appointment['id']} concluído');
+
         _showSuccessSnackBar('Agendamento concluído!');
         await _loadAppointments();
       } catch (e) {
@@ -656,6 +675,10 @@ class _PetShopAppointmentsPageState extends State<PetShopAppointmentsPage> {
     if (confirm == true) {
       try {
         await AppointmentService.cancelAppointment(appointment['id']);
+
+        // 🔔 NOTIFICAÇÃO: Agendamento cancelado (cliente recebe)
+        print('📱 Notificação: Agendamento #${appointment['id']} cancelado');
+
         _showSuccessSnackBar('Agendamento cancelado com sucesso!');
         await _loadAppointments();
       } catch (e) {
