@@ -1,4 +1,8 @@
-# TorchApp - Frontend 🐾
+<img src = "docs/imgs/torch_logo.png" alt = "Logo Torch" width = "350">
+
+---
+
+# Frontend 🐾
 
 Frontend em Flutter para o TorchApp. O repositório do backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
 
