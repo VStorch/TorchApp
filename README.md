@@ -7,6 +7,7 @@
 Aplicativo mobile desenvolvido em Flutter para o projeto Torch, focado no agendamento rápido e intuitivo de serviços em Pet Shops.<br>
 O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)<br>
 Já a página de redirecionamento para a redefinição de senha está [aqui](https://github.com/VStorch/PaginaRedirecionamento)
+
 ---
 
 ### Índice
@@ -91,7 +92,7 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
     `lib/assets/images_profile/`
     
 **Fontes customizadas**
-- Inknut Antiqua (Rugular/Semibold/Bold/Black)
+- Inknut Antiqua (Regular/Semibold/Bold/Black)
 - InclusiveSans
 
 ---
