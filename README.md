@@ -13,7 +13,7 @@ O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
 
 - [Descrição](#descrição)
 - [Funcionalidades](#funcionalidades)
-- [Tecnologias](#tecnologias-e-dependências)
+- [Tecnologias e Dependências](#tecnologias-e-dependências)
 - [Arquitetura](#arquitetura)
 - [Como rodar o projeto](#como-rodar-o-projeto)
 - [Estrutura de pastas](#estrutura-de-pastas)
@@ -38,18 +38,18 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 1. Cliente
     - Cadastra seus próprios pets
-    - Visualiza serviços e ofertas disponibilizados pelos PetShops
+    - Visualiza serviços e ofertas disponibilizados pelos Pet Shops
     - Verifica horários livres conforme o serviço escolhido
     - Faz agendamentos
     - Gerencia agendamentos futuros
     - Atualiza seus dados
 
-2. Dono de PetShop
-    - Possui um PetShop associado à sua conta
+2. Dono de Pet Shop
+    - Possui um Pet Shop associado à sua conta
     - Cadastra e edita serviços oferecidos
     - Gera slots de horário para dias específicos, vinculados aos serviços
     - Acompanha agendamentos realizados por clientes
-    - Atualiza informações do PetShop
+    - Atualiza informações do Pet Shop
     - Gerencia perfil
 
 ---
@@ -63,6 +63,36 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 - Flutter Localizations
 
 **Comunicação com API**
+- Dio 5.7.0
+- http 1.5.0
+
+**Armazenamento Local**
+- shared_preferences 2.2.2
+
+**Imagens e Mídias**
+- image_picker 1.0.4
+    Para capturar fotos da câmera ou selecionar da galeria
+
+**Interface e animações**
+- lottie 2.2.0
+    Exibição de animações em JSON
+
+**Mapas**
+- google_maps_flutter 2.5.0
+
+**Internacionalização**
+- intl 0.20.2
+
+**Assets**
+- Animações diversificadas
+- Imagens diversas
+- Pastas organizadas em:<br>
+    `lib/assets/images/`<br>
+    `lib/assets/images_profile/`
+    
+**Fontes customizadas**
+- Inknut Antiqua (Rugular/Semibold/Bold/Black)
+- InclusiveSans
 
 ---
 
