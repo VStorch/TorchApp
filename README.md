@@ -26,9 +26,29 @@ O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
 
 ### Descrição
 
-O TorchApp é um aplicativo móvel desenvolvido para facilitar o agendamento de horários em Pet Shops. Com uma interface intuitiva, o app permite que os usuários agendem rapidamente serviços para seus animais de estimação, enquanto os Pet Shops podem gerenciar seus horários de forma eficiente. O objetivo é proporcionar agilidade tanto para os clientes quanto para os fornecedores de serviços.
+O Torch é um aplicativo móvel desenvolvido para facilitar o agendamento de horários em Pet Shops. Com uma interface intuitiva, o app permite que os usuários agendem rapidamente serviços para seus animais de estimação, enquanto os Pet Shops podem gerenciar seus horários de forma eficiente. O objetivo é proporcionar agilidade tanto para os clientes quanto para os fornecedores de serviços.
 
 ### Funcionalidades
+
+#### Tipos de Usuário
+
+O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
+
+1. Cliente
+    - Cadastra seus próprios pets
+    - Visualiza serviços e ofertas disponibilizados pelos PetShops
+    - Verifica horários livres conforme o serviço escolhido
+    - Faz agendamentos
+    - Gerencia agendamentos futuros
+    - Atualiza seus dados
+
+2. Dono de PetShop
+    - Possui um PetShop associado à sua conta
+    - Cadastra e edita serviços oferecidos
+    - Gera slots de horário para dias específicos, vinculados aos serviços
+    - Acompanha agendamentos realizados por clientes
+    - Atualiza informações do PetShop
+    - Gerencia perfil
 
 ---
 
