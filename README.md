@@ -13,7 +13,7 @@ O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
 
 - [Descrição](#descrição)
 - [Funcionalidades](#funcionalidades)
-- [Tecnologias](#tecnologias)
+- [Tecnologias](#tecnologias-e-dependências)
 - [Arquitetura](#arquitetura)
 - [Como rodar o projeto](#como-rodar-o-projeto)
 - [Estrutura de pastas](#estrutura-de-pastas)
@@ -27,6 +27,8 @@ O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
 ### Descrição
 
 O Torch é um aplicativo móvel desenvolvido para facilitar o agendamento de horários em Pet Shops. Com uma interface intuitiva, o app permite que os usuários agendem rapidamente serviços para seus animais de estimação, enquanto os Pet Shops podem gerenciar seus horários de forma eficiente. O objetivo é proporcionar agilidade tanto para os clientes quanto para os fornecedores de serviços.
+
+---
 
 ### Funcionalidades
 
@@ -52,9 +54,15 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 ---
 
-### Tecnologias
+### Tecnologias e Dependências
 
+**Base**
 - Flutter 3.32.3
+- Dart 3.8.1
+- Material Design 3
+- Flutter Localizations
+
+**Comunicação com API**
 
 ---
 
