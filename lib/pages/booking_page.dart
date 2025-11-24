@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:torch_app/pages/pix_payment_screen.dart';
 import '../data/pet_shop_services/petshop_service.dart';
 import '../models/appointment_service.dart';
 import '../models/promotion.dart';
@@ -357,6 +358,30 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue[300]!, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.pix, color: Colors.blue[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Pagamento via PIX',
+                      style: TextStyle(
+                        color: Colors.blue[900],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -371,7 +396,7 @@ class _BookingPageState extends State<BookingPage> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Confirmar'),
+            child: const Text('Continuar para Pagamento'),
           ),
         ],
       ),
@@ -381,6 +406,7 @@ class _BookingPageState extends State<BookingPage> {
       setState(() => isBooking = true);
 
       try {
+        // Verificar se o horário ainda está disponível
         final updatedSlots = await ApiService.getAvailableSlots(
           serviceId: widget.service.id!,
           date: _formatDate(selectedDate),
@@ -397,7 +423,7 @@ class _BookingPageState extends State<BookingPage> {
           return;
         }
 
-        // Criar o agendamento
+        // Criar o agendamento pendente (aguardando pagamento)
         await AppointmentService.createAppointment(
           userId: userId!,
           petId: selectedPetId!,
@@ -409,43 +435,52 @@ class _BookingPageState extends State<BookingPage> {
           finalPrice: finalPrice,
         );
 
-        // 🔔 NOTIFICAÇÃO: Buscar informações do pet e usuário
-        final prefs = await SharedPreferences.getInstance();
-        final userName = prefs.getString('user_name') ?? 'Cliente';
+        setState(() => isBooking = false);
 
-        final selectedPet = userPets.firstWhere(
-              (pet) => pet['id'] == selectedPetId,
-          orElse: () => {'name': 'Pet'},
-        );
-        final petName = selectedPet['name'] ?? 'Pet';
-
-        // 🔔 ENVIAR NOTIFICAÇÃO PARA O DONO DO PET SHOP
-        await NotificationService.showNewAppointmentNotification(
-          clientName: userName,
-          petName: petName,
-          serviceName: widget.service.name,
-          date: '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
-          time: selectedSlot!.startTime,
-        );
-
-        setState(() {
-          final index = availableSlots.indexWhere((slot) => slot.id == selectedSlot!.id);
-          if (index != -1) {
-            availableSlots[index] = TimeSlot(
-              id: availableSlots[index].id,
-              startTime: availableSlots[index].startTime,
-              endTime: availableSlots[index].endTime,
-              isBooked: true,
-            );
-          }
-          selectedSlot = null;
-          isBooking = false;
-        });
-
-        _showSuccessSnackBar('Agendamento realizado com sucesso!');
-
+        // Navegar para a tela de pagamento PIX
         if (mounted) {
-          Navigator.pop(context, true);
+          final paymentSuccess = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PixPaymentScreen(
+                serviceName: widget.service.name,
+                finalPrice: finalPrice,
+                appointmentDate: '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                appointmentTime: selectedSlot!.startTime,
+                couponCode: couponApplied ? appliedCoupon?.couponCode : null,
+              ),
+            ),
+          );
+
+          if (paymentSuccess == true) {
+            // Pagamento confirmado
+            final prefs = await SharedPreferences.getInstance();
+            final userName = prefs.getString('user_name') ?? 'Cliente';
+
+            final selectedPet = userPets.firstWhere(
+                  (pet) => pet['id'] == selectedPetId,
+              orElse: () => {'name': 'Pet'},
+            );
+            final petName = selectedPet['name'] ?? 'Pet';
+
+            // Enviar notificação
+            await NotificationService.showNewAppointmentNotification(
+              clientName: userName,
+              petName: petName,
+              serviceName: widget.service.name,
+              date: '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+              time: selectedSlot!.startTime,
+            );
+
+            _showSuccessSnackBar('Agendamento realizado com sucesso!');
+
+            if (mounted) {
+              Navigator.pop(context, true);
+            }
+          } else {
+            // Pagamento cancelado ou expirado
+            _showErrorSnackBar('Pagamento não foi concluído. O agendamento foi cancelado.');
+          }
         }
       } catch (e) {
         setState(() => isBooking = false);
