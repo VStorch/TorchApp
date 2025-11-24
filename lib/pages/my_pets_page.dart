@@ -25,12 +25,10 @@ class _MyPetsPageState extends State<MyPetsPage> {
     _loadUserAndPets();
   }
 
-  // Busca o userId do SharedPreferences
   Future<void> _loadUserAndPets() async {
     setState(() => _loading = true);
 
     try {
-      // Buscar userId do SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getInt('user_id');
 
@@ -42,13 +40,17 @@ class _MyPetsPageState extends State<MyPetsPage> {
       setState(() => _currentUserId = userId);
       debugPrint("UserId carregado: $userId");
 
-      // Agora carregar os pets
       await _loadPets();
 
     } catch (e) {
       debugPrint("Erro ao carregar dados: $e");
+      if (mounted) {
+        _showSnackBar('Erro ao carregar dados', isError: true);
+      }
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -60,20 +62,52 @@ class _MyPetsPageState extends State<MyPetsPage> {
       debugPrint("=== DEBUG PETS ===");
       debugPrint("CurrentUserId: $_currentUserId");
       debugPrint("Total pets carregados: ${pets.length}");
-      for (var pet in pets) {
-        debugPrint("Pet: ${pet.name}, UserId: ${pet.userId}");
-      }
+
       final filteredPets = pets.where((p) => p.userId == _currentUserId).toList();
       debugPrint("Pets filtrados para este usuário: ${filteredPets.length}");
-      setState(() => _pets = filteredPets);
+
+      if (mounted) {
+        setState(() => _pets = filteredPets);
+      }
     } catch (e) {
       debugPrint("Erro ao carregar pets: $e");
+      if (mounted) {
+        _showSnackBar('Erro ao carregar pets', isError: true);
+      }
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red.shade700 : Colors.green.shade700,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  // Calcula a idade do pet
+  String _calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    final difference = now.difference(birthDate);
+    final years = (difference.inDays / 365).floor();
+    final months = ((difference.inDays % 365) / 30).floor();
+
+    if (years > 0) {
+      return years == 1 ? '1 ano' : '$years anos';
+    } else if (months > 0) {
+      return months == 1 ? '1 mês' : '$months meses';
+    } else {
+      return '${difference.inDays} dias';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Se ainda não carregou o userId, mostra loading
     if (_currentUserId == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -125,21 +159,25 @@ class _MyPetsPageState extends State<MyPetsPage> {
           ),
         ),
       ),
-
       drawer: CustomDrawer(menuItems: menuItems),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: _pets.isEmpty
-              ? [_buildEmptyCard()]
-              : _pets.map((pet) => _buildPetCard(pet)).toList(),
+          : RefreshIndicator(
+        onRefresh: _loadPets,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: _pets.isEmpty
+                ? [_buildEmptyCard()]
+                : _pets.map((pet) => _buildPetCard(pet)).toList(),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFFEBDD6C),
         onPressed: () => _showAddPetDialog(context),
+        tooltip: 'Adicionar Pet',
         child: const Icon(Icons.add, color: Colors.black, size: 32),
       ),
     );
@@ -150,6 +188,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: const Color(0xFFFFF8C6),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -157,34 +196,70 @@ class _MyPetsPageState extends State<MyPetsPage> {
           children: [
             Row(
               children: [
-                const Icon(Icons.pets, size: 28),
-                const SizedBox(width: 8),
-                Text(pet.name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18)),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEBDD6C),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.pets, size: 28),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pet.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Text(
+                        _calculateAge(pet.birthDate),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text("Espécie: ${pet.species}"),
-            Text("Raça: ${pet.breed}"),
-            Text("Peso: ${pet.weight} kg"),
-            Text(
-              "Nascimento: ${DateFormat('dd/MM/yyyy').format(pet.birthDate)}",
+            const Divider(height: 24),
+            _buildInfoRow(Icons.category, "Espécie", pet.species),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.loyalty, "Raça", pet.breed),
+            const SizedBox(height: 8),
+            _buildInfoRow(Icons.monitor_weight, "Peso", "${pet.weight} kg"),
+            const SizedBox(height: 8),
+            _buildInfoRow(
+              Icons.cake,
+              "Nascimento",
+              DateFormat('dd/MM/yyyy').format(pet.birthDate),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                OutlinedButton(
+                TextButton.icon(
                   onPressed: () => _showEditPetDialog(context, pet),
-                  child: const Text("Editar"),
+                  icon: const Icon(Icons.edit, size: 18),
+                  label: const Text("Editar"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue.shade700,
+                  ),
                 ),
-                OutlinedButton(
-                  onPressed: () async {
-                    final success = await PetService.deletePet(pet.id!);
-                    if (success) _loadPets();
-                  },
-                  child: const Text("Excluir"),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: () => _confirmDeletePet(context, pet),
+                  icon: const Icon(Icons.delete, size: 18),
+                  label: const Text("Excluir"),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red.shade700,
+                  ),
                 ),
               ],
             ),
@@ -194,36 +269,138 @@ class _MyPetsPageState extends State<MyPetsPage> {
     );
   }
 
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey.shade700),
+        const SizedBox(width: 8),
+        Text(
+          "$label: ",
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade800,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 15),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Diálogo de confirmação para exclusão
+  void _confirmDeletePet(BuildContext context, Pet pet) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        backgroundColor: const Color(0xFFF6F0D1),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+            SizedBox(width: 8),
+            Text("Confirmar Exclusão"),
+          ],
+        ),
+        content: Text(
+          "Tem certeza que deseja excluir ${pet.name}?\n\nEsta ação não pode ser desfeita.",
+          style: const TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancelar"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deletePet(pet);
+            },
+            child: const Text("Excluir"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deletePet(Pet pet) async {
+    // Mostrar loading
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      final success = await PetService.deletePet(pet.id!);
+
+      if (!mounted) return;
+      Navigator.pop(context); // Fecha o loading
+
+      if (success) {
+        _showSnackBar('${pet.name} foi excluído com sucesso');
+        await _loadPets();
+      } else {
+        _showSnackBar('Erro ao excluir ${pet.name}', isError: true);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      _showSnackBar('Erro ao excluir pet', isError: true);
+    }
+  }
+
   Widget _buildEmptyCard() {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: const Color(0xFFFFF8C6),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
-              children: [
-                Icon(Icons.pets, size: 28),
-                SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    "Você ainda não tem nenhum pet cadastrado?",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                ),
-              ],
+            Icon(
+              Icons.pets_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
             ),
-            const SizedBox(height: 10),
-            const Text("Toque no botão abaixo para adicionar um amigo!"),
             const SizedBox(height: 16),
-            Center(
-              child: OutlinedButton(
-                onPressed: () => _showAddPetDialog(context),
-                child: const Text("Cadastrar"),
+            const Text(
+              "Nenhum pet cadastrado",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-            )
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Adicione seu primeiro amiguinho!",
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEBDD6C),
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              onPressed: () => _showAddPetDialog(context),
+              icon: const Icon(Icons.add),
+              label: const Text("Cadastrar Pet"),
+            ),
           ],
         ),
       ),
@@ -317,7 +494,11 @@ class _MyPetsPageState extends State<MyPetsPage> {
                       }
                     },
                     icon: const Icon(Icons.calendar_month),
-                    label: const Text("Selecionar Data de Nascimento"),
+                    label: Text(
+                      birthDate == DateTime.now()
+                          ? "Selecionar Data de Nascimento"
+                          : DateFormat('dd/MM/yyyy').format(birthDate),
+                    ),
                   ),
                   if (birthDateError != null)
                     Padding(
@@ -340,39 +521,22 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           backgroundColor: const Color(0xFFEBDD6C),
                           foregroundColor: Colors.black,
                         ),
-                        onPressed: () async {
-                          setState(() {
-                            nameError = nameController.text.isEmpty ? 'Nome é obrigatório' : null;
-                            speciesError = speciesController.text.isEmpty ? 'Espécie é obrigatória' : null;
-                            breedError = breedController.text.isEmpty ? 'Raça é obrigatória' : null;
-                            final weight = double.tryParse(weightController.text);
-                            weightError = (weight == null || weight <= 0) ? 'Peso deve ser maior que zero' : null;
-                            birthDateError = birthDate.isAfter(DateTime.now()) ? 'Data inválida' : null;
-                          });
-
-                          if ([nameError, speciesError, breedError, weightError, birthDateError].every((e) => e == null)) {
-                            final pet = Pet(
-                              nameController.text,
-                              breedController.text,
-                              speciesController.text,
-                              double.parse(weightController.text),
-                              birthDate,
-                              _currentUserId!,
-                            );
-                            debugPrint("=== CRIANDO PET ===");
-                            debugPrint("UserId sendo enviado: $_currentUserId");
-                            debugPrint("Pet: ${pet.toJson()}");
-                            final success = await PetService.addPet(pet);
-                            if (success) {
-                              _loadPets();
-                              Navigator.pop(context);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Erro ao cadastrar pet')),
-                              );
-                            }
-                          }
-                        },
+                        onPressed: () => _savePet(
+                          context,
+                          setState,
+                          nameController,
+                          speciesController,
+                          breedController,
+                          weightController,
+                          birthDate,
+                              (errors) {
+                            nameError = errors['name'];
+                            speciesError = errors['species'];
+                            breedError = errors['breed'];
+                            weightError = errors['weight'];
+                            birthDateError = errors['birthDate'];
+                          },
+                        ),
                         child: const Text("Salvar"),
                       ),
                     ],
@@ -384,6 +548,87 @@ class _MyPetsPageState extends State<MyPetsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _savePet(
+      BuildContext dialogContext,
+      StateSetter setState,
+      TextEditingController nameController,
+      TextEditingController speciesController,
+      TextEditingController breedController,
+      TextEditingController weightController,
+      DateTime birthDate,
+      Function(Map<String, String?>) setErrors,
+      ) async {
+    final errors = <String, String?>{};
+
+    if (nameController.text.trim().isEmpty) {
+      errors['name'] = 'Nome é obrigatório';
+    } else if (nameController.text.trim().length > 50) {
+      errors['name'] = 'Nome muito longo (máx. 50 caracteres)';
+    }
+
+    if (speciesController.text.trim().isEmpty) {
+      errors['species'] = 'Espécie é obrigatória';
+    }
+
+    if (breedController.text.trim().isEmpty) {
+      errors['breed'] = 'Raça é obrigatória';
+    }
+
+    // Aceita vírgula como separador decimal
+    final weightText = weightController.text.replaceAll(',', '.');
+    final weight = double.tryParse(weightText);
+    if (weight == null || weight <= 0) {
+      errors['weight'] = 'Peso deve ser maior que zero';
+    } else if (weight > 500) {
+      errors['weight'] = 'Peso muito alto (máx. 500 kg)';
+    }
+
+    if (birthDate.isAfter(DateTime.now())) {
+      errors['birthDate'] = 'Data não pode ser futura';
+    }
+
+    setState(() => setErrors(errors));
+
+    if (errors.isEmpty) {
+      // Mostrar loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      try {
+        final pet = Pet(
+          nameController.text.trim(),
+          breedController.text.trim(),
+          speciesController.text.trim(),
+          weight!,
+          birthDate,
+          _currentUserId!,
+        );
+
+        final success = await PetService.addPet(pet);
+
+        if (!mounted) return;
+        Navigator.pop(context); // Fecha loading
+
+        if (success) {
+          Navigator.pop(dialogContext); // Fecha diálogo
+          _showSnackBar('${pet.name} cadastrado com sucesso!');
+          await _loadPets();
+        } else {
+          _showSnackBar('Erro ao cadastrar pet', isError: true);
+        }
+      } catch (e) {
+        if (!mounted) return;
+        Navigator.pop(context);
+        _showSnackBar('Erro ao cadastrar pet', isError: true);
+      }
+    }
   }
 
   void _showEditPetDialog(BuildContext context, Pet pet) {
@@ -456,7 +701,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
                       }
                     },
                     icon: const Icon(Icons.calendar_month),
-                    label: const Text("Selecionar Data de Nascimento"),
+                    label: Text(DateFormat('dd/MM/yyyy').format(birthDate)),
                   ),
                   if (birthDateError != null)
                     Padding(
@@ -479,37 +724,23 @@ class _MyPetsPageState extends State<MyPetsPage> {
                           backgroundColor: const Color(0xFFEBDD6C),
                           foregroundColor: Colors.black,
                         ),
-                        onPressed: () async {
-                          setState(() {
-                            nameError = nameController.text.isEmpty ? 'Nome é obrigatório' : null;
-                            speciesError = speciesController.text.isEmpty ? 'Espécie é obrigatória' : null;
-                            breedError = breedController.text.isEmpty ? 'Raça é obrigatória' : null;
-                            final weight = double.tryParse(weightController.text);
-                            weightError = (weight == null || weight <= 0) ? 'Peso deve ser maior que zero' : null;
-                            birthDateError = birthDate.isAfter(DateTime.now()) ? 'Data inválida' : null;
-                          });
-
-                          if ([nameError, speciesError, breedError, weightError, birthDateError].every((e) => e == null)) {
-                            final petAtualizado = Pet(
-                              nameController.text,
-                              breedController.text,
-                              speciesController.text,
-                              double.parse(weightController.text),
-                              birthDate,
-                              _currentUserId!,
-                              id: pet.id,
-                            );
-                            final success = await PetService.updatePet(petAtualizado);
-                            if (success) {
-                              _loadPets();
-                              Navigator.pop(context);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Erro ao atualizar pet')),
-                              );
-                            }
-                          }
-                        },
+                        onPressed: () => _updatePet(
+                          context,
+                          setState,
+                          pet,
+                          nameController,
+                          speciesController,
+                          breedController,
+                          weightController,
+                          birthDate,
+                              (errors) {
+                            nameError = errors['name'];
+                            speciesError = errors['species'];
+                            breedError = errors['breed'];
+                            weightError = errors['weight'];
+                            birthDateError = errors['birthDate'];
+                          },
+                        ),
                         child: const Text("Salvar"),
                       ),
                     ],
@@ -521,6 +752,87 @@ class _MyPetsPageState extends State<MyPetsPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _updatePet(
+      BuildContext dialogContext,
+      StateSetter setState,
+      Pet originalPet,
+      TextEditingController nameController,
+      TextEditingController speciesController,
+      TextEditingController breedController,
+      TextEditingController weightController,
+      DateTime birthDate,
+      Function(Map<String, String?>) setErrors,
+      ) async {
+    final errors = <String, String?>{};
+
+    if (nameController.text.trim().isEmpty) {
+      errors['name'] = 'Nome é obrigatório';
+    } else if (nameController.text.trim().length > 50) {
+      errors['name'] = 'Nome muito longo (máx. 50 caracteres)';
+    }
+
+    if (speciesController.text.trim().isEmpty) {
+      errors['species'] = 'Espécie é obrigatória';
+    }
+
+    if (breedController.text.trim().isEmpty) {
+      errors['breed'] = 'Raça é obrigatória';
+    }
+
+    final weightText = weightController.text.replaceAll(',', '.');
+    final weight = double.tryParse(weightText);
+    if (weight == null || weight <= 0) {
+      errors['weight'] = 'Peso deve ser maior que zero';
+    } else if (weight > 500) {
+      errors['weight'] = 'Peso muito alto (máx. 500 kg)';
+    }
+
+    if (birthDate.isAfter(DateTime.now())) {
+      errors['birthDate'] = 'Data não pode ser futura';
+    }
+
+    setState(() => setErrors(errors));
+
+    if (errors.isEmpty) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      try {
+        final petAtualizado = Pet(
+          nameController.text.trim(),
+          breedController.text.trim(),
+          speciesController.text.trim(),
+          weight!,
+          birthDate,
+          _currentUserId!,
+          id: originalPet.id,
+        );
+
+        final success = await PetService.updatePet(petAtualizado);
+
+        if (!mounted) return;
+        Navigator.pop(context); // Fecha loading
+
+        if (success) {
+          Navigator.pop(dialogContext); // Fecha diálogo
+          _showSnackBar('${petAtualizado.name} atualizado com sucesso!');
+          await _loadPets();
+        } else {
+          _showSnackBar('Erro ao atualizar pet', isError: true);
+        }
+      } catch (e) {
+        if (!mounted) return;
+        Navigator.pop(context);
+        _showSnackBar('Erro ao atualizar pet', isError: true);
+      }
+    }
   }
 
   Widget _buildInputField(String label, TextEditingController controller,
@@ -537,6 +849,7 @@ class _MyPetsPageState extends State<MyPetsPage> {
           borderSide: BorderSide.none,
         ),
         errorText: errorText,
+        errorMaxLines: 2,
       ),
     );
   }

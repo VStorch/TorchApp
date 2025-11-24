@@ -1,13 +1,93 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../components/custom_drawer.dart';
 import '../models/page_type.dart';
 import '../models/menu_item.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final int? userId;
+  final String? userName;
 
-  const HomePage({super.key, this.userId});
+  const HomePage({super.key, this.userId, this.userName});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  late List<AnimationController> _pawControllers;
+  late List<Animation<double>> _pawAnimations;
+  String userName = 'Usuário';
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePawAnimations();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    // Prioridade 1: Se veio pelo construtor
+    if (widget.userName != null && widget.userName!.isNotEmpty) {
+      if (mounted) {
+        setState(() {
+          userName = widget.userName!;
+        });
+      }
+      return;
+    }
+
+    // Prioridade 2: Busca do SharedPreferences
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedName = prefs.getString('user_name');
+
+      if (savedName != null && savedName.isNotEmpty && mounted) {
+        setState(() {
+          userName = savedName;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar nome: $e');
+    }
+  }
+
+  void _initializePawAnimations() {
+    _pawControllers = List.generate(
+      12,
+          (index) => AnimationController(
+        duration: Duration(milliseconds: 1500 + (index * 100)),
+        vsync: this,
+      ),
+    );
+
+    _pawAnimations = _pawControllers.map((controller) {
+      return Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+          parent: controller,
+          curve: Curves.easeInOut,
+        ),
+      );
+    }).toList();
+
+    for (int i = 0; i < _pawControllers.length; i++) {
+      int reversedIndex = _pawControllers.length - 1 - i;
+      Future.delayed(Duration(milliseconds: reversedIndex * 150), () {
+        if (mounted) {
+          _pawControllers[i].repeat(reverse: true);
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _pawControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +98,11 @@ class HomePage extends StatelessWidget {
     final barHeight = screenHeight * 0.06;
 
     final menuItems = PageType.values
-        .map((type) => MenuItem.fromType(type, currentUserId: userId))
+        .map((type) => MenuItem.fromType(
+      type,
+      currentUserId: widget.userId,
+      currentUserName: widget.userName,
+    ))
         .toList();
 
     return Scaffold(
@@ -34,7 +118,7 @@ class HomePage extends StatelessWidget {
           ),
           child: SafeArea(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Builder(
@@ -46,29 +130,20 @@ class HomePage extends StatelessWidget {
                     );
                   },
                 ),
-                SizedBox(width: screenWidth * 0.03),
                 Expanded(
-                  child: Container(
-                    height: barHeight * 0.65,
-                    alignment: Alignment.center,
-                    child: TextField(
-                      textAlignVertical: TextAlignVertical.center,
-                      style: TextStyle(fontSize: isTablet ? 22 : 16),
-                      decoration: InputDecoration(
-                        hintText: 'Busque um PetShop',
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: const Color(0xFFFBF8E1),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
-                        ),
+                  child: Center(
+                    child: Text(
+                      'Olá, $userName!',
+                      style: TextStyle(
+                        fontSize: isTablet ? 22 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
-                SizedBox(width: screenWidth * 0.02),
+                SizedBox(width: screenWidth * 0.08),
               ],
             ),
           ),
@@ -81,7 +156,6 @@ class HomePage extends StatelessWidget {
 
           return Stack(
             children: [
-              // Botão "Repetir o último serviço"
               Align(
                 alignment: Alignment(0.0, -0.80),
                 child: FractionallySizedBox(
@@ -101,11 +175,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Patinhas
-              ..._paws(width, height),
-
-              // Gato central
+              ..._buildAnimatedPaws(width, height),
               Align(
                 alignment: const Alignment(0, 0.0),
                 child: FractionallySizedBox(
@@ -118,8 +188,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // Logo TorchApp
               Align(
                 alignment: const Alignment(0.05, 0.4),
                 child: FractionallySizedBox(
@@ -130,8 +198,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-
-              // --- Faixa inferior com borda ---
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Container(
@@ -149,7 +215,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  static List<Widget> _paws(double width, double height) {
+  List<Widget> _buildAnimatedPaws(double width, double height) {
     final pawsData = [
       [0.12, 0.90, 55.0],
       [0.17, 0.74, 45.0],
@@ -165,24 +231,40 @@ class HomePage extends StatelessWidget {
       [0.88, 0.62, -54.0],
     ];
 
-    return pawsData.map((e) {
-      double top = e[0] * height;
-      double left = e[1] * width;
-      double rotation = e[2];
+    return List.generate(pawsData.length, (index) {
+      final data = pawsData[index];
+      double top = data[0] * height;
+      double left = data[1] * width;
+      double rotation = data[2];
       double size = width * 0.08;
+
       return Positioned(
         top: top,
         left: left,
-        child: Transform.rotate(
-          angle: rotation * (math.pi / 180),
-          child: Image.asset(
-            'lib/assets/images/pata de cachorro.png',
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-          ),
+        child: AnimatedBuilder(
+          animation: _pawAnimations[index],
+          builder: (context, child) {
+            final scale = 0.8 + (_pawAnimations[index].value * 0.4);
+            final opacity = 0.6 + (_pawAnimations[index].value * 0.4);
+
+            return Transform.scale(
+              scale: scale,
+              child: Opacity(
+                opacity: opacity,
+                child: Transform.rotate(
+                  angle: rotation * (math.pi / 180),
+                  child: Image.asset(
+                    'lib/assets/images/pata de cachorro.png',
+                    width: size,
+                    height: size,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       );
-    }).toList();
+    });
   }
 }

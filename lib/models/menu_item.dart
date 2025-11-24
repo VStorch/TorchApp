@@ -23,13 +23,16 @@ class MenuItem {
   });
 
   /// Factory que cria MenuItem baseado no PageType
-  factory MenuItem.fromType(PageType type, {int? currentUserId}) {
+  factory MenuItem.fromType(PageType type, {int? currentUserId, String? currentUserName}) { // 👈 ADICIONA currentUserName
     switch (type) {
       case PageType.home:
         return MenuItem(
           title: 'Tela Inicial',
           icon: Icons.home,
-          destinationPage: HomePage(userId: currentUserId,),
+          destinationPage: HomePage(
+            userId: currentUserId,
+            userName: currentUserName, // 👈 PASSA O NOME
+          ),
         );
       case PageType.myPets:
         return MenuItem(

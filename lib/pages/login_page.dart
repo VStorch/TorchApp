@@ -43,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     await prefs.setString('user_surname', userData['surname'] ?? '');
     await prefs.setString('user_email', userData['email'] ?? '');
 
-    (" Dados salvos: ${userData['name']} ${userData['surname']}");
+    print("Dados salvos: ${userData['name']} ${userData['surname']}");
   }
 
   Future<void> _login() async {
@@ -97,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
 
       bool isPetShopOwner = petShopResponse.statusCode == 200;
 
-      (isPetShopOwner ? " Usuário é DONO de Pet Shop" : " Usuário é CLIENTE");
+      print(isPetShopOwner ? "Usuário é DONO de Pet Shop" : "Usuário é CLIENTE");
 
       // Navegar para a tela correta
       if (mounted) {
@@ -122,7 +122,10 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(userId: userId),
+              builder: (context) => HomePage(
+                userId: userId,
+                userName: userData['name'], // 👈 PASSA O NOME
+              ),
             ),
           );
         }
