@@ -5,8 +5,8 @@
 # Frontend 🐾
 
 Aplicativo mobile desenvolvido em Flutter para o projeto Torch, focado no agendamento rápido e intuitivo de serviços em Pet Shops.<br>
-O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)
-
+O Backend está disponível [aqui.](https://github.com/VStorch/TorchAppBackend)<br>
+Já a página de redirecionamento para a redefinição de senha está [aqui](https://github.com/VStorch/PaginaRedirecionamento)
 ---
 
 ### Índice
@@ -70,11 +70,11 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 - shared_preferences 2.2.2
 
 **Imagens e Mídias**
-- image_picker 1.0.4
+- image_picker 1.0.4<br>
     Para capturar fotos da câmera ou selecionar da galeria
 
 **Interface e animações**
-- lottie 2.2.0
+- lottie 2.2.0<br>
     Exibição de animações em JSON
 
 **Mapas**
