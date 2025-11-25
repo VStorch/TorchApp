@@ -119,9 +119,14 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
         ),
         title: Row(
           children: [
-            Icon(Icons.access_time, color: Colors.red[700]),
-            const SizedBox(width: 8),
-            const Text('Tempo Esgotado'),
+            Icon(Icons.access_time, color: Colors.red[700], size: 20),
+            const SizedBox(width: 4),
+            const Expanded(
+              child: Text(
+                'Tempo Esgotado',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
           ],
         ),
         content: const Text(
@@ -168,11 +173,18 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
             children: [
               Icon(Icons.check_circle, color: Colors.green[700]),
               const SizedBox(width: 8),
-              const Text('Pagamento Confirmado!'),
+              const Text(
+                'Pagamento Confirmado!',
+                style: TextStyle(
+                  fontSize: 18,      // <<< diminua aqui
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           content: const Text(
-            'Seu pagamento foi processado com sucesso. O agendamento está confirmado!',
+            'Seu pagamento foi processado com sucesso.\nO agendamento está confirmado!',
+            textAlign: TextAlign.center,
           ),
           actions: [
             ElevatedButton(
