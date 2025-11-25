@@ -124,7 +124,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Builder(
                   builder: (context) {
                     return IconButton(
-                      icon: Icon(Icons.pets, size: screenWidth * 0.08),
+                      icon: Icon(Icons.pets, size: screenWidth * 0.10),
                       onPressed: () => Scaffold.of(context).openDrawer(),
                       padding: EdgeInsets.zero,
                     );
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Text(
                       'Olá, $userName!',
                       style: TextStyle(
-                        fontSize: isTablet ? 22 : 18,
+                        fontSize: isTablet ? 26 : 22,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
