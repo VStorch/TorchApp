@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:torch_app/data/user/user.dart';
 
@@ -47,6 +48,43 @@ class UserService {
       return false;
     }
   }
+
+  static Future<String?> updloadUserImage(int userId, File imageFile) async {
+    final uri = Uri.parse('$baseUrl/$userId/upload-image');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.files.add(
+      await http.MultipartFile.fromPath(
+          'file',
+          imageFile.path,
+          filename: imageFile.path.split('/').last,
+      ),
+    );
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final body = await response.stream.bytesToString();
+      final json = jsonDecode(body);
+      return json['profileImage'];
+    }
+
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> getUserById(int userId) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/$userId'));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      print('Erro ao buscar usuário: $e');
+      return null;
+    }
+  }
+
 
   // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   // Métodos de validação

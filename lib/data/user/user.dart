@@ -1,28 +1,24 @@
 class User {
-  // id pode ser nulo, pois quando o usuário for criado, obviamente não estará no backend
   final int? id;
-
   final String email;
   final String password;
   final String name;
   final String surname;
+  final String? profileImage;
 
+  User(this.name, this.surname, this.email, this.password, {this.id, this.profileImage});
 
-// Definição da classe User
-  User(this.name, this.surname, this.email, this.password, {this.id});
-
-  // Cria um objeto User com base nos dados do backend
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-        json['name'] ?? '',
-        json['surname'] ?? '',
-        json['email'] ?? '',
-        json['password'] ?? '',
-        id: json['id']
+      json['name'] ?? '',
+      json['surname'] ?? '',
+      json['email'] ?? '',
+      json['password'] ?? '',
+      id: json['id'],
+      profileImage: json['profileImage'],
     );
   }
 
-  // Envia para o backend, converte em Json os dados
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -30,6 +26,7 @@ class User {
       'surname': surname,
       'email': email,
       'password': password,
+      'profileImage': profileImage,
     };
   }
 }
