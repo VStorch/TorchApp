@@ -1,12 +1,11 @@
-// Adicione este import no seu booking_page.dart
-// import 'pix_payment_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 class PixPaymentScreen extends StatefulWidget {
+  final int petShopId;
   final String serviceName;
   final double finalPrice;
   final String appointmentDate;
@@ -15,6 +14,7 @@ class PixPaymentScreen extends StatefulWidget {
 
   const PixPaymentScreen({
     super.key,
+    required this.petShopId,
     required this.serviceName,
     required this.finalPrice,
     required this.appointmentDate,
@@ -37,11 +37,127 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
   Timer? countdownTimer;
   bool paymentConfirmed = false;
 
+  // Dados PIX do pet shop
+  Map<String, dynamic>? pixSettings;
+
   @override
   void initState() {
     super.initState();
-    _generatePixCode();
+    _loadPixSettingsAndGenerate();
     _startCountdown();
+  }
+
+  Future<void> _loadPixSettingsAndGenerate() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final key = 'pix_settings_${widget.petShopId}';
+
+      final enabled = prefs.getBool('${key}_enabled') ?? false;
+
+      if (!enabled) {
+        _showPixNotConfiguredDialog();
+        return;
+      }
+
+      pixSettings = {
+        'pixKey': prefs.getString('${key}_key') ?? '',
+        'keyType': prefs.getString('${key}_key_type') ?? '',
+        'merchantName': prefs.getString('${key}_merchant_name') ?? '',
+        'merchantCity': prefs.getString('${key}_merchant_city') ?? '',
+        'merchantId': prefs.getString('${key}_merchant_id') ?? '',
+      };
+
+      await _generatePixCode();
+    } catch (e) {
+      _showErrorDialog('Erro ao carregar configurações PIX: $e');
+    }
+  }
+
+  void _showPixNotConfiguredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.orange[700]!, width: 2),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.orange[700], size: 24),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'PIX não configurado',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: const Text(
+          'O pet shop ainda não configurou o pagamento via PIX. '
+              'Por favor, escolha outro método de pagamento ou entre em contato.',
+        ),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: corPrimaria,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop(false);
+            },
+            child: const Text('Entendi'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.red[700]!, width: 2),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.error, color: Colors.red[700], size: 24),
+            const SizedBox(width: 8),
+            const Text(
+              'Erro',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: corPrimaria,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop(false);
+            },
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _startCountdown() {
@@ -56,28 +172,119 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
   }
 
   Future<void> _generatePixCode() async {
-    // Simula a geração do código PIX
-    // Em produção, você deve chamar sua API backend para gerar o código PIX real
     await Future.delayed(const Duration(seconds: 2));
 
-    setState(() {
-      // Código PIX de exemplo (formato simplificado)
-      // Em produção, use o código PIX real gerado pela sua instituição financeira
-      pixCode = _createMockPixCode();
-      isLoadingPix = false;
-    });
+    try {
+      final code = _createPixCode();
+
+      if (code.isEmpty) {
+        throw Exception('Não foi possível gerar o código PIX');
+      }
+
+      setState(() {
+        pixCode = code;
+        isLoadingPix = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() => isLoadingPix = false);
+        _showErrorDialog('Erro ao gerar código PIX: ${e.toString()}');
+      }
+    }
   }
 
-  String _createMockPixCode() {
-    // Este é apenas um exemplo para demonstração
-    // Em produção, você deve gerar um código PIX válido através da API do seu banco
-    final valor = widget.finalPrice.toStringAsFixed(2);
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
+  String _createPixCode() {
+    if (pixSettings == null) return '';
 
-    // Formato simplificado de código PIX (apenas para demonstração)
-    return '00020126580014br.gov.bcb.pix0136$timestamp'
-        '520400005303986540$valor'
-        '5802BR5925SEU PETSHOP LTDA6009SAO PAULO62070503***63041D3D';
+    try {
+      final valor = widget.finalPrice.toStringAsFixed(2);
+      final pixKey = (pixSettings!['pixKey'] ?? '').trim();
+
+      // Limitar tamanho do nome e cidade (máximo 25 caracteres cada)
+      String merchantName = (pixSettings!['merchantName'] ?? 'COMERCIANTE').toUpperCase().trim();
+      if (merchantName.length > 25) {
+        merchantName = merchantName.substring(0, 25);
+      }
+
+      String merchantCity = (pixSettings!['merchantCity'] ?? 'CIDADE').toUpperCase().trim();
+      if (merchantCity.length > 15) {
+        merchantCity = merchantCity.substring(0, 15);
+      }
+
+      // Validar chave PIX
+      if (pixKey.isEmpty) {
+        throw Exception('Chave PIX não configurada');
+      }
+
+      // Construir o payload PIX corretamente
+      String payload = '000201'; // Payload Format Indicator (ID: 00, Tamanho: 02, Valor: 01)
+
+      // Merchant Account Information (Tag 26)
+      String merchantAccountInfo = '';
+      merchantAccountInfo += '0014'; // GUI ID + tamanho
+      merchantAccountInfo += 'br.gov.bcb.pix'; // GUI valor
+
+      final pixKeyLength = pixKey.length.toString().padLeft(2, '0');
+      merchantAccountInfo += '01$pixKeyLength$pixKey'; // Chave PIX
+
+      final merchantAccountLength = merchantAccountInfo.length.toString().padLeft(2, '0');
+      payload += '26$merchantAccountLength$merchantAccountInfo';
+
+      payload += '52040000'; // Merchant Category Code
+      payload += '5303986'; // Currency Code (986 = BRL)
+
+      final valorLength = valor.length.toString().padLeft(2, '0');
+      payload += '54$valorLength$valor'; // Transaction Amount
+
+      payload += '5802BR'; // Country Code
+
+      // Merchant Name
+      final nameLength = merchantName.length.toString().padLeft(2, '0');
+      payload += '59$nameLength$merchantName';
+
+      // Merchant City
+      final cityLength = merchantCity.length.toString().padLeft(2, '0');
+      payload += '60$cityLength$merchantCity';
+
+      // Additional Data Field Template (Tag 62)
+      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+      final txid = timestamp.length > 25 ? timestamp.substring(timestamp.length - 25) : timestamp.padLeft(25, '0');
+
+      final txidLength = txid.length.toString().padLeft(2, '0');
+      String additionalData = '05$txidLength$txid';
+
+      final additionalDataLength = additionalData.length.toString().padLeft(2, '0');
+      payload += '62$additionalDataLength$additionalData';
+
+      // CRC16
+      payload += '6304';
+      final crc = _calculateCRC16(payload);
+      final crcHex = crc.toRadixString(16).toUpperCase().padLeft(4, '0');
+      payload += crcHex;
+
+      return payload;
+    } catch (e) {
+      debugPrint('Erro ao gerar código PIX: $e');
+      return '';
+    }
+  }
+
+  int _calculateCRC16(String payload) {
+    int crc = 0xFFFF;
+    final bytes = payload.codeUnits;
+
+    for (int byte in bytes) {
+      crc ^= byte << 8;
+      for (int i = 0; i < 8; i++) {
+        if ((crc & 0x8000) != 0) {
+          crc = (crc << 1) ^ 0x1021;
+        } else {
+          crc = crc << 1;
+        }
+      }
+    }
+
+    return crc & 0xFFFF;
   }
 
   String _formatCountdown() {
@@ -153,8 +360,6 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
   }
 
   Future<void> _confirmPayment() async {
-    // Aqui você deve implementar a verificação real do pagamento
-    // Por enquanto, vamos simular uma confirmação
     setState(() => paymentConfirmed = true);
 
     await Future.delayed(const Duration(seconds: 2));
@@ -173,11 +378,13 @@ class _PixPaymentScreenState extends State<PixPaymentScreen> {
             children: [
               Icon(Icons.check_circle, color: Colors.green[700]),
               const SizedBox(width: 8),
-              const Text(
-                'Pagamento Confirmado!',
-                style: TextStyle(
-                  fontSize: 18,      // <<< diminua aqui
-                  fontWeight: FontWeight.bold,
+              const Expanded(
+                child: Text(
+                  'Pagamento Confirmado!',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],

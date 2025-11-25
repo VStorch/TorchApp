@@ -443,6 +443,7 @@ class _BookingPageState extends State<BookingPage> {
             context,
             MaterialPageRoute(
               builder: (context) => PixPaymentScreen(
+                petShopId: widget.petShopId, // <<< ADICIONE ESTA LINHA
                 serviceName: widget.service.name,
                 finalPrice: finalPrice,
                 appointmentDate: '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',

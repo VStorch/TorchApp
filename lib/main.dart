@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_links/app_links.dart';
 import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/reset_password_page.dart';
+import 'package:torch_app/pages_pet_shop/pix_settings_page.dart';
 import 'package:torch_app/routes.dart';
 
 import 'models/notification_service.dart';
@@ -124,7 +125,7 @@ class _MyAppState extends State<MyApp> {
       ],
 
       // Página inicial
-      home: const LoadingPage(),
+      home: const LoadingPage()
     );
   }
 }

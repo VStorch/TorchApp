@@ -8,6 +8,7 @@ import 'services.dart';
 import 'reviews.dart';
 import 'promotions.dart';
 import 'payment_method.dart';
+import 'pix_settings_page.dart';
 
 class Settings extends StatefulWidget {
   final int petShopId;
@@ -442,6 +443,26 @@ class _SettingsState extends State<Settings> {
                 },
               ),
               onTap: notificationsEnabled ? _showNotificationSettings : null,
+            ),
+            SizedBox(height: screenHeight * 0.015),
+            _buildCard(
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              icon: Icons.pix,
+              title: "Configurações PIX",
+              subtitle: "Configure seus dados para receber pagamentos",
+              iconColor: Colors.teal[700],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PixSettingsPage(
+                      petShopId: widget.petShopId,
+                      userId: widget.userId,
+                    ),
+                  ),
+                );
+              },
             ),
             SizedBox(height: screenHeight * 0.015),
             _buildCard(
