@@ -22,6 +22,7 @@ Já a página de redirecionamento para a redefinição de senha está [aqui](htt
 - [Fluxo de navegação](#fluxo-de-navegação)
 - [Integração com o backend](#integração-com-o-backend)
 - [Status do projeto](#status-do-projeto)
+- [Desenvolvedores](#desenvolvedores)
 
 ---
 
@@ -149,4 +150,13 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 ---
 
 ### Status do projeto
+
 Em desenvolvimento.
+
+---
+
+### Desenvolvedores
+
+- [João Pedro Pitz](https://github.com/joaopedropitzz)
+- [Leonardo Cortelim dos Santos](https://github.com/LeonardoCortelim)
+- [Vinícius Storch](https://github.com/VStorch)
