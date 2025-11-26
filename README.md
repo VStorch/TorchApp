@@ -79,7 +79,7 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
     Exibição de animações em JSON
 
 **Mapas**
-- google_maps_flutter 2.5.0
+- flutter_map 5.1.0
 
 **Internacionalização**
 - intl 0.20.2
@@ -103,16 +103,33 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 ### Como rodar o projeto
 
-Caso haja problemas no terminal, execute:
+1. Clonar o repositório
 
-```bash
-flutter clean
+    ```bash
+    git clone https://github.com/VStorch/TorchApp.git
+    cd TorchApp
+    ```
 
-flutter pub get
+2. Instalar dependências
 
-flutter run
-```
+    ```bash
+    flutter pub get
+    ```
 
+3. Rodar o app
+
+    ```bash
+    flutter run
+    ```
+
+    Se houverem problemas com dependências ou configurações, execute os seguintes comandos:
+
+    ```bash
+    flutter clean
+    flutter pub get
+    flutter run
+    ```
+    
 ---
 
 ### Estrutura de pastas
