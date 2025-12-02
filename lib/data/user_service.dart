@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:torch_app/data/user/user.dart';
+import 'package:http_parser/http_parser.dart' show MediaType;
+
 
 class UserService {
   static const String baseUrl = 'http://10.0.2.2:8080/users';
@@ -50,25 +52,46 @@ class UserService {
   }
 
   static Future<String?> updloadUserImage(int userId, File imageFile) async {
-    final uri = Uri.parse('$baseUrl/$userId/upload-image');
-    final request = http.MultipartRequest('POST', uri);
+    try {
+      print('🔵 Iniciando upload da imagem...');
+      print('🔵 Caminho do arquivo: ${imageFile.path}');
+      print('🔵 Arquivo existe: ${await imageFile.exists()}');
 
-    request.files.add(
-      await http.MultipartFile.fromPath(
+      final uri = Uri.parse('$baseUrl/$userId/upload-image');
+      final request = http.MultipartRequest('POST', uri);
+
+      final extension = imageFile.path.split('.').last.toLowerCase();
+      print('🔵 Extensão detectada: $extension');
+
+      request.files.add(
+        await http.MultipartFile.fromPath(
           'file',
           imageFile.path,
           filename: imageFile.path.split('/').last,
-      ),
-    );
-    final response = await request.send();
+          contentType: MediaType('image', extension == 'png' ? 'png' : 'jpeg'),
+        ),
+      );
 
-    if (response.statusCode == 200) {
-      final body = await response.stream.bytesToString();
-      final json = jsonDecode(body);
-      return json['profileImage'];
+      print('🔵 Enviando request...');
+      final response = await request.send();
+      print('🔵 Status code: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final body = await response.stream.bytesToString();
+        print('🟢 Resposta do servidor: $body');
+        final json = jsonDecode(body);
+        return json['profileImage'];
+      } else {
+        final body = await response.stream.bytesToString();
+        print('🔴 Erro do servidor: $body');
+      }
+
+      print('🔴 Erro no upload: Status ${response.statusCode}');
+      return null;
+    } catch (e) {
+      print('🔴 Exceção ao fazer upload da imagem: $e');
+      return null;
     }
-
-    return null;
   }
 
   static Future<Map<String, dynamic>?> getUserById(int userId) async {
