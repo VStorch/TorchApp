@@ -247,6 +247,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
         );
 
         if (confirm == true) {
+          // Limpa os dados salvos ao sair
           final prefs = await SharedPreferences.getInstance();
           await prefs.clear();
 
@@ -412,7 +413,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               SizedBox(height: spacing),
               const Divider(thickness: 1),
-              _buildProfileOption(Icons.pets, "Meus Pets", optionFontSize),
+              _buildProfileOption(
+                  Icons.pets, "Meus Pets", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
                   Icons.receipt_long, "Meus Pedidos", optionFontSize),
