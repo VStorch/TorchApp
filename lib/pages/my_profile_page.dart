@@ -2,9 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:torch_app/data/user_service.dart';
 import 'package:torch_app/pages/pet_shops_page.dart';
-import 'package:torch_app/pages/my_pets_page.dart';
-import 'package:torch_app/pages/my_appointments_page.dart';
 
 import '../components/custom_drawer.dart';
 import '../models/menu_item.dart';
@@ -23,6 +22,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   File? _profileImage;
   String? _selectedAssetImage;
   String _userName = "Carregando...";
+  String? _serverImage;
 
   final List<String> _defaultImages = [
     "lib/assets/images_profile/dog1.jpg",
@@ -47,6 +47,15 @@ class _MyProfilePageState extends State<MyProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     final name = prefs.getString('user_name') ?? '';
     final surname = prefs.getString('user_surname') ?? '';
+    final userId = prefs.getInt('user_id');
+
+    // Buscar a imagem do usuário atual no backend
+    if (userId != null) {
+      final userResponse = await UserService.getUserById(userId);
+      if (userResponse != null && userResponse['profileImage'] != null) {
+        _serverImage = userResponse['profileImage'];
+      }
+    }
 
     setState(() {
       _userName = name.isNotEmpty && surname.isNotEmpty
@@ -58,19 +67,91 @@ class _MyProfilePageState extends State<MyProfilePage> {
   Future<void> _pickFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-        _selectedAssetImage = null;
-      });
+
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+
+    setState(() {
+      _profileImage = file;
+      _selectedAssetImage = null;
+    });
+
+    // Fazer upload da imagem para o backend
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+
+    if (userId != null) {
+      final fileName = await UserService.updloadUserImage(userId, file);
+
+      if (fileName != null) {
+        setState(() {
+          _serverImage = fileName; // Atualizar a imagem do servidor
+          _profileImage = null; // Limpar a preview local
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Imagem salva com sucesso!')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro ao salvar a imagem')),
+          );
+        }
+      }
     }
   }
 
-  void _pickDefaultImage(String path) {
+  Future<void> _pickDefaultImage(String path) async {
+    // Converter a imagem de asset para File temporário
+    final byteData = await DefaultAssetBundle.of(context).load(path);
+    final buffer = byteData.buffer;
+
+    // Criar arquivo temporário
+    final tempDir = Directory.systemTemp;
+    final fileName = path.split('/').last;
+    final tempFile = File('${tempDir.path}/$fileName');
+
+    await tempFile.writeAsBytes(
+      buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+    );
+
     setState(() {
       _selectedAssetImage = path;
       _profileImage = null;
     });
+
+    // Fazer upload da imagem padrão para o backend
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('user_id');
+
+    if (userId != null) {
+      final fileName = await UserService.updloadUserImage(userId, tempFile);
+
+      if (fileName != null) {
+        setState(() {
+          _serverImage = fileName;
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Imagem padrão salva com sucesso!')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro ao salvar a imagem')),
+          );
+        }
+      }
+    }
+
+    // Limpar arquivo temporário
+    await tempFile.delete();
   }
 
   void _showImageOptions(BuildContext context) {
@@ -93,19 +174,27 @@ class _MyProfilePageState extends State<MyProfilePage> {
                   backgroundColor: yellow,
                   foregroundColor: Colors.black,
                 ),
-                onPressed: _pickFromGallery,
+                onPressed: () {
+                  Navigator.pop(context);
+                  _pickFromGallery();
+                },
                 icon: const Icon(Icons.photo),
                 label: const Text("Galeria"),
               ),
               const SizedBox(height: 12),
+              const Text(
+                "Ou escolha uma imagem padrão:",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              ),
+              const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
                 children: _defaultImages.map((path) {
                   return GestureDetector(
                     onTap: () {
-                      _pickDefaultImage(path);
                       Navigator.pop(context);
+                      _pickDefaultImage(path);
                     },
                     child: CircleAvatar(
                       radius: 30,
@@ -123,20 +212,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   void _handleOptionTap(String title) async {
     switch (title) {
-      case "Meus Pets":
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyPetsPage()),
-        );
-        break;
-
-      case "Meus Agendamentos":
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const MyAppointmentsPage()),
-        );
-        break;
-
       case "Alterar Senha":
         Navigator.push(
           context,
@@ -276,14 +351,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
     final optionFontSize = (screenWidth * 0.045).clamp(14.0, 20.0);
     final spacing = screenHeight * 0.03;
 
-    final menuItems = PageType.values
-        .map((type) => MenuItem.fromType(type))
-        .toList();
+    final menuItems = PageType.values.map((type) => MenuItem.fromType(type)).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFFBF8E1),
       drawer: CustomDrawer(menuItems: menuItems),
-
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(screenHeight * 0.08),
         child: Container(
@@ -321,7 +393,6 @@ class _MyProfilePageState extends State<MyProfilePage> {
           ),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: spacing),
@@ -331,19 +402,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
               SizedBox(height: spacing),
               GestureDetector(
                 onTap: () => _showImageOptions(context),
-                child: CircleAvatar(
-                  radius: avatarRadius,
-                  backgroundColor: Colors.black,
-                  child: CircleAvatar(
-                    radius: avatarRadius - 3,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!)
-                        : _selectedAssetImage != null
-                        ? AssetImage(_selectedAssetImage!) as ImageProvider
-                        : const AssetImage(
-                        "lib/assets/images/american.jpg"),
-                  ),
-                ),
+                child: _buildProfileAvatar(avatarRadius),
               ),
               SizedBox(height: spacing),
               Text(
@@ -353,11 +412,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
               ),
               SizedBox(height: spacing),
               const Divider(thickness: 1),
-              _buildProfileOption(
-                  Icons.pets, "Meus Pets", optionFontSize),
+              _buildProfileOption(Icons.pets, "Meus Pets", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
-                  Icons.receipt_long, "Meus Agendamentos", optionFontSize),
+                  Icons.receipt_long, "Meus Pedidos", optionFontSize),
               const Divider(thickness: 1),
               _buildProfileOption(
                   Icons.notifications, "Notificações", optionFontSize),
@@ -380,6 +438,38 @@ class _MyProfilePageState extends State<MyProfilePage> {
       title: Text(title,
           style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.w500)),
       onTap: () => _handleOptionTap(title),
+    );
+  }
+
+  Widget _buildProfileAvatar(double radius) {
+    ImageProvider imageProvider;
+
+    // 1) Imagem recém-selecionada da galeria (preview)
+    if (_profileImage != null) {
+      imageProvider = FileImage(_profileImage!);
+    }
+    // 2) Imagem padrão recém-selecionada (preview)
+    else if (_selectedAssetImage != null) {
+      imageProvider = AssetImage(_selectedAssetImage!);
+    }
+    // 3) Imagem do servidor (definitiva)
+    else if (_serverImage != null && _serverImage!.isNotEmpty) {
+      imageProvider = NetworkImage(
+        'http://10.0.2.2:8080/user-images/$_serverImage',
+      );
+    }
+    // 4) Imagem placeholder
+    else {
+      imageProvider = const AssetImage("lib/assets/images/american.jpg");
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: Colors.black,
+      child: CircleAvatar(
+        radius: radius - 3,
+        backgroundImage: imageProvider,
+      ),
     );
   }
 }
