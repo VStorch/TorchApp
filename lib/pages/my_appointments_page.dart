@@ -491,7 +491,7 @@ class _MyAppointmentsPageState extends State<MyAppointmentsPage> {
             ),
             child: Row(
               children: [
-                Icon(Icons.pets, size: 24, color: Colors.black87),
+                const Icon(Icons.pets, size: 24, color: Colors.black87),
                 const SizedBox(width: 8),
                 Text(
                   _getStatusText(status),
@@ -841,7 +841,7 @@ class _EvaluationDialogState extends State<_EvaluationDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.star_rounded, size: 28, color: Colors.black87),
+                  const Icon(Icons.star_rounded, size: 28, color: Colors.black87),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
@@ -1043,14 +1043,12 @@ class _PetShopDetailsDialogState extends State<_PetShopDetailsDialog> {
       final response = await widget.petShopService.getPetShopInformationById(petShopId);
 
       Map<String, dynamic>? data;
-      if (response is Map<String, dynamic>) {
-        if (response.containsKey('data') && response['data'] != null) {
-          data = response['data'] as Map<String, dynamic>;
-        } else {
-          data = response;
-        }
+      if (response.containsKey('data') && response['data'] != null) {
+        data = response['data'] as Map<String, dynamic>;
+      } else {
+        data = response;
       }
-
+    
       if (mounted) {
         setState(() {
           petShopData = data;
@@ -1145,7 +1143,7 @@ class _PetShopDetailsDialogState extends State<_PetShopDetailsDialog> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.store, size: 28, color: Colors.black87),
+                  const Icon(Icons.store, size: 28, color: Colors.black87),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
@@ -1221,7 +1219,7 @@ class _PetShopDetailsDialogState extends State<_PetShopDetailsDialog> {
                       ),
                       child: Column(
                         children: [
-                          Icon(Icons.store,
+                          const Icon(Icons.store,
                               size: 40, color: Colors.black87),
                           const SizedBox(height: 8),
                           Text(

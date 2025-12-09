@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cpf_cnpj_validator/cpf_validator.dart'; // ADICIONAR
-import 'package:cpf_cnpj_validator/cnpj_validator.dart'; // ADICIONAR
+import 'package:cpf_cnpj_validator/cnpj_validator.dart';
 import 'dart:convert';
 import 'package:torch_app/models/dtos/pet_shop_dto.dart';
 

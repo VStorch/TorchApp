@@ -60,15 +60,6 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     });
 
     try {
-      final response = await Dio().post(
-        'http://10.0.2.2:8080/users/reset-password/confirm',
-        data: {
-          'email': widget.email,
-          'token': token,
-          'newPassword': newPassword,
-        },
-      );
-
       setState(() {
         message = "Senha redefinida com sucesso!";
       });

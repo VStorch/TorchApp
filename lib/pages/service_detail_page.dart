@@ -81,16 +81,14 @@ class _ServiceDetailPageState extends State<ServiceDetailPage> {
 
       Map<String, dynamic>? data;
 
-      if (response is Map<String, dynamic>) {
-        if (response.containsKey('data') && response['data'] != null) {
-          data = response['data'] as Map<String, dynamic>;
-          print('📦 Dados extraídos de response[data]: $data');
-        } else {
-          data = response;
-          print('📦 Usando response direto: $data');
-        }
+      if (response.containsKey('data') && response['data'] != null) {
+        data = response['data'] as Map<String, dynamic>;
+        print('📦 Dados extraídos de response[data]: $data');
+      } else {
+        data = response;
+        print('📦 Usando response direto: $data');
       }
-
+    
       if (mounted) {
         setState(() {
           petShopData = data;

@@ -88,15 +88,13 @@ class _SearchServicePageState extends State<SearchServicePage> {
         final response = await _petShopService.getPetShopInformationById(petShopId);
 
         Map<String, dynamic>? data;
-        if (response is Map<String, dynamic>) {
-          if (response.containsKey('data') && response['data'] != null) {
-            data = response['data'] as Map<String, dynamic>;
-          } else {
-            data = response;
-          }
+        if (response.containsKey('data') && response['data'] != null) {
+          data = response['data'] as Map<String, dynamic>;
+        } else {
+          data = response;
         }
-
-        if (data != null && data['name'] != null) {
+      
+        if (data['name'] != null) {
           _petShopNames[petShopId.toString()] = data['name'].toString();
         } else {
           _petShopNames[petShopId.toString()] = 'Pet Shop $petShopId';

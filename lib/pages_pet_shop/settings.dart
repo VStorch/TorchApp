@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:torch_app/pages/login_page.dart';
 import '../components/custom_drawer_pet_shop.dart';
-import 'home_page_pet_shop.dart';
-import 'profile.dart';
-import 'services.dart';
-import 'reviews.dart';
-import 'promotions.dart';
-import 'payment_method.dart';
 import 'pix_settings_page.dart';
 
 class Settings extends StatefulWidget {

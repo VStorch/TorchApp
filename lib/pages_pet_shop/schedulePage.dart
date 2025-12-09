@@ -49,7 +49,7 @@ class _SchedulePageState extends State<SchedulePage> {
       widget.initialSchedules.forEach((dia, valores) {
         print('🟢 Preenchendo dia: $dia com valores: $valores');
 
-        if (valores != null && _openControllers.containsKey(dia)) {
+        if (_openControllers.containsKey(dia)) {
           _openControllers[dia]?.text = valores['abre'] ?? '';
           _closeControllers[dia]?.text = valores['fecha'] ?? '';
           print('   ✅ Preenchido: abre=${valores['abre']}, fecha=${valores['fecha']}');

@@ -12,7 +12,6 @@ Já a página de redirecionamento para a redefinição de senha está [aqui](htt
 
 ### Índice
 
-- [Índice](#índice)
 - [Descrição](#descrição)
 - [Funcionalidades](#funcionalidades)
 - [Tipos de Usuário](#tipos-de-usuário)

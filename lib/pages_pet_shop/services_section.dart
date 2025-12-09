@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'custom_widgets.dart';
 
 class ServicesSection extends StatefulWidget {
   final List<String> serviceOptions;
