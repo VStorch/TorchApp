@@ -142,78 +142,30 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 Segue algumas telas do sistema
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
-
-  <div style="text-align: center;">
-    <img src="docs/screens/loading_page.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de carregamento</p>
-  </div>
-
-  <div style="text-align: center;">
-    <img src="docs/screens/login_page.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de login</p>
-  </div>
-
-</div>
+| ![](docs/screens/loading_page.png) | ![](docs/screens/login_page.png) |
+|:----------------------------------:|:--------------------------------:|
+| Tela de carregamento | Tela de login |
 
 #### Telas do Pet Shop
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+| ![](docs/screens/petshop_home_page.png) | ![](docs/screens/service_creation.png) |
+|:---------------------------------------:|:--------------------------------------:|
+| Tela inicial do Pet Shop | Tela de serviços |
 
-  <div style="text-align: center;">
-    <img src="docs/screens/petshop_home_page.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela inicial do Pet Shop</p>
-  </div>
-
-  <div style="text-align: center;">
-    <img src="docs/screens/service_creation.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de serviços</p>
-  </div>
-
-</div>
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
-
-  <div style="text-align: center;">
-    <img src="docs/screens/slots_creation.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de criação de slots de horário</p>
-  </div>
-
-  <div style="text-align: center;">
-    <img src="docs/screens/appointment_petshop_screen.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de agendamentos</p>
-  </div>
-
-</div>
+| ![](docs/screens/slots_creation.png) | ![](docs/screens/appointment_petshop_screen.png) |
+|:------------------------------------:|:------------------------------------------------:|
+| Tela de criação de slots de horário | Tela de agendamentos |
 
 
 #### Telas do Cliente
 
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+| ![](docs/screens/client_home_page.png) | ![](docs/screens/service_search.png) |
+|:--------------------------------------:|:-------------------------------------:|
+| Tela inicial do Cliente | Tela que lista os serviços |
 
-  <div style="text-align: center;">
-    <img src="docs/screens/client_home_page.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela inicial do Cliente</p>
-  </div>
-
-  <div style="text-align: center;">
-    <img src="docs/screens/service_search.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela que lista os serviços</p>
-  </div>
-
-</div>
-<div style="display: flex; gap: 20px; flex-wrap: wrap;">
-
-  <div style="text-align: center;">
-    <img src="docs/screens/appointment.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Tela de agendamento</p>
-  </div>
-
-  <div style="text-align: center;">
-    <img src="docs/screens/scheduled_appointment.png" width="250">
-    <p style="font-size: 14px; margin-top: 8px;">Confirmação do agendamento</p>
-  </div>
-
-</div>
+| ![](docs/screens/appointment.png) | ![](docs/screens/scheduled_appointment.png) |
+|:---------------------------------:|:--------------------------------------------:|
+| Tela de agendamento | Confirmação do agendamento |
 
 ---
 
