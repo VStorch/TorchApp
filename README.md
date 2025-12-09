@@ -142,88 +142,77 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 Segue algumas telas do sistema
 
-<div style="display: flex; gap: 20px;">
-  <figure style="text-align: center;">
-    <img src="docs/screens/loading_page.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de carregamento
-    </figcaption>
-  </figure>
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
 
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
+    <img src="docs/screens/loading_page.png" width="250">
+    <p style="font-size: 14px; margin-top: 8px;">Tela de carregamento</p>
+  </div>
+
+  <div style="text-align: center;">
     <img src="docs/screens/login_page.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de login
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela de login</p>
+  </div>
+
 </div>
 
 #### Telas do Pet Shop
 
-<div style="display: flex; gap: 20px;">
-  <figure style="text-align: center;">
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+  <div style="text-align: center;">
     <img src="docs/screens/petshop_home_page.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela inicial do Pet Shop
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela inicial do Pet Shop</p>
+  </div>
 
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
     <img src="docs/screens/service_creation.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de serviços
-    </figcaption>
-  </figure>
-</div>
+    <p style="font-size: 14px; margin-top: 8px;">Tela de serviços</p>
+  </div>
 
-<div style="display: flex; gap: 20px;">
-  <figure style="text-align: center;">
+</div>
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+  <div style="text-align: center;">
     <img src="docs/screens/slots_creation.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de criação de slots de horário
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela de criação de slots de horário</p>
+  </div>
 
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
     <img src="docs/screens/appointment_petshop_screen.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de agendamentos
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela de agendamentos</p>
+  </div>
+
 </div>
+
 
 #### Telas do Cliente
 
-<div style="display: flex; gap: 20px;">
-  <figure style="text-align: center;">
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+  <div style="text-align: center;">
     <img src="docs/screens/client_home_page.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela inicial do Cliente
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela inicial do Cliente</p>
+  </div>
 
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
     <img src="docs/screens/service_search.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela que lista os serviços
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela que lista os serviços</p>
+  </div>
+
 </div>
+<div style="display: flex; gap: 20px; flex-wrap: wrap;">
 
-<div style="display: flex; gap: 20px;">
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
     <img src="docs/screens/appointment.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Tela de agendamento
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Tela de agendamento</p>
+  </div>
 
-  <figure style="text-align: center;">
+  <div style="text-align: center;">
     <img src="docs/screens/scheduled_appointment.png" width="250">
-    <figcaption style="display: block; text-align: center; margin-top: 8px;">
-        Confirmação do agendamento
-    </figcaption>
-  </figure>
+    <p style="font-size: 14px; margin-top: 8px;">Confirmação do agendamento</p>
+  </div>
+
 </div>
 
 ---
