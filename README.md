@@ -16,9 +16,7 @@ Já a página de redirecionamento para a redefinição de senha está [aqui](htt
 - [Funcionalidades](#funcionalidades)
 - [Tipos de Usuário](#tipos-de-usuário)
 - [Tecnologias e Dependências](#tecnologias-e-dependências)
-- [Arquitetura](#arquitetura)
 - [Como rodar o projeto](#como-rodar-o-projeto)
-- [Estrutura de pastas](#estrutura-de-pastas)
 - [Capturas de tela](#capturas-de-tela)
 - [Fluxo de navegação](#fluxo-de-navegação)
 - [Integração com o backend](#integração-com-o-backend)
@@ -99,10 +97,6 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 
 ---
 
-### Arquitetura
-
----
-
 ### Como rodar o projeto
 
 1. Clonar o repositório
@@ -132,10 +126,6 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
     flutter run
     ```
     
----
-
-### Estrutura de pastas
-
 ---
 
 ### Capturas de tela
@@ -170,6 +160,36 @@ Segue algumas telas do sistema
 ---
 
 ### Fluxo de navegação
+
+Abaixo está uma visão simplificada do fluxo geral de navegação do aplicativo Torch. O objetivo é apresentar o caminho principal que o usuário percorre, tanto no perfil de Cliente quanto no de Pet Shop.
+
+1. Tela de carregamento
+2. Autenticação
+    - Login
+    - Cadastro
+3. Seleção de perfil
+    - Cliente
+    - Pet Shop
+4. Página principal (Home)
+    - Layout adaptado conforme o tipo de usuário
+5. Fluxo do Cliente
+    - Cadastro de Pets
+    - Lista de Serviços
+    - Seleção do Pet
+    - Seleção do Horário
+    - Confirmação do Agendamento
+    - Avaliação do Pet Shop
+    - Edição de Perfil
+6. Fluxo do Pet Shop
+    - Gerenciamento de Serviços
+    - Criação de Slots de Horários
+    - Lista de Agendamentos
+    - Edição de Perfil (dados da empresa e do responsável)
+7. Configurações
+    - Habilitar/Desabilitar notificações
+    - Alterar senha
+    - Sobre o app
+    - Sair (Logout)
 
 ---
 
