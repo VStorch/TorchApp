@@ -21,6 +21,7 @@ Já a página de redirecionamento para a redefinição de senha está [aqui](htt
 - [Fluxo de navegação](#fluxo-de-navegação)
 - [Integração com o backend](#integração-com-o-backend)
 - [Desenvolvedores](#desenvolvedores)
+- [Documentação do Software](#documentação-do-software)
 - [Status do projeto](#status-do-projeto)
 
 ---
