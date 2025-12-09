@@ -143,12 +143,12 @@ O Torch possui dois perfis de uso, cada um com funcionalidades específicas:
 Segue algumas telas do sistema
 
 <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/loading_page.png" width="250">
     <figcaption>Tela de carregamento</figcaption>
   </figure>
 
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/login_page.png" width="250">
     <figcaption>Tela de login</figcaption>
   </figure>
@@ -157,24 +157,24 @@ Segue algumas telas do sistema
 #### Telas do Pet Shop
 
 <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/petshop_home_page.png" width="250">
     <figcaption>Tela inicial do Pet Shop</figcaption>
   </figure>
 
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/service_creation.png" width="250">
     <figcaption>Tela de serviços</figcaption>
   </figure>
 </div>
 
 <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/slots_creation.png" width="250">
     <figcaption>Tela de criação de slots de horário</figcaption>
   </figure>
 
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/appointment_petshop_screen.png" width="250">
     <figcaption>Tela de agendamentos</figcaption>
   </figure>
@@ -183,24 +183,24 @@ Segue algumas telas do sistema
 #### Telas do Cliente
 
 <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/client_home_page.png" width="250">
     <figcaption>Tela inicial do Cliente</figcaption>
   </figure>
 
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/service_search.png" width="250">
     <figcaption>Tela que lista os serviços</figcaption>
   </figure>
 </div>
 
 <div style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/appointment.png" width="250">
     <figcaption>Tela de agendamento</figcaption>
   </figure>
 
-  <figure style="text-align: center;">
+  <figure style="display: block; text-align: center;">
     <img src="docs/screens/scheduled_appointment.png" width="250">
     <figcaption>Confirmação do agendamento</figcaption>
   </figure>
