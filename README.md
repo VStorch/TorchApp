@@ -195,6 +195,14 @@ Abaixo está uma visão simplificada do fluxo geral de navegação do aplicativo
 
 ### Integração com o backend
 
+O Torch se comunica com o backend utilizando REST APIs fornecidas pelo projeto TorchAppBackend (Spring Boot).
+
+#### Autenticação
+O processo de autenticação segue o seguinte fluxo:
+1. O usuário informa e-mail e senha
+2. O backend valida as credenciais
+3. A resposta retorna os dados do usuário
+
 ---
 
 ### Desenvolvedores

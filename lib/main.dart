@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:app_links/app_links.dart';
 import 'package:torch_app/pages/loading_page.dart';
 import 'package:torch_app/pages/reset_password_page.dart';
-import 'package:torch_app/pages_pet_shop/pix_settings_page.dart';
 import 'package:torch_app/routes.dart';
 
 import 'models/notification_service.dart';
@@ -12,7 +11,7 @@ void main() async {
   // Garantir que o Flutter esteja inicializado
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 🔔 Inicializar o serviço de notificações
+  // Inicializar o serviço de notificações
   await NotificationService.initialize();
 
   runApp(const MyApp());
@@ -66,7 +65,7 @@ class _MyAppState extends State<MyApp> {
     final couponCode = uri.queryParameters['coupon'];
     final petShopId = uri.queryParameters['petshop_id'];
 
-    // ← TRATAMENTO PARA RESET DE SENHA
+    // Tratamento para reset de senha
     if (uri.host == 'reset-password' && token != null && email != null) {
       navigatorKey.currentState?.pushAndRemoveUntil(
         MaterialPageRoute(
@@ -78,13 +77,13 @@ class _MyAppState extends State<MyApp> {
             (route) => false,
       );
     }
-    // ← TRATAMENTO PARA PROMOÇÕES
+    // Tratameto para promoções
     else if (uri.host == 'promotions' || uri.path.contains('/promotions')) {
       navigatorKey.currentState?.pushNamed(
         AppRoutes.promotions,
       );
     }
-    // ← TRATAMENTO PARA DETALHES DO PETSHOP
+    // Tratamento para detalhes do PetShop
     else if (uri.host == 'petshop' && petShopId != null) {
       navigatorKey.currentState?.pushNamed(
         AppRoutes.petshopDetails,
@@ -94,7 +93,7 @@ class _MyAppState extends State<MyApp> {
         },
       );
     }
-    // ← TRATAMENTO PARA BUSCA DE SERVIÇOS
+    // Tratamento para busca de serviços
     else if (uri.host == 'search' || uri.path.contains('/search')) {
       navigatorKey.currentState?.pushNamed(
         AppRoutes.searchService,
@@ -111,7 +110,7 @@ class _MyAppState extends State<MyApp> {
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
 
-      // ← GERADOR DE ROTAS ADICIONADO
+      // Gerador de rotas
       onGenerateRoute: AppRoutes.generateRoute,
 
       // Suporte à localização (português Brasil)
