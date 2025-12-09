@@ -213,6 +213,12 @@ O processo de autenticação segue o seguinte fluxo:
 
 ---
 
+### Documentação do Software
+
+Acesse a documentação em: [Torch](https://docs.google.com/document/d/1rGbcGYY655Smcz7teA9VlWOLTOMnTLguNPUWll94FlI/edit?tab=t.0)
+
+---
+
 ### Status do projeto
 
 Em desenvolvimento.
